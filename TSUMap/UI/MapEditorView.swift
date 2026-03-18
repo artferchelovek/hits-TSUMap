@@ -108,7 +108,7 @@ struct MapEditorView: View {
                     .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
                     
                     if isDrawMode {
-                        Color.white.opacity(0.001) // Полностью прозрачный слой
+                        Color.white.opacity(0.001)
                             .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
                         
                             .onTapGesture(coordinateSpace: .local) { location in

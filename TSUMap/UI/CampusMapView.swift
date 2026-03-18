@@ -21,17 +21,17 @@ struct CampusMapView: View {
         mapWidth / CGFloat(columnsCount)
     }
     
-    @State private var startLocation: GridPoint? = nil
+    @Binding var startLocation: GridPoint?
+    @Binding var endLocation: GridPoint?
     
     @State private var currentScale: CGFloat = 1.0
     @State private var finalScale: CGFloat = 1.0
     
     var body: some View {
         VStack {
-            
             ScrollView([.horizontal, .vertical], showsIndicators: false) {
                 ZStack(alignment: .topLeading) {
-
+                    
                     Image("TSUMap")
                         .resizable()
                         .scaledToFit()
@@ -54,6 +54,21 @@ struct CampusMapView: View {
                             
                             context.draw(coordinateText, at: CGPoint(x: x, y: y - 15), anchor: .bottom)
                         }
+                        
+                        if let end = endLocation {
+                            let x = CGFloat(end.col) * cellSize + (cellSize / 2)
+                            let y = CGFloat(end.row) * cellSize + (cellSize / 2)
+                            let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
+                            context.fill(Path(ellipseIn: rect), with: .color(.red))
+                            context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
+                            
+                            let coordinateText = Text("[\(end.row), \(end.col)]")
+                                .font(.body)
+                                .fontWeight(.bold)
+                                .foregroundColor(.red)
+                            
+                            context.draw(coordinateText, at: CGPoint(x: x, y: y - 15), anchor: .bottom)
+                        }
                     }
                     .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
                     
@@ -73,7 +88,9 @@ struct CampusMapView: View {
                         }
                 )
             }
+            .defaultScrollAnchor(.center)
         }
+        
     }
     
     private func Tap(at location: CGPoint) {
@@ -81,12 +98,22 @@ struct CampusMapView: View {
         let row = Int(location.y / cellSize)
         
         guard row >= 0 && row < rowsCount && col >= 0 && col < columnsCount else { return }
-        
         if tsuCampusGrid[row][col] == 1 { return }
-        startLocation = GridPoint(row: row, col: col)
+        
+        if startLocation == nil {
+            withAnimation(.spring()) {
+                startLocation = GridPoint(row: row, col: col)
+            }
+        }
+        else if endLocation == nil {
+            endLocation = GridPoint(row: row, col: col)
+            // СЕРËЖА ВОТ ТУТ МОЖЕШЬ ВЫЗЫВАТЬ ФУНКЦИЮ СВОЮ
+        }
     }
 }
 
 #Preview {
-    CampusMapView()
+    CampusMapView(
+        startLocation: .constant(nil),
+        endLocation: .constant(nil))
 }
