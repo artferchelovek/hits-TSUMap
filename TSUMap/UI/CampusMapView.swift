@@ -6,20 +6,28 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct GridPoint: Equatable, Hashable {
     let row: Int
     let col: Int
 }
 
+enum CellType {
+    case path
+    case obstacle
+}
+
 struct CampusMapView: View {
-    let columnsCount = 100
-    let rowsCount = 120
-    let mapWidth: CGFloat = 1500
+    let columnsCount = 150
+    let rowsCount = 150
     
-    var cellSize: CGFloat {
-        mapWidth / CGFloat(columnsCount)
-    }
+    let cellSize: CGFloat = 14.0
+    
+    var mapWidth: CGFloat { CGFloat(columnsCount) * cellSize }
+    var mapHeight: CGFloat { CGFloat(rowsCount) * cellSize }
+    
+    @State private var grid: [[CellType]]
     
     @Binding var startLocation: GridPoint?
     @Binding var endLocation: GridPoint?
@@ -27,15 +35,40 @@ struct CampusMapView: View {
     @State private var currentScale: CGFloat = 1.0
     @State private var finalScale: CGFloat = 1.0
     
+    init(startLocation: Binding<GridPoint?>, endLocation: Binding<GridPoint?>) {
+        
+        self._startLocation = startLocation
+        self._endLocation = endLocation
+        
+        if tsuCampusGrid.isEmpty {
+            _grid = State(initialValue: Array(repeating: Array(repeating: .obstacle, count: columnsCount), count: rowsCount))
+        } else {
+            let loadedGrid = tsuCampusGrid.map { row in
+                row.map { value in
+                    value == 1 ? CellType.obstacle : CellType.path
+                }
+            }
+            _grid = State(initialValue: loadedGrid)
+        }
+    }
+    
     var body: some View {
         VStack {
             ScrollView([.horizontal, .vertical], showsIndicators: false) {
                 ZStack(alignment: .topLeading) {
                     
-                    Image("TSUMap")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: mapWidth)
+                    Map(
+                        initialPosition: .region(
+                            MKCoordinateRegion(
+                                center: CLLocationCoordinate2D(latitude: 56.4690, longitude: 84.9470),
+                                span: MKCoordinateSpan(latitudeDelta: 0.007, longitudeDelta: 0.007)
+                            )
+                        ),
+                        interactionModes: []
+                    )
+                    .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
+                    .allowsHitTesting(false)
+                    .frame(width: mapWidth, height: mapHeight)
                     
                     Canvas { context, _ in
                         if let start = startLocation {
@@ -104,13 +137,14 @@ struct CampusMapView: View {
             }
         } else if endLocation == nil {
             endLocation = GridPoint(row: row, col: col)
-            // СЕРËЖА ВОТ ТУТ МОЖЕШЬ ВЫЗЫВАТЬ ФУНКЦИЮ СВОЮ
         }
+        
+        guard let startLocation, let endLocation else { return }
     }
 }
 
 #Preview {
     CampusMapView(
-        startLocation: .constant(nil),
-        endLocation: .constant(nil))
+        startLocation: .constant(nil as GridPoint?),
+        endLocation: .constant(nil as GridPoint?))
 }

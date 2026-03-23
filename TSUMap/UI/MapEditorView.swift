@@ -1,11 +1,6 @@
 import SwiftUI
 import MapKit
 
-enum CellType {
-    case path
-    case obstacle
-}
-
 struct MapEditorView: View {
     let columnsCount = 150
     let rowsCount = 150
