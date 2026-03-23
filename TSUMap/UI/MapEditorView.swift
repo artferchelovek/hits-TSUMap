@@ -1,50 +1,36 @@
-//
-//  MapEditorView.swift
-//  TSUMap
-//
-//  Created by Artem on 18.03.2026.
-//
-
 import SwiftUI
+import MapKit
 
 enum CellType {
     case path
     case obstacle
 }
 
-struct CellView: View {
-    @Binding var cellType: CellType
-    let size: CGFloat
-    
-    var body: some View {
-        Rectangle()
-            .fill(cellType == .obstacle ? Color.black.opacity(0.4) : Color.clear)
-            .frame(width: size, height: size)
-            .border(Color.white.opacity(0.1), width: 0.5)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                cellType = cellType == .obstacle ? .path : .obstacle
-            }
-    }
-}
-
 struct MapEditorView: View {
-    let columnsCount = 100
-    let rowsCount = 170
-    let mapWidth: CGFloat = 1500
+    let columnsCount = 150
+    let rowsCount = 150
     
-    var cellSize: CGFloat {
-        mapWidth / CGFloat(columnsCount)
-    }
+    let baseCellSize: CGFloat = 14.0
+    
+    var baseWidth: CGFloat { CGFloat(columnsCount) * baseCellSize }
+    var baseHeight: CGFloat { CGFloat(rowsCount) * baseCellSize }
     
     @State private var grid: [[CellType]]
+    @State private var isDrawMode: Bool = true
     @State private var currentScale: CGFloat = 1.0
     @State private var finalScale: CGFloat = 1.0
     
-    @State private var isDrawMode: Bool = true
-    
     init() {
-        _grid = State(initialValue: Array(repeating: Array(repeating: .obstacle, count: columnsCount), count: rowsCount))
+        if tsuCampusGrid.isEmpty {
+            _grid = State(initialValue: Array(repeating: Array(repeating: .obstacle, count: columnsCount), count: rowsCount))
+        } else {
+            let loadedGrid = tsuCampusGrid.map { row in
+                row.map { value in
+                    value == 1 ? CellType.obstacle : CellType.path
+                }
+            }
+            _grid = State(initialValue: loadedGrid)
+        }
     }
     
     var body: some View {
@@ -65,65 +51,72 @@ struct MapEditorView: View {
             }
             .padding()
             
+            let maxScale: CGFloat = 1.3
+            let minScale: CGFloat = 0.5
+            let currentTotalScale = min(maxScale, max(minScale, finalScale * currentScale))
+            
             ScrollView([.horizontal, .vertical], showsIndicators: true) {
                 ZStack(alignment: .topLeading) {
                     
-                    Image("TSUMap")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: mapWidth)
+                    Map(
+                        initialPosition: .region(
+                            MKCoordinateRegion(
+                                center: CLLocationCoordinate2D(latitude: 56.4690, longitude: 84.9470),
+                                span: MKCoordinateSpan(latitudeDelta: 0.007, longitudeDelta: 0.007)
+                            )
+                        ),
+                        interactionModes: []
+                    )
+                    .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
+                    .allowsHitTesting(false)
+                    .frame(width: baseWidth, height: baseHeight)
                     
                     Canvas { context, size in
-                        
                         var gridLines = Path()
-                        
                         for col in 0...columnsCount {
-                            let x = CGFloat(col) * cellSize
+                            let x = CGFloat(col) * baseCellSize
                             gridLines.move(to: CGPoint(x: x, y: 0))
                             gridLines.addLine(to: CGPoint(x: x, y: size.height))
                         }
-                        
                         for row in 0...rowsCount {
-                            let y = CGFloat(row) * cellSize
+                            let y = CGFloat(row) * baseCellSize
                             gridLines.move(to: CGPoint(x: 0, y: y))
                             gridLines.addLine(to: CGPoint(x: size.width, y: y))
                         }
+                        context.stroke(gridLines, with: .color(.black.opacity(0.15)), lineWidth: 0.3)
                         
-                        context.stroke(gridLines, with: .color(.black.opacity(0.2)), lineWidth: 0.5)
-                        
+                        var obstaclesPath = Path()
                         for row in 0..<rowsCount {
                             for col in 0..<columnsCount where grid[row][col] == .obstacle {
+                                
                                 let rect = CGRect(
-                                    x: CGFloat(col) * cellSize,
-                                    y: CGFloat(row) * cellSize,
-                                    width: cellSize,
-                                    height: cellSize
+                                    x: CGFloat(col) * baseCellSize,
+                                    y: CGFloat(row) * baseCellSize,
+                                    width: baseCellSize,
+                                    height: baseCellSize
                                 )
-                                context.fill(Path(rect), with: .color(.black.opacity(0.5)))
+                                obstaclesPath.addRect(rect)
                             }
                         }
+                        context.fill(obstaclesPath, with: .color(.black.opacity(0.4)))
                     }
-                    .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
+                    .frame(width: baseWidth, height: baseHeight)
                     
                     if isDrawMode {
                         Color.white.opacity(0.001)
-                            .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
-                        
+                            .frame(width: baseWidth, height: baseHeight)
                             .onTapGesture(coordinateSpace: .local) { location in
-                                let col = Int(location.x / cellSize)
-                                let row = Int(location.y / cellSize)
-                                
+                                let col = Int(location.x / baseCellSize)
+                                let row = Int(location.y / baseCellSize)
                                 if row >= 0 && row < rowsCount && col >= 0 && col < columnsCount {
                                     grid[row][col] = grid[row][col] == .obstacle ? .path : .obstacle
                                 }
                             }
-                        
                             .gesture(
-                                DragGesture(minimumDistance: 5)
+                                DragGesture(minimumDistance: 2)
                                     .onChanged { value in
-                                        let col = Int(value.location.x / cellSize)
-                                        let row = Int(value.location.y / cellSize)
-                                        
+                                        let col = Int(value.location.x / baseCellSize)
+                                        let row = Int(value.location.y / baseCellSize)
                                         if row >= 0 && row < rowsCount && col >= 0 && col < columnsCount {
                                             grid[row][col] = .path
                                         }
@@ -131,16 +124,22 @@ struct MapEditorView: View {
                             )
                     }
                 }
-                .scaleEffect(finalScale * currentScale)
-                .gesture(
-                    MagnificationGesture()
-                        .onChanged { amount in currentScale = amount }
-                        .onEnded { amount in
-                            finalScale = max(0.5, min(finalScale * amount, 4.0))
-                            currentScale = 1.0
-                        }
+                .scaleEffect(currentTotalScale, anchor: .topLeading)
+                .frame(
+                    width: baseWidth * currentTotalScale,
+                    height: baseHeight * currentTotalScale,
+                    alignment: .topLeading
                 )
             }
+            .defaultScrollAnchor(.center)
+            .gesture(
+                MagnificationGesture()
+                    .onChanged { amount in currentScale = amount }
+                    .onEnded { amount in
+                        finalScale = min(maxScale, max(minScale, finalScale * amount))
+                        currentScale = 1.0
+                    }
+            )
         }
     }
     

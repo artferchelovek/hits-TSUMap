@@ -11,7 +11,7 @@ import SwiftUI
 struct TSUMapApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MapEditorView()
         }
     }
 }
