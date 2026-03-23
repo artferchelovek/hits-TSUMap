@@ -137,8 +137,9 @@ struct CampusMapView: View {
             }
         } else if endLocation == nil {
             endLocation = GridPoint(row: row, col: col)
-            // СЕРËЖА ВОТ ТУТ МОЖЕШЬ ВЫЗЫВАТЬ ФУНКЦИЮ СВОЮ
         }
+        
+        guard let startLocation, let endLocation else { return }
     }
 }
 
