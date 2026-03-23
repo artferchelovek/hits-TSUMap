@@ -13,7 +13,7 @@ class TreeNode {
     var children: [String: TreeNode] = [:]
     var result: String?
     var defaultResult: String?
-
+    
     init(attributeName: String, defaultResult: String? = nil) {
         self.attributeName = attributeName
         self.defaultResult = defaultResult
@@ -26,13 +26,13 @@ class TreeNode {
 func predict(tree: TreeNode, situation: Attribute) -> (result: String, path: [TreeNode]) {
     var currentNode = tree
     var path: [TreeNode] = []
-
+    
     while currentNode.result == nil {
         path.append(currentNode)
-
+        
         guard let attribute = currentNode.attributeName else { break }
         let value = getValue(from: situation, for: attribute)
-
+        
         if let nextNode = currentNode.children[value] {
             currentNode = nextNode
         } else {
@@ -51,7 +51,7 @@ func Entropy(_ data: [Attribute]) -> Double {
     for item in data {
         counts[ item.recommended_place, default: 0.0] += 1.0
     }
-
+    
     let totalCount = Double(data.count)
     var entropy = 0.0
     for count in counts.values {
@@ -63,7 +63,7 @@ func Entropy(_ data: [Attribute]) -> Double {
 
 func InformationGain(from data: [Attribute], for columnName: String) -> Double {
     let totalEntropy = Entropy(data)
-
+    
     var groups: [String: [Attribute]] = [:]
     for item in data {
         let value = getValue(from: item, for: columnName)
@@ -82,17 +82,17 @@ func buildTree(data: [Attribute], availableAttributes: [String]) -> TreeNode {
     if allSame {
         return TreeNode(result: element)
     }
-
+    
     var counts: [String: Int] = [:]
     for item in data {
         counts[item.recommended_place, default: 0] += 1
     }
     let mostCommon = counts.max(by: { $0.value < $1.value })!.key
-
+       
     if availableAttributes.isEmpty {
         return TreeNode(result: mostCommon)
     }
-
+    
     var bestAttribute = ""
     var bestGain = -1.0
     for attribute in availableAttributes {
@@ -102,10 +102,10 @@ func buildTree(data: [Attribute], availableAttributes: [String]) -> TreeNode {
             bestAttribute = attribute
         }
     }
-
+    
     let node = TreeNode(attributeName: bestAttribute, defaultResult: mostCommon)
     let updatedAttribute = availableAttributes.filter {$0 != bestAttribute}
-
+    
     var groups: [String: [Attribute]] = [:]
     for item in data {
         let value = getValue(from: item, for: bestAttribute)
@@ -115,12 +115,11 @@ func buildTree(data: [Attribute], availableAttributes: [String]) -> TreeNode {
             groups[value, default: []].append(item)
         }
     }
-
+    
     for (branchValue, BranchData) in groups {
         let childNode = buildTree(data: BranchData, availableAttributes: updatedAttribute)
         node.children[branchValue] = childNode
     }
-    var temp = node
-
-    return temp
+    
+    return node
 }
