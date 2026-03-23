@@ -39,7 +39,7 @@ private func InformationGain(from data: [Attribute], for columnName: String) -> 
 
 func buildTree(data: [Attribute], availableAttributes: [String]) -> Node {
     let element = data[0].recommended_place
-    let allSame = data.allSatisfy{$0.recommended_place == element}
+    let allSame = data.allSatisfy {$0.recommended_place == element}
     if allSame {
         return Node(result: element)
     }
@@ -65,7 +65,7 @@ func buildTree(data: [Attribute], availableAttributes: [String]) -> Node {
     }
     
     let node = Node(attributeName: bestAttribute, defaultResult: mostCommon)
-    let updatedAttribute = availableAttributes.filter{$0 != bestAttribute}
+    let updatedAttribute = availableAttributes.filter {$0 != bestAttribute}
     
     var groups: [String: [Attribute]] = [:]
     for item in data {
@@ -83,5 +83,3 @@ func buildTree(data: [Attribute], availableAttributes: [String]) -> Node {
     }
     return node
 }
-
-

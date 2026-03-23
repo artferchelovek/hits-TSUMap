@@ -12,8 +12,7 @@ func predict(tree: Node, situation: Attribute) -> (result: String, path: [Node])
         
         if let nextNode = currentNode.children[value] {
             currentNode = nextNode
-        }
-        else {
+        } else {
             let fallback = currentNode.defaultResult ?? "Неизвестно"
             return (fallback, path)
         }
