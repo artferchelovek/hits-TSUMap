@@ -87,16 +87,15 @@ struct MapEditorView: View {
                         
                         var obstaclesPath = Path()
                         for row in 0..<rowsCount {
-                            for col in 0..<columnsCount {
-                                if grid[row][col] == .obstacle {
-                                    let rect = CGRect(
-                                        x: CGFloat(col) * baseCellSize,
-                                        y: CGFloat(row) * baseCellSize,
-                                        width: baseCellSize,
-                                        height: baseCellSize
-                                    )
-                                    obstaclesPath.addRect(rect)
-                                }
+                            for col in 0..<columnsCount where grid[row][col] == .obstacle {
+                                
+                                let rect = CGRect(
+                                    x: CGFloat(col) * baseCellSize,
+                                    y: CGFloat(row) * baseCellSize,
+                                    width: baseCellSize,
+                                    height: baseCellSize
+                                )
+                                obstaclesPath.addRect(rect)
                             }
                         }
                         context.fill(obstaclesPath, with: .color(.black.opacity(0.4)))
