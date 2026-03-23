@@ -32,7 +32,12 @@ struct ContentView: View {
     @State private var startLocation: GridPoint?
     @State private var endLocation: GridPoint?
     @State private var paths: [GridPoint] = []
-
+    
+    @State private var isShowingSheet = false
+    
+    @State private var treeNode: TreeNode?
+    @State private var predictionResult: String?
+    
     var body: some View {
         ZStack(alignment: .topLeading) {
             CampusMapView(
@@ -55,8 +60,10 @@ struct ContentView: View {
                         Spacer()
                     }.transition(.move(edge: .top).combined(with: .opacity))
                 } else {
-                    FloatingSearchBar()
-                        .transition(.move(edge: .top).combined(with: .opacity))
+                    HStack {
+                        FloatingSearchBar()
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
 
                 Spacer()
@@ -74,17 +81,24 @@ struct ContentView: View {
                         HStack {
                             Button {
                                 withAnimation(.spring()) {
-                                    // tree
+                                    isShowingSheet.toggle()
                                 }
                             } label: {
                                 Text("Куда пойдём?").padding(.vertical, 6).padding(.horizontal, 20)
-                            }.buttonStyle(.glassProminent)
+                            }
+                            .buttonStyle(.glassProminent)
+                            .sheet(isPresented: $isShowingSheet) {
+                                DecisionTreeView(treeNode: treeNode) { prediction in
+                                    self.predictionResult = prediction
+                                }
+                            }
 
                             Button {
                                 withAnimation(.spring()) {
                                     startLocation = nil
                                     endLocation = nil
                                     paths = []
+                                    predictionResult = nil
                                 }
                             } label: {
                                 HStack {
@@ -98,6 +112,20 @@ struct ContentView: View {
             .padding()
             .animation(.spring(response: 0.4, dampingFraction: 0.8), value: startLocation)
         }
+        .onAppear {
+            loadTree()
+        }
+    }
+    
+    private func loadTree() {
+        guard let url = Bundle.main.url(forResource: "data", withExtension: "csv"),
+              let content = try? String(contentsOf: url, encoding: .utf8) else {
+            return
+        }
+        
+        let data = CVSParser(content: content)
+        let attributes = ["location", "budget", "time_available", "food_type", "queue_tolerance", "weather"]
+        treeNode = buildTree(data: data, availableAttributes: attributes)
     }
 }
 
