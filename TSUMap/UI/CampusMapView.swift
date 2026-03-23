@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct GridPoint: Equatable {
+struct GridPoint: Equatable, Hashable {
     let row: Int
     let col: Int
 }
@@ -95,7 +95,6 @@ struct CampusMapView: View {
     private func Tap(at location: CGPoint) {
         let col = Int(location.x / cellSize)
         let row = Int(location.y / cellSize)
-        
         guard row >= 0 && row < rowsCount && col >= 0 && col < columnsCount else { return }
         if tsuCampusGrid[row][col] == 1 { return }
         
