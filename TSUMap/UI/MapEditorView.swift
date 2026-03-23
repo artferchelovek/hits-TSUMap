@@ -4,17 +4,17 @@ import MapKit
 struct MapEditorView: View {
     let columnsCount = 150
     let rowsCount = 150
-    
+
     let baseCellSize: CGFloat = 14.0
-    
+
     var baseWidth: CGFloat { CGFloat(columnsCount) * baseCellSize }
     var baseHeight: CGFloat { CGFloat(rowsCount) * baseCellSize }
-    
+
     @State private var grid: [[CellType]]
     @State private var isDrawMode: Bool = true
     @State private var currentScale: CGFloat = 1.0
     @State private var finalScale: CGFloat = 1.0
-    
+
     init() {
         if tsuCampusGrid.isEmpty {
             _grid = State(initialValue: Array(repeating: Array(repeating: .obstacle, count: columnsCount), count: rowsCount))
@@ -27,7 +27,7 @@ struct MapEditorView: View {
             _grid = State(initialValue: loadedGrid)
         }
     }
-    
+
     var body: some View {
         VStack {
             HStack {
@@ -37,22 +37,22 @@ struct MapEditorView: View {
                 }
                 .pickerStyle(.segmented)
                 .frame(width: 150)
-                
+
                 Spacer()
-                
+
                 Button("Экспорт") {
                     exportGrid()
                 }.buttonStyle(.borderedProminent)
             }
             .padding()
-            
+
             let maxScale: CGFloat = 1.3
             let minScale: CGFloat = 0.5
             let currentTotalScale = min(maxScale, max(minScale, finalScale * currentScale))
-            
+
             ScrollView([.horizontal, .vertical], showsIndicators: true) {
                 ZStack(alignment: .topLeading) {
-                    
+
                     Map(
                         initialPosition: .region(
                             MKCoordinateRegion(
@@ -65,7 +65,7 @@ struct MapEditorView: View {
                     .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
                     .allowsHitTesting(false)
                     .frame(width: baseWidth, height: baseHeight)
-                    
+
                     Canvas { context, size in
                         var gridLines = Path()
                         for col in 0...columnsCount {
@@ -79,11 +79,11 @@ struct MapEditorView: View {
                             gridLines.addLine(to: CGPoint(x: size.width, y: y))
                         }
                         context.stroke(gridLines, with: .color(.black.opacity(0.15)), lineWidth: 0.3)
-                        
+
                         var obstaclesPath = Path()
                         for row in 0..<rowsCount {
                             for col in 0..<columnsCount where grid[row][col] == .obstacle {
-                                
+
                                 let rect = CGRect(
                                     x: CGFloat(col) * baseCellSize,
                                     y: CGFloat(row) * baseCellSize,
@@ -96,7 +96,7 @@ struct MapEditorView: View {
                         context.fill(obstaclesPath, with: .color(.black.opacity(0.4)))
                     }
                     .frame(width: baseWidth, height: baseHeight)
-                    
+
                     if isDrawMode {
                         Color.white.opacity(0.001)
                             .frame(width: baseWidth, height: baseHeight)
@@ -137,7 +137,7 @@ struct MapEditorView: View {
             )
         }
     }
-    
+
     private func exportGrid() {
         print("let tsuCampusGrid = [")
         for row in grid {

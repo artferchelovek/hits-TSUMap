@@ -3,7 +3,7 @@ import Foundation
 func CVSParser(content: String) -> [Attribute] {
     var attributes: [Attribute] = []
     let rows = content.split(separator: "\n")
-    
+
     for row in rows {
         let words = row.split(separator: ",")
         if words.count == 7 {
