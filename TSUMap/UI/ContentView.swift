@@ -31,12 +31,14 @@ struct ContentView: View {
 
     @State private var startLocation: GridPoint?
     @State private var endLocation: GridPoint?
+    @State private var paths: [GridPoint] = []
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             CampusMapView(
                 startLocation: $startLocation,
-                endLocation: $endLocation
+                endLocation: $endLocation,
+                paths: $paths
             ).ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -82,6 +84,7 @@ struct ContentView: View {
                                 withAnimation(.spring()) {
                                     startLocation = nil
                                     endLocation = nil
+                                    paths = []
                                 }
                             } label: {
                                 HStack {

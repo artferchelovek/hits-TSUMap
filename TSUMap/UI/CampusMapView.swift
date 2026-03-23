@@ -31,14 +31,16 @@ struct CampusMapView: View {
     
     @Binding var startLocation: GridPoint?
     @Binding var endLocation: GridPoint?
-    @State var paths: [GridPoint] = []
+    @Binding var paths: [GridPoint]
+    
     @State private var currentScale: CGFloat = 1.0
     @State private var finalScale: CGFloat = 1.0
     
-    init(startLocation: Binding<GridPoint?>, endLocation: Binding<GridPoint?>) {
+    init(startLocation: Binding<GridPoint?>, endLocation: Binding<GridPoint?>, paths: Binding<[GridPoint]>) {
         
         self._startLocation = startLocation
         self._endLocation = endLocation
+        self._paths = paths
         
         if tsuCampusGrid.isEmpty {
             _grid = State(initialValue: Array(repeating: Array(repeating: .obstacle, count: columnsCount), count: rowsCount))
@@ -102,6 +104,7 @@ struct CampusMapView: View {
 
                             context.draw(coordinateText, at: CGPoint(x: x, y: y - 15), anchor: .bottom)
                         }
+                        
                         if paths.count > 1 {
                             var myPath = Path()
                             guard let first = paths.first else {return}
@@ -138,6 +141,7 @@ struct CampusMapView: View {
         let col = Int(location.x / cellSize)
         let row = Int(location.y / cellSize)
         paths = []
+        
         guard row >= 0 && row < rowsCount && col >= 0 && col < columnsCount else { return }
         if tsuCampusGrid[row][col] == 1 { return }
 
@@ -157,5 +161,7 @@ struct CampusMapView: View {
 #Preview {
     CampusMapView(
         startLocation: .constant(nil as GridPoint?),
-        endLocation: .constant(nil as GridPoint?))
+        endLocation: .constant(nil as GridPoint?),
+        paths: .constant([])
+    )
 }
