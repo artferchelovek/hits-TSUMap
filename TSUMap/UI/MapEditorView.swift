@@ -92,16 +92,14 @@ struct MapEditorView: View {
                         context.stroke(gridLines, with: .color(.black.opacity(0.2)), lineWidth: 0.5)
                         
                         for row in 0..<rowsCount {
-                            for col in 0..<columnsCount {
-                                if grid[row][col] == .obstacle {
-                                    let rect = CGRect(
-                                        x: CGFloat(col) * cellSize,
-                                        y: CGFloat(row) * cellSize,
-                                        width: cellSize,
-                                        height: cellSize
-                                    )
-                                    context.fill(Path(rect), with: .color(.black.opacity(0.5)))
-                                }
+                            for col in 0..<columnsCount where grid[row][col] == .obstacle {
+                                let rect = CGRect(
+                                    x: CGFloat(col) * cellSize,
+                                    y: CGFloat(row) * cellSize,
+                                    width: cellSize,
+                                    height: cellSize
+                                )
+                                context.fill(Path(rect), with: .color(.black.opacity(0.5)))
                             }
                         }
                     }

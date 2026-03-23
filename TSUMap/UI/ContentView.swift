@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @State private var startLocation: GridPoint? = nil
-    @State private var endLocation: GridPoint? = nil
+    @State private var startLocation: GridPoint?
+    @State private var endLocation: GridPoint?
     
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -34,7 +34,7 @@ struct ContentView: View {
                 Spacer()
                 VStack(spacing: 15) {
                     
-                    if (startLocation == nil) {
+                    if startLocation == nil {
                         HStack {
                             Text("Укажите, где вы находитесь")
                                 .font(.title2).bold()
@@ -71,9 +71,7 @@ struct ContentView: View {
                             }
                         }
                     }
-                    
                 }
-                
             }.padding().animation(.spring(), value: startLocation)
         }
     }

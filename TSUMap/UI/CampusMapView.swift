@@ -37,7 +37,7 @@ struct CampusMapView: View {
                         .scaledToFit()
                         .frame(width: mapWidth)
                     
-                    Canvas { context, size in
+                    Canvas { context, _ in
                         if let start = startLocation {
                             let x = CGFloat(start.col) * cellSize + (cellSize / 2)
                             let y = CGFloat(start.row) * cellSize + (cellSize / 2)
@@ -90,7 +90,6 @@ struct CampusMapView: View {
             }
             .defaultScrollAnchor(.center)
         }
-        
     }
     
     private func Tap(at location: CGPoint) {
@@ -104,8 +103,7 @@ struct CampusMapView: View {
             withAnimation(.spring()) {
                 startLocation = GridPoint(row: row, col: col)
             }
-        }
-        else if endLocation == nil {
+        } else if endLocation == nil {
             endLocation = GridPoint(row: row, col: col)
             // СЕРËЖА ВОТ ТУТ МОЖЕШЬ ВЫЗЫВАТЬ ФУНКЦИЮ СВОЮ
         }

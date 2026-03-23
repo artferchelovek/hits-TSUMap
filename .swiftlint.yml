@@ -1,0 +1,22 @@
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - first_where
+  - nimble_operator
+  - operator_usage_whitespace
+  - prohibited_super_call
+  - redundant_nil_coalescing
+  - vertical_whitespace_closing_braces
+  - yoda_condition
+
+disabled_rules:
+  - line_length
+  - trailing_whitespace
+  - identifier_name
+
+included:
+  - TSUMap
+
+excluded:
+  - Pods
+  - Carthage
