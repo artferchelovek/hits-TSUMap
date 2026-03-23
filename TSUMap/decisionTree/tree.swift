@@ -6,43 +6,8 @@
 //
 
 import Foundation
-import SwiftUI
 
-struct Attribute {
-    var location: String
-    var budget: String
-    var time_available: String
-    var food_type: String
-    var queue_tolerance: String
-    var weather: String
-    var recommended_place: String
-}
-
-
-func CVSParser(content: String) -> [Attribute] {
-    var attributes: [Attribute] = []
-    let rows = content.split(separator: "\n")
-    
-    for row in rows {
-        let words = row.split(separator: ",")
-        if words.count == 7 {
-            let attribute = Attribute(
-                location: words[0].trimmingCharacters(in: .whitespaces),
-                budget: words[1].trimmingCharacters(in: .whitespaces),
-                time_available: words[2].trimmingCharacters(in: .whitespaces),
-                food_type: words[3].trimmingCharacters(in: .whitespaces),
-                queue_tolerance: words[4].trimmingCharacters(in: .whitespaces),
-                weather: words[5].trimmingCharacters(in: .whitespaces),
-                recommended_place: words[6].trimmingCharacters(in: .whitespaces)
-            )
-            attributes.append(attribute)
-        }
-    }
-    print("мяу")
-    return attributes
-}
-
-func Entropy(_ data: [Attribute]) -> Double {
+private func Entropy(_ data: [Attribute]) -> Double {
     var counts: [String: Double] = [:]
     for item in data {
         counts[ item.recommended_place, default: 0.0] += 1.0
@@ -57,51 +22,19 @@ func Entropy(_ data: [Attribute]) -> Double {
     return entropy
 }
 
-func getValue (from item: Attribute, for column: String) -> String {
-    switch column {
-    case "location": return item.location
-    case "budget": return item.budget
-    case "time_available": return item.time_available
-    case "food_type": return item.food_type
-    case "queue_tolerance": return item.queue_tolerance
-    case "weather": return item.weather
-    case "recommended_place": return item.recommended_place
-    default: return ""
-    }
-}
-
-func InformationGain(from data: [Attribute], for columnName: String) -> Double {
+private func InformationGain(from data: [Attribute], for columnName: String) -> Double {
     let totalEntropy = Entropy(data)
     
     var groups: [String: [Attribute]] = [:]
     for item in data {
         let value = getValue(from: item, for: columnName)
-        if groups[value] == nil {
-            groups[value] = [item]
-        } else {
-            groups[value]?.append(item)
-        }
+        groups[value, default: []].append(item)
     }
     var entropy = 0.0
     for group in groups.values {
         entropy += Entropy(group) * Double(group.count) / Double(data.count)
     }
     return totalEntropy - entropy
-}
-
-class Node {
-    var attributeName : String?
-    var children : [String: Node] = [:]
-    var result : String?
-    var defaultResult: String?
-    
-    init(attributeName: String, defaultResult: String? = nil) {
-        self.attributeName = attributeName
-        self.defaultResult = defaultResult
-    }
-    init (result: String) {
-        self.result = result
-    }
 }
 
 func buildTree(data: [Attribute], availableAttributes: [String]) -> Node {
@@ -151,26 +84,4 @@ func buildTree(data: [Attribute], availableAttributes: [String]) -> Node {
     return node
 }
 
-func predict(tree: Node, situation: Attribute) -> (result: String, path: [String]) {
-    var currentNode = tree
-    var path: [String] = []
-    
-    while currentNode.result == nil {
-        guard let attribute = currentNode.attributeName else { break }
-        let value = getValue(from: situation, for: attribute)
-        
-        path.append("Проверка [\(attribute)]: выбрано значение [\(value)]")
-        
-        if let nextNode = currentNode.children[value] {
-            currentNode = nextNode
-        } else {
-            let fallback = currentNode.defaultResult ?? "Неизвестно"
-            path.append("Ветка не найдена, используем наиболее вероятный вариант")
-            return (fallback, path)
-        }
-    }
-    
-    let finalResult = currentNode.result ?? "Ошибка"
-    return (finalResult, path)
-}
 
