@@ -42,7 +42,6 @@ func AStar(graph: [[CellType]], start: GridPoint, end: GridPoint) -> [GridPoint]
 
     while !opened.isEmpty {
 
-        
         opened = opened.sorted(by: ({$0.funcF < $1.funcF}))
         guard let currentVertex = opened.first else {
             break
@@ -55,14 +54,13 @@ func AStar(graph: [[CellType]], start: GridPoint, end: GridPoint) -> [GridPoint]
         opened.removeFirst()
         isVisited.insert(currentVertex.point)
 
-        
         for (row, col) in neighbors {
             let neighborsPos = GridPoint(row: currentVertex.point.row + row, col: currentVertex.point.col + col)
 
             if !isValidStep(graph: graph, vertex: neighborsPos, isVisited: isVisited) {continue}
 
             let neighborH = h(neighborsPos, end)
-            let neighborDist = (row == 0 || col == 0) ? currentVertex.dist + 1  : currentVertex.dist + sqrt(2)
+            let neighborDist = (row == 0 || col == 0) ? currentVertex.dist + 1 : currentVertex.dist + sqrt(2)
 
             guard let item = opened.firstIndex(where: {$0.point == neighborsPos}) else {
 
@@ -78,15 +76,14 @@ func AStar(graph: [[CellType]], start: GridPoint, end: GridPoint) -> [GridPoint]
             }
         }
     }
-    
+
     return createPath(parents: parents, start: start, end: end)
 }
-
 
 func createPath(parents: [GridPoint: GridPoint], start: GridPoint, end: GridPoint) -> [GridPoint] {
     var path: [GridPoint] = [end]
     var currentVertex: GridPoint = end
-    
+
     while currentVertex != start {
         guard let nextNode = parents[currentVertex] else {
             break
@@ -96,5 +93,4 @@ func createPath(parents: [GridPoint: GridPoint], start: GridPoint, end: GridPoin
     }
 
     return path
-    
 }

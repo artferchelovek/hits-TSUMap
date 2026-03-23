@@ -9,14 +9,14 @@ import SwiftUI
 
 struct FloatingSearchBar: View {
     @State private var searchText: String = ""
-    
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.title3)
                 .fontWeight(.medium)
                 .foregroundColor(.primary)
-            
+
             TextField("Найти коворкинг...", text: $searchText)
                 .font(.body)
         }
@@ -28,17 +28,17 @@ struct FloatingSearchBar: View {
 }
 
 struct ContentView: View {
-    
+
     @State private var startLocation: GridPoint?
     @State private var endLocation: GridPoint?
-    
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             CampusMapView(
                 startLocation: $startLocation,
                 endLocation: $endLocation
             ).ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 if startLocation == nil {
                     HStack {
@@ -49,16 +49,16 @@ struct ContentView: View {
                             .padding(.vertical, 10)
                             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 15))
                             .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 2)
-                        
+
                         Spacer()
                     }.transition(.move(edge: .top).combined(with: .opacity))
                 } else {
                     FloatingSearchBar()
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
-                
+
                 Spacer()
-                
+
                 VStack(spacing: 15) {
                     if startLocation == nil {
                         HStack {
@@ -77,7 +77,7 @@ struct ContentView: View {
                             } label: {
                                 Text("Куда пойдём?").padding(.vertical, 6).padding(.horizontal, 20)
                             }.buttonStyle(.glassProminent)
-                            
+
                             Button {
                                 withAnimation(.spring()) {
                                     startLocation = nil
