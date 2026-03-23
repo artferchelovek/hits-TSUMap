@@ -7,6 +7,26 @@
 
 import SwiftUI
 
+struct FloatingSearchBar: View {
+    @State private var searchText: String = ""
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.title3)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+            
+            TextField("Найти коворкинг...", text: $searchText)
+                .font(.body)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(.regularMaterial, in: Capsule())
+        .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 2)
+    }
+}
+
 struct ContentView: View {
     
     @State private var startLocation: GridPoint?
@@ -20,20 +40,26 @@ struct ContentView: View {
             ).ignoresSafeArea()
             
             VStack(spacing: 0) {
-                HStack {
-                    Text("TSUMap")
-                        .font(.title)
-                        .bold()
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 15))
-                        .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 2)
-                    
-                    Spacer()
+                if startLocation == nil {
+                    HStack {
+                        Text("TSUMap")
+                            .font(.title)
+                            .bold()
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 15))
+                            .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 2)
+                        
+                        Spacer()
+                    }.transition(.move(edge: .top).combined(with: .opacity))
+                } else {
+                    FloatingSearchBar()
+                        .transition(.move(edge: .top).combined(with: .opacity))
                 }
+                
                 Spacer()
+                
                 VStack(spacing: 15) {
-                    
                     if startLocation == nil {
                         HStack {
                             Text("Укажите, где вы находитесь")
@@ -44,35 +70,30 @@ struct ContentView: View {
                         }
                     } else {
                         HStack {
-                            if endLocation == nil {
-                                Text("Куда пойдём?")
-                                    .font(.title2).bold()
-                                    .padding(.horizontal, 12).padding(.vertical, 10)
-                                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 30))
-                                Spacer()
-                            } else {
-                                Button {
-                                    withAnimation(.spring()) {
-                                        startLocation = nil
-                                        endLocation = nil
-                                    }
-                                } label: {
-                                    HStack {
-                                        Image(systemName: "arrow.uturn.backward").font(.title3).bold()
-                                        
-                                        Text("Сбросить маршрут").font(.title3).bold()
-                                    }
-                                    .padding()
-                                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 30))
-                                    .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 2)
-                                    
-                                    Spacer()
+                            Button {
+                                withAnimation(.spring()) {
+                                    // tree
                                 }
-                            }
+                            } label: {
+                                Text("Куда пойдём?").padding(.vertical, 6).padding(.horizontal, 20)
+                            }.buttonStyle(.glassProminent)
+                            
+                            Button {
+                                withAnimation(.spring()) {
+                                    startLocation = nil
+                                    endLocation = nil
+                                }
+                            } label: {
+                                HStack {
+                                    Text("Сбросить маршрут").font(.body).padding(.vertical, 6).padding(.horizontal, 20)
+                                }
+                            }.buttonStyle(.glass)
                         }
                     }
                 }
-            }.padding().animation(.spring(), value: startLocation)
+            }
+            .padding()
+            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: startLocation)
         }
     }
 }
