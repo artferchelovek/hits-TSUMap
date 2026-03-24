@@ -7,7 +7,7 @@
 
 import Foundation
 
-private func Entropy(_ data: [treeAttribute]) -> Double {
+private func Entropy(_ data: [TreeAttribute]) -> Double {
     var counts: [String: Double] = [:]
     for item in data {
         counts[ item.recommended_place, default: 0.0] += 1.0
@@ -22,10 +22,10 @@ private func Entropy(_ data: [treeAttribute]) -> Double {
     return entropy
 }
 
-private func InformationGain(from data: [treeAttribute], for columnName: String) -> Double {
+private func InformationGain(from data: [TreeAttribute], for columnName: String) -> Double {
     let totalEntropy = Entropy(data)
     
-    var groups: [String: [treeAttribute]] = [:]
+    var groups: [String: [TreeAttribute]] = [:]
     for item in data {
         let value = getAttribute(from: item, for: columnName)
         groups[value, default: []].append(item)
@@ -38,9 +38,9 @@ private func InformationGain(from data: [treeAttribute], for columnName: String)
 }
 
 class TreeNode {
-    var attributeName : String?
-    var children : [String: TreeNode] = [:]
-    var result : String?
+    var attributeName: String?
+    var children: [String: TreeNode] = [:]
+    var result: String?
     var defaultResult: String?
     
     init(attributeName: String, defaultResult: String? = nil) {
@@ -52,9 +52,9 @@ class TreeNode {
     }
 }
 
-func buildTree(data: [treeAttribute], availableAttributes: [String]) -> TreeNode {
+func buildTree(data: [TreeAttribute], availableAttributes: [String]) -> TreeNode {
     let element = data[0].recommended_place
-    let allSame = data.allSatisfy{$0.recommended_place == element}
+    let allSame = data.allSatisfy {$0.recommended_place == element}
     if allSame {
         return TreeNode(result: element)
     }
@@ -80,9 +80,9 @@ func buildTree(data: [treeAttribute], availableAttributes: [String]) -> TreeNode
     }
     
     let node = TreeNode(attributeName: bestAttribute, defaultResult: mostCommon)
-    let updatedAttribute = availableAttributes.filter{$0 != bestAttribute}
+    let updatedAttribute = availableAttributes.filter {$0 != bestAttribute}
     
-    var groups: [String: [treeAttribute]] = [:]
+    var groups: [String: [TreeAttribute]] = [:]
     for item in data {
         let value = getAttribute(from: item, for: bestAttribute)
         if groups[value] == nil {
@@ -99,7 +99,7 @@ func buildTree(data: [treeAttribute], availableAttributes: [String]) -> TreeNode
     return node
 }
 
-func predict(tree: TreeNode, situation: treeAttribute) -> (result: String, path: [TreeNode]) {
+func predict(tree: TreeNode, situation: TreeAttribute) -> (result: String, path: [TreeNode]) {
     var currentNode = tree
     var path: [TreeNode] = []
     
@@ -111,8 +111,7 @@ func predict(tree: TreeNode, situation: treeAttribute) -> (result: String, path:
         
         if let nextNode = currentNode.children[value] {
             currentNode = nextNode
-        }
-        else {
+        } else {
             let fallback = currentNode.defaultResult ?? "Неизвестно"
             return (fallback, path)
         }
