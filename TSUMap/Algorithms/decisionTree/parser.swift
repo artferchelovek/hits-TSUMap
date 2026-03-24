@@ -1,6 +1,6 @@
 import Foundation
 
-func CVSParser(content: String) -> [treeAttribute] {
+func CSVParser(content: String) -> [treeAttribute] {
     var attributes: [treeAttribute] = []
     let rows = content.split(separator: "\n")
 
