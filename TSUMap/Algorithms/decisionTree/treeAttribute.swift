@@ -1,4 +1,4 @@
-struct Attribute {
+struct treeAttribute {
     var location: String
     var budget: String
     var time_available: String
