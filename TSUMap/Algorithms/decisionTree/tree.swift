@@ -42,7 +42,7 @@ private func InformationGain(from data: [TreeAttribute], for columnName: String)
     
     var groups: [String: [TreeAttribute]] = [:]
     for item in data {
-        let value = getAttribute(from: item, for: columnName)
+        let value = getTreeAttribute(from: item, for: columnName)
         groups[value, default: []].append(item)
     }
     var entropy = 0.0
@@ -84,7 +84,7 @@ func buildTree(data: [TreeAttribute], availableAttributes: [String]) -> TreeNode
     
     var groups: [String: [TreeAttribute]] = [:]
     for item in data {
-        let value = getAttribute(from: item, for: bestAttribute)
+        let value = getTreeAttribute(from: item, for: bestAttribute)
         if groups[value] == nil {
             groups[value] = [item]
         } else {
@@ -107,7 +107,7 @@ func predictTree(tree: TreeNode, situation: TreeAttribute) -> (result: String, p
         path.append(currentNode)
         
         guard let attribute = currentNode.attributeName else { break }
-        let value = getAttribute(from: situation, for: attribute)
+        let value = getTreeAttribute(from: situation, for: attribute)
         
         if let nextNode = currentNode.children[value] {
             currentNode = nextNode

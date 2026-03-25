@@ -1,4 +1,4 @@
-func getAttribute(from item: TreeAttribute, for column: String) -> String {
+func getTreeAttribute(from item: TreeAttribute, for column: String) -> String {
     switch column {
     case "location": return item.location
     case "budget": return item.budget
