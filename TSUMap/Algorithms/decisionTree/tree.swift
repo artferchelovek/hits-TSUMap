@@ -7,6 +7,21 @@
 
 import Foundation
 
+class TreeNode {
+    var attributeName: String?
+    var children: [String: TreeNode] = [:]
+    var result: String?
+    var defaultResult: String?
+    
+    init(attributeName: String, defaultResult: String? = nil) {
+        self.attributeName = attributeName
+        self.defaultResult = defaultResult
+    }
+    init (result: String) {
+        self.result = result
+    }
+}
+
 private func Entropy(_ data: [TreeAttribute]) -> Double {
     var counts: [String: Double] = [:]
     for item in data {
@@ -35,21 +50,6 @@ private func InformationGain(from data: [TreeAttribute], for columnName: String)
         entropy += Entropy(group) * Double(group.count) / Double(data.count)
     }
     return totalEntropy - entropy
-}
-
-class TreeNode {
-    var attributeName: String?
-    var children: [String: TreeNode] = [:]
-    var result: String?
-    var defaultResult: String?
-    
-    init(attributeName: String, defaultResult: String? = nil) {
-        self.attributeName = attributeName
-        self.defaultResult = defaultResult
-    }
-    init (result: String) {
-        self.result = result
-    }
 }
 
 func buildTree(data: [TreeAttribute], availableAttributes: [String]) -> TreeNode {
@@ -99,7 +99,7 @@ func buildTree(data: [TreeAttribute], availableAttributes: [String]) -> TreeNode
     return node
 }
 
-func predict(tree: TreeNode, situation: TreeAttribute) -> (result: String, path: [TreeNode]) {
+func predictTree(tree: TreeNode, situation: TreeAttribute) -> (result: String, path: [TreeNode]) {
     var currentNode = tree
     var path: [TreeNode] = []
     
