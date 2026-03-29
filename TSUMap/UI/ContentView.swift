@@ -33,10 +33,12 @@ struct ContentView: View {
     @State private var endLocation: GridPoint?
     @State private var paths: [GridPoint] = []
     
-    @State private var isShowingSheet = false
+    @State private var isShowingDecisionSheet = false
     
     @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
+    
+    @StateObject var manager = VenueManager()
     
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -81,16 +83,17 @@ struct ContentView: View {
                         HStack {
                             Button {
                                 withAnimation(.spring()) {
-                                    isShowingSheet.toggle()
+                                    isShowingDecisionSheet.toggle()
                                 }
                             } label: {
                                 Text("Куда пойдём?").padding(.vertical, 6).padding(.horizontal, 20)
                             }
                             .buttonStyle(.glassProminent)
-                            .sheet(isPresented: $isShowingSheet) {
-                                DecisionTreeView(treeNode: treeNode) { prediction in
+                            .sheet(isPresented: $isShowingDecisionSheet) {
+                                DecisionTreeView(manager: manager, treeNode: treeNode) { prediction in
                                     self.predictionResult = prediction
                                 }
+                                .presentationDragIndicator(.visible)
                             }
 
                             Button {
@@ -118,14 +121,18 @@ struct ContentView: View {
     }
     
     private func loadTree() {
-        guard let url = Bundle.main.url(forResource: "data", withExtension: "csv"),
-              let content = try? String(contentsOf: url, encoding: .utf8) else {
+        let data = manager.allAttributes
+        
+        guard !data.isEmpty else {
+            print("Данных для построения дерева нет")
             return
         }
         
-        let data = CVSParser(content: content)
         let attributes = ["location", "budget", "time_available", "food_type", "queue_tolerance", "weather"]
+        
         treeNode = buildTree(data: data, availableAttributes: attributes)
+        
+        print("Дерево перестроено на основе \(data.count) записей")
     }
 }
 
