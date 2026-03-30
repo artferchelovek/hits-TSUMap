@@ -34,7 +34,7 @@ struct DecisionTreeView: View {
     var onPredictionCompleted: ((String) -> Void)?
     
     @State private var isShowingSettingsSheet = false
-    @State private var userAttribute = Attribute(
+    @State private var userAttribute = TreeAttribute(
         location: "",
         budget: "",
         time_available: "",
@@ -64,9 +64,11 @@ struct DecisionTreeView: View {
                         .padding(.horizontal)
                         .padding(.vertical, 10)
                     }
-                    .onChange(of: messages.count) { _ in
+                    .onChange(of: messages.count) {
                         if let lastId = messages.last?.id {
-                            withAnimation { proxy.scrollTo(lastId, anchor: .bottom) }
+                            withAnimation {
+                                proxy.scrollTo(lastId, anchor: .bottom)
+                            }
                         }
                     }
                 }
@@ -174,7 +176,7 @@ struct DecisionTreeView: View {
                 }
                 
                 if let treeNode = treeNode {
-                    let (result, _) = predict(tree: treeNode, situation: userAttribute)
+                    let (result, _) = predictTree(tree: treeNode, situation: userAttribute)
                     withAnimation(.spring()) {
                         messages.append(ChatMessage(text: "Рекомендую посетить:", isUser: false))
                         messages.append(ChatMessage(text: "\(result)", isUser: false))

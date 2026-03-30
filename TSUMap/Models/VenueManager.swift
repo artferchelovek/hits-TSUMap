@@ -33,7 +33,7 @@ struct AttributeDTO: Codable {
     var weather: String
     var recommended_place: String
     
-    init(from attr: Attribute) {
+    init(from attr: TreeAttribute) {
         self.location = attr.location
         self.budget = attr.budget
         self.time_available = attr.time_available
@@ -43,8 +43,8 @@ struct AttributeDTO: Codable {
         self.recommended_place = attr.recommended_place
     }
     
-    func toAttribute() -> Attribute {
-        return Attribute(
+    func toAttribute() -> TreeAttribute {
+        return TreeAttribute(
             location: location,
             budget: budget,
             time_available: time_available,
@@ -57,7 +57,7 @@ struct AttributeDTO: Codable {
 }
 
 final class VenueManager: ObservableObject {
-    @Published var allAttributes: [Attribute] = []
+    @Published var allAttributes: [TreeAttribute] = []
     
     private static let fileURL: URL = {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -68,7 +68,7 @@ final class VenueManager: ObservableObject {
         loadData()
     }
     
-    var groupedAttributes: [String: [Attribute]] {
+    var groupedAttributes: [String: [TreeAttribute]] {
         Dictionary(grouping: allAttributes, by: { $0.recommended_place })
     }
     
@@ -98,11 +98,11 @@ final class VenueManager: ObservableObject {
             return
         }
         
-        self.allAttributes = CVSParser(content: content)
+        self.allAttributes = CSVParser(content: content)
         save()
     }
     
-    func addVenue(_ attribute: Attribute) {
+    func addVenue(_ attribute: TreeAttribute) {
         allAttributes.append(attribute)
         save()
     }
@@ -112,7 +112,7 @@ final class VenueManager: ObservableObject {
         save()
     }
     
-    func updateVenueScenarios(placeName: String, newScenarios: [Attribute]) {
+    func updateVenueScenarios(placeName: String, newScenarios: [TreeAttribute]) {
         allAttributes.removeAll { $0.recommended_place == placeName }
         
         allAttributes.append(contentsOf: newScenarios)

@@ -188,7 +188,7 @@ struct EditVenueView: View {
         let queues = selections["queue_tolerance"] ?? []
         let weathers = selections["weather"] ?? []
         
-        var newEntries: [Attribute] = []
+        var newEntries: [TreeAttribute] = []
         
         for loc in locs {
             for bud in buds {
@@ -196,7 +196,7 @@ struct EditVenueView: View {
                     for food in foods {
                         for weath in weathers {
                             for queue in queues {
-                                let newAttr = Attribute(
+                                let newAttr = TreeAttribute(
                                     location: loc,
                                     budget: bud,
                                     time_available: tim,
