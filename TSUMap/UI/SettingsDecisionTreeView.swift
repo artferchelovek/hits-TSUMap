@@ -46,7 +46,7 @@ struct SettingsDecisionTreeView: View {
                     }
                 }
             }
-            .listStyle(.plain)
+            
             .navigationTitle("Настроить предпочтения")
             .toolbarTitleDisplayMode(.inline)
             .toolbar {

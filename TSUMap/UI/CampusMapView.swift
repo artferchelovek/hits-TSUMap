@@ -54,6 +54,53 @@ struct CampusMapView: View {
         }
     }
 
+    private func CanvasGrid() -> some View {
+        return Canvas { context, _ in
+            if let start = startLocation {
+                let x = CGFloat(start.col) * cellSize + (cellSize / 2)
+                let y = CGFloat(start.row) * cellSize + (cellSize / 2)
+                
+                let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
+                
+                context.fill(Path(ellipseIn: rect), with: .color(.blue))
+                context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
+                
+                let coordinateText = Text("[\(start.row), \(start.col)]")
+                    .font(.body)
+                    .fontWeight(.bold)
+                    .foregroundColor(.blue)
+                
+                context.draw(coordinateText, at: CGPoint(x: x, y: y - 15), anchor: .bottom)
+            }
+            
+            if let end = endLocation {
+                let x = CGFloat(end.col) * cellSize + (cellSize / 2)
+                let y = CGFloat(end.row) * cellSize + (cellSize / 2)
+                let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
+                context.fill(Path(ellipseIn: rect), with: .color(.red))
+                context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
+                
+                let coordinateText = Text("[\(end.row), \(end.col)]")
+                    .font(.body)
+                    .fontWeight(.bold)
+                    .foregroundColor(.red)
+                
+                context.draw(coordinateText, at: CGPoint(x: x, y: y - 15), anchor: .bottom)
+            }
+            
+            if paths.count > 1 {
+                var myPath = Path()
+                guard let first = paths.first else {return}
+                myPath.move(to: CGPoint(x: CGFloat(first.col) * cellSize + cellSize / 2, y: CGFloat(first.row) * cellSize + cellSize / 2))
+                for i in 1..<paths.count {
+                    myPath.addLine(to: CGPoint(x: CGFloat(paths[i].col) * cellSize + cellSize / 2, y: CGFloat(paths[i].row) * cellSize + cellSize / 2))
+                }
+                context.stroke(myPath, with: .color(.red), style: StrokeStyle(lineWidth: 3, lineJoin: .round, dash: [10, 5]))
+            }
+        }
+        .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
+    }
+    
     var body: some View {
         VStack {
             ScrollView([.horizontal, .vertical], showsIndicators: false) {
@@ -72,50 +119,7 @@ struct CampusMapView: View {
                     .allowsHitTesting(false)
                     .frame(width: mapWidth, height: mapHeight)
 
-                    Canvas { context, _ in
-                        if let start = startLocation {
-                            let x = CGFloat(start.col) * cellSize + (cellSize / 2)
-                            let y = CGFloat(start.row) * cellSize + (cellSize / 2)
-
-                            let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
-
-                            context.fill(Path(ellipseIn: rect), with: .color(.blue))
-                            context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
-
-                            let coordinateText = Text("[\(start.row), \(start.col)]")
-                                .font(.body)
-                                .fontWeight(.bold)
-                                .foregroundColor(.blue)
-
-                            context.draw(coordinateText, at: CGPoint(x: x, y: y - 15), anchor: .bottom)
-                        }
-
-                        if let end = endLocation {
-                            let x = CGFloat(end.col) * cellSize + (cellSize / 2)
-                            let y = CGFloat(end.row) * cellSize + (cellSize / 2)
-                            let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
-                            context.fill(Path(ellipseIn: rect), with: .color(.red))
-                            context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
-
-                            let coordinateText = Text("[\(end.row), \(end.col)]")
-                                .font(.body)
-                                .fontWeight(.bold)
-                                .foregroundColor(.red)
-
-                            context.draw(coordinateText, at: CGPoint(x: x, y: y - 15), anchor: .bottom)
-                        }
-                        
-                        if paths.count > 1 {
-                            var myPath = Path()
-                            guard let first = paths.first else {return}
-                            myPath.move(to: CGPoint(x: CGFloat(first.col) * cellSize + cellSize / 2, y: CGFloat(first.row) * cellSize + cellSize / 2))
-                            for i in 1..<paths.count {
-                                myPath.addLine(to: CGPoint(x: CGFloat(paths[i].col) * cellSize + cellSize / 2, y: CGFloat(paths[i].row) * cellSize + cellSize / 2))
-                            }
-                            context.stroke(myPath, with: .color(.red), style: StrokeStyle(lineWidth: 3, lineJoin: .round, dash: [10, 5]))
-                        }
-                    }
-                    .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
+                    CanvasGrid()
 
                     Color.white.opacity(0.001)
                         .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
