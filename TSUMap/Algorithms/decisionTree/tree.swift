@@ -7,6 +7,7 @@
 
 import Foundation
 
+// MARK: временно переделал под Node -> TreeNode
 class TreeNode {
     var attributeName: String?
     var children: [String: TreeNode] = [:]
@@ -22,7 +23,30 @@ class TreeNode {
     }
 }
 
-private func Entropy(_ data: [TreeAttribute]) -> Double {
+func predictTree(tree: TreeNode, situation: TreeAttribute) -> (result: String, path: [TreeNode]) {
+    var currentNode = tree
+    var path: [TreeNode] = []
+    
+    while currentNode.result == nil {
+        path.append(currentNode)
+        
+        guard let attribute = currentNode.attributeName else { break }
+        let value = getTreeAttribute(from: situation, for: attribute)
+        
+        if let nextNode = currentNode.children[value] {
+            currentNode = nextNode
+        } else {
+            let fallback = currentNode.defaultResult ?? "Неизвестно"
+            return (fallback, path)
+        }
+    }
+    path.append(currentNode
+    )
+    let finalResult = currentNode.result ?? "Ошибка"
+    return (finalResult, path)
+}
+
+func Entropy(_ data: [TreeAttribute]) -> Double {
     var counts: [String: Double] = [:]
     for item in data {
         counts[ item.recommended_place, default: 0.0] += 1.0
@@ -37,7 +61,7 @@ private func Entropy(_ data: [TreeAttribute]) -> Double {
     return entropy
 }
 
-private func InformationGain(from data: [TreeAttribute], for columnName: String) -> Double {
+func InformationGain(from data: [TreeAttribute], for columnName: String) -> Double {
     let totalEntropy = Entropy(data)
     
     var groups: [String: [TreeAttribute]] = [:]
@@ -96,28 +120,6 @@ func buildTree(data: [TreeAttribute], availableAttributes: [String]) -> TreeNode
         let childNode = buildTree(data: BranchData, availableAttributes: updatedAttribute)
         node.children[branchValue] = childNode
     }
-    return node
-}
-
-func predictTree(tree: TreeNode, situation: TreeAttribute) -> (result: String, path: [TreeNode]) {
-    var currentNode = tree
-    var path: [TreeNode] = []
     
-    while currentNode.result == nil {
-        path.append(currentNode)
-        
-        guard let attribute = currentNode.attributeName else { break }
-        let value = getTreeAttribute(from: situation, for: attribute)
-        
-        if let nextNode = currentNode.children[value] {
-            currentNode = nextNode
-        } else {
-            let fallback = currentNode.defaultResult ?? "Неизвестно"
-            return (fallback, path)
-        }
-    }
-    path.append(currentNode
-    )
-    let finalResult = currentNode.result ?? "Ошибка"
-    return (finalResult, path)
+    return node
 }
