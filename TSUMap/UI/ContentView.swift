@@ -31,6 +31,7 @@ struct ContentView: View {
 
     @State private var startLocation: GridPoint?
     @State private var endLocation: GridPoint?
+    @State private var showNeuralView = false
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -88,12 +89,21 @@ struct ContentView: View {
                                     Text("Сбросить маршрут").font(.body).padding(.vertical, 6).padding(.horizontal, 20)
                                 }
                             }.buttonStyle(.glass)
+                            
+                            Button {
+                                showNeuralView = true
+                            } label: {
+                                Text("Оценить заведение").padding(.vertical, 6).padding(.horizontal, 20)
+                            }.buttonStyle(.glassProminent)
                         }
                     }
                 }
             }
             .padding()
             .animation(.spring(response: 0.4, dampingFraction: 0.8), value: startLocation)
+        }
+        .sheet(isPresented: $showNeuralView) {
+            NeuralView()
         }
     }
 }
