@@ -22,6 +22,8 @@ struct QuestionConfig: Identifiable {
 }
 
 struct AppConfig {
+    static let cellScale = 4.5
+    
     static let questions: [QuestionConfig] = [
         QuestionConfig(
             key: "location",

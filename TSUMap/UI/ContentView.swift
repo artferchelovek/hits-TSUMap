@@ -32,15 +32,67 @@ struct ContentView: View {
     @State private var startLocation: GridPoint?
     @State private var endLocation: GridPoint?
     @State private var paths: [GridPoint] = []
-    
     @State private var isShowingDecisionSheet = false
     
     @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
     
+    @State private var animatePlusMinus = true
+    
     @StateObject var manager = VenueManager()
     @StateObject var placeManager = PlaceManager()
-
+    
+    fileprivate func PathsView() -> some View {
+        VStack(spacing: 15) {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("Маршрут построен")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("\(Double(paths.count) * AppConfig.cellScale / 83, specifier: "%.0f") мин")
+                        .font(.title2).bold()
+                }
+                Spacer()
+                HStack {
+                    Image(systemName: "plusminus")
+                        .symbolEffect(.drawOn.individually,
+                                      options: .nonRepeating,
+                                      isActive: animatePlusMinus)
+                        .font(.title2)
+                        .foregroundStyle(Color.primary)
+                    Text("\(Double(paths.count) * AppConfig.cellScale, specifier: "%.0f") м")
+                }
+                .font(.title3).fontWeight(.medium)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(.blue.opacity(0.1), in: Capsule())
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        animatePlusMinus = false
+                    }
+                    
+                }
+            }
+            
+            Button {
+                withAnimation(.spring()) {
+                    paths = []
+                    startLocation = nil
+                    endLocation = nil
+                    animatePlusMinus = true
+                }
+            } label: {
+                Text("Сбросить")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.glassProminent)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+    
     var body: some View {
         ZStack(alignment: .topLeading) {
             CampusMapView(
@@ -84,7 +136,7 @@ struct ContentView: View {
                         .background(.regularMaterial)
                         .cornerRadius(24)
                         .shadow(color: .black.opacity(0.1), radius: 10)
-                    } else {
+                    } else if endLocation == nil {
                         HStack {
                             Button {
                                 withAnimation(.spring()) {
@@ -100,25 +152,20 @@ struct ContentView: View {
                                 }
                                 .presentationDragIndicator(.visible)
                             }
-                            
-                            Button {
-                                withAnimation(.spring()) {
-                                    startLocation = nil
-                                    endLocation = nil
-                                    paths = []
-                                    predictionResult = nil
-                                }
-                            } label: {
-                                HStack {
-                                    Text("Сбросить маршрут").font(.body).padding(.vertical, 6).padding(.horizontal, 20)
-                                }
-                            }.buttonStyle(.glass)
                         }
+                    } else {
+                        PathsView()
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(30)
+                            .shadow(color: .black.opacity(0.1), radius: 10)
+                            .offset(y: !paths.isEmpty ? 0 : 600)
+                            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: paths.isEmpty)
                     }
                 }
             }
             .padding()
-            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: startLocation)
+            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: paths.isEmpty)
+            .animation(.spring(), value: startLocation)
         }
         .onAppear {
             loadTree()
