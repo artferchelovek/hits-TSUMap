@@ -30,67 +30,74 @@ struct MathUtils {
         }
         return res
     }
-    static func randomGaussian() -> Double {
-        return Double.random(in: -0.1...0.1)
-    }
 }
 
-struct DenseLayer {
+struct DenseLayer: Codable {
     var weights: [[Double]]
     var biases: [Double]
     var isOutputLayer: Bool
     
-    var lastInputs: [Double] = []
     var lastZ: [Double] = []
+    var lastInputs: [Double] = []
     
     init(inputSize: Int, outputSize: Int, isOutput: Bool) {
         self.isOutputLayer = isOutput
         self.biases = Array(repeating: 0.0, count: outputSize)
-        self.weights = (0..<outputSize).map {_ in ( 0..<inputSize).map {_ in MathUtils.randomGaussian() }
+        
+        let limit = sqrt(6.0 / Double(inputSize + outputSize))
+        self.weights = (0..<outputSize).map { _ in
+            (0..<inputSize).map { _ in Double.random(in: -limit...limit) }
         }
     }
     
     mutating func forward(inputs: [Double]) -> [Double] {
         self.lastInputs = inputs
-        let z = MathUtils.dotProduct(inputs, self.weights, self.biases)
+        let z = MathUtils.dotProduct(inputs, weights, biases)
         self.lastZ = z
         
         if isOutputLayer {
             return MathUtils.softmax(z)
         } else {
-            return z.map {MathUtils.relu($0)}
+            return z.map { MathUtils.relu($0) }
         }
     }
 }
 
-struct NeuralNetwork {
+struct NeuralNetwork: Codable {
     var hiddenLayer: DenseLayer
     var outputLayer: DenseLayer
-    var learningRate: Double = 0.01
+    var learningRate: Double = 0.0005
+    
+    init(hiddenLayer: DenseLayer, outputLayer: DenseLayer) {
+        self.hiddenLayer = hiddenLayer
+        self.outputLayer = outputLayer
+    }
     
     func predict(input: [Double]) -> Int {
-        var hiddenLayerCopy = hiddenLayer
-        var outputLayerCopy = outputLayer
+        var mutableSelf = self
+        let hOut = mutableSelf.hiddenLayer.forward(inputs: input)
+        let fOut = mutableSelf.outputLayer.forward(inputs: hOut)
         
-        let hiddenOutput = hiddenLayerCopy.forward(inputs: input)
-        let finalOutput = outputLayerCopy.forward(inputs: hiddenOutput)
-        
-        guard let maxProbability = finalOutput.max(),
-              let predictedDigit = finalOutput.firstIndex(of: maxProbability) else {
+        if fOut.contains(where: { $0.isNaN }) {
             return -1
         }
-        return predictedDigit
+        
+        return fOut.enumerated().max(by: { $0.element < $1.element })?.offset ?? -1
     }
     
     mutating func train(input: [Double], target: [Double]) {
         let hOut = hiddenLayer.forward(inputs: input)
         let fOut = outputLayer.forward(inputs: hOut)
         
-        var outputErrors = (0..<fOut.count).map {fOut[$0] - target[$0]}
+        var outputErrors = [Double](repeating: 0.0, count: target.count)
+        for i in 0..<target.count {
+            outputErrors[i] = fOut[i] - target[i]
+        }
         
         for i in 0..<outputLayer.weights.count {
             for j in 0..<outputLayer.weights[i].count {
-                let gradient = outputErrors[i] * hOut[j]
+                var gradient = outputErrors[i] * hOut[j]
+                gradient = max(-1.0, min(1.0, gradient))
                 outputLayer.weights[i][j] -= learningRate * gradient
             }
             outputLayer.biases[i] -= learningRate * outputErrors[i]
@@ -107,10 +114,35 @@ struct NeuralNetwork {
         
         for i in 0..<hiddenLayer.weights.count {
             for j in 0..<hiddenLayer.weights[i].count {
-                let gradient = hiddenErrors[j] * input[j]
+                var gradient = hiddenErrors[i] * input[j]
+                gradient = max(-1.0, min(1.0, gradient))
                 hiddenLayer.weights[i][j] -= learningRate * gradient
             }
             hiddenLayer.biases[i] -= learningRate * hiddenErrors[i]
+        }
+    }
+}
+
+struct TrainingItem {
+    let input: [Double]
+    let target: [Double]
+}
+
+extension NeuralNetwork {
+    static func makeOneHot(digit: Int) -> [Double] {
+        var array = Array(repeating: 0.0, count: 10)
+        if digit >= 0 && digit < 10 {
+            array[digit] = 1.0
+        }
+        return array
+    }
+    
+    mutating func trainEpochs(data: [TrainingItem], epochs: Int) {
+        for epoch in 1...epochs {
+            let shuffledData = data.shuffled()
+            for item in shuffledData {
+                self.train(input: item.input, target: item.target)
+            }
         }
     }
 }
