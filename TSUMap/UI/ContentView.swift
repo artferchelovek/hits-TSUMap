@@ -49,28 +49,29 @@ struct ContentView: View {
                     Text("Маршрут построен")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Text("\(Double(paths.count) * AppConfig.cellScale / 83, specifier: "%.0f") мин")
-                        .font(.title2).bold()
+                    HStack {
+                        Text("\(Double(paths.count) * AppConfig.cellScale / 83, specifier: "%.0f") мин")
+                            .font(.title2).bold()
+                        Spacer()
+                        HStack {
+                            Image(systemName: "plusminus")
+                                .symbolEffect(.drawOn.individually,
+                                              options: .nonRepeating,
+                                              isActive: animatePlusMinus)
+                                .font(.title2)
+                                .foregroundStyle(Color.primary)
+                            Text("\(Double(paths.count) * AppConfig.cellScale, specifier: "%.0f") м")
+                                .font(.title3).fontWeight(.medium)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(.blue.opacity(0.1), in: Capsule())
+                    }
                 }
-                Spacer()
-                HStack {
-                    Image(systemName: "plusminus")
-                        .symbolEffect(.drawOn.individually,
-                                      options: .nonRepeating,
-                                      isActive: animatePlusMinus)
-                        .font(.title2)
-                        .foregroundStyle(Color.primary)
-                    Text("\(Double(paths.count) * AppConfig.cellScale, specifier: "%.0f") м")
-                }
-                .font(.title3).fontWeight(.medium)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(.blue.opacity(0.1), in: Capsule())
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                         animatePlusMinus = false
                     }
-                    
                 }
             }
             
@@ -152,6 +153,15 @@ struct ContentView: View {
                                 }
                                 .presentationDragIndicator(.visible)
                             }
+                            
+                            Button {
+                                withAnimation(.spring()) {
+                                    isShowingDecisionSheet.toggle()
+                                }
+                            } label: {
+                                Text("Изменить старт").padding(.vertical, 6).padding(.horizontal, 20)
+                            }
+                            .buttonStyle(.glass)
                         }
                     } else {
                         PathsView()
