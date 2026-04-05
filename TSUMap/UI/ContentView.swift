@@ -7,26 +7,6 @@
 
 import SwiftUI
 
-struct FloatingSearchBar: View {
-    @State private var searchText: String = ""
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .font(.title3)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
-            
-            TextField("Найти коворкинг...", text: $searchText)
-                .font(.body)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.regularMaterial, in: Capsule())
-        .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 2)
-    }
-}
-
 struct ContentView: View {
     
     @State private var startLocation: GridPoint?
@@ -156,7 +136,7 @@ struct ContentView: View {
                             
                             Button {
                                 withAnimation(.spring()) {
-                                    isShowingDecisionSheet.toggle()
+                                    startLocation = nil
                                 }
                             } label: {
                                 Text("Изменить старт").padding(.vertical, 6).padding(.horizontal, 20)
