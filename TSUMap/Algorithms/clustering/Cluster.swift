@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-class Cluster {
+class Cluster: Identifiable {
     var id = UUID()
     var medoid: Place
     var placesInClust: [Place] = []

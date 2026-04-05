@@ -1,16 +1,16 @@
 import Foundation
 
 enum ClusteringType: String {
-    case Astar = "AStar"
+    case aStar = "AStar"
     case byStraight = "EuclideanDistance"
 
-    func metric(_ firstPoint: GridPoint, _ secondPoint: GridPoint) -> Double {
+    func metric(_ firstPoint: Place, _ secondPoint: Place, _ cashe: AStarCash) -> Double {
         switch self {
-        case .Astar:
-            let distance = distBetweenPlaces[firstPoint]?[secondPoint] ?? Int.max
-            return Double(distance)
+        case .aStar:
+            let dist = cashe.getDistance(firstPlace: firstPoint, secondPlace: secondPoint)
+            return Double(dist)
         case . byStraight:
-            return EuclideanDistance(firstPoint, secondPoint)
+            return EuclideanDistance(firstPoint.entryCord, secondPoint.entryCord)
         }
     }
 }

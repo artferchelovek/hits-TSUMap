@@ -8,13 +8,20 @@ import Combine
 @MainActor
 final class PlaceManager: ObservableObject {
     @Published var places: [String: Place] = [:]
-    init() {loadData()}
+    private var aStarPaths: AStarCash?
+    
+    init() {
+        loadData()
+    }
+    
+    public func setGrid(grid: [[CellType]]) {
+        self.aStarPaths = AStarCash(grid: grid)
+    }
     
     private func loadData() {
         guard let jsonURL = Bundle.main.url(forResource: "dataPlace", withExtension: "json") else {
-            print("ВСЕ ЕЩЕ НЕ РАБОТАЕТ")
-                    return
-                }
+            return
+        }
         do {
             let data = try Data(contentsOf: jsonURL)
             
@@ -24,9 +31,17 @@ final class PlaceManager: ObservableObject {
                 dict[place.id] = place
             }
             
-                self.places = dict
+            self.places = dict
         } catch {
             print(error)
         }
+    }
+    
+    public func clustering(numberClusters: Int, typeClustering: ClusteringType, data: [Place]) -> [Cluster] {
+        guard let paths = aStarPaths else {
+            return []
+        }
+        
+        return Clustering(data: data, numberOfClusters: numberClusters, clusteringType: typeClustering, aStarPaths: paths).startClustering()
     }
 }

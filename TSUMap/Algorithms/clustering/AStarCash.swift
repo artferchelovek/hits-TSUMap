@@ -1,25 +1,31 @@
 import Foundation
 
-var distBetweenPlaces: [GridPoint: [GridPoint: Int]] = [:]
-
-private func cashAStar(grid: [[CellType]], places: [Place]) {
-    for i in 0..<places.count {
-        let startPlace = places[i].entryCord
-
-        if distBetweenPlaces[startPlace] == nil {
-            distBetweenPlaces[startPlace] = [:]
+class AStarCash {
+    private var paths: [String: [String: Int]] = [:]
+    private let grid: [[CellType]]
+    
+    init (grid: [[CellType]]) {
+        self.grid = grid
+    }
+    
+    public func getDistance(firstPlace: Place, secondPlace: Place) -> Int {
+        let firstId = firstPlace.id
+        let secondId = secondPlace.id
+        if firstPlace.entryCord == secondPlace.entryCord { return 0 }
+        
+        if let path = paths[firstId]?[secondId] {
+            return path
         }
-
-        for j in i..<places.count {
-            let endPlace = places[j].entryCord
-
-            if distBetweenPlaces[endPlace] == nil {
-                distBetweenPlaces[endPlace] = [:]
-            }
-
-            let dist = AStar(graph: grid, start: startPlace, end: endPlace).count
-            distBetweenPlaces[endPlace]?[startPlace] = dist
-            distBetweenPlaces[startPlace]?[endPlace] = dist
-        }
+        
+        let path = AStar(graph: grid, start: firstPlace.entryCord, end: secondPlace.entryCord)
+        let pathCount = path.isEmpty ? 10000 : path.count
+        
+        if paths[firstId] == nil { paths[firstId] = [:] }
+        if paths[secondId] == nil { paths[secondId] = [:] }
+            
+        paths[firstId]?[secondId] = pathCount
+        paths[secondId]?[firstId] = pathCount
+        
+        return pathCount
     }
 }

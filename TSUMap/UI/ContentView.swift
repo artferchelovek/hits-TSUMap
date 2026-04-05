@@ -39,13 +39,15 @@ struct ContentView: View {
     @State private var predictionResult: String?
     
     @StateObject var manager = VenueManager()
-    
+    @StateObject var placeManager = PlaceManager()
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             CampusMapView(
                 startLocation: $startLocation,
                 endLocation: $endLocation,
-                paths: $paths
+                paths: $paths,
+                placeManager: placeManager
             ).ignoresSafeArea()
             
             VStack(spacing: 0) {

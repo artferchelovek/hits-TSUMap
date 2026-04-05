@@ -13,6 +13,7 @@ struct Place: Hashable, Codable, Identifiable {
     var name: String
     var type: PlaceType
     var address: String
+    var rating: Double
 }
 
 enum PlaceType: String, Hashable, Codable {
