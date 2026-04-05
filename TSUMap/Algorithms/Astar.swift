@@ -81,12 +81,13 @@ func AStar(graph: [[CellType]], start: GridPoint, end: GridPoint) -> [GridPoint]
 }
 
 func createPath(parents: [GridPoint: GridPoint], start: GridPoint, end: GridPoint) -> [GridPoint] {
+    if start == end { return [] }
     var path: [GridPoint] = [end]
     var currentVertex: GridPoint = end
 
     while currentVertex != start {
         guard let nextNode = parents[currentVertex] else {
-            break
+            return []
         }
         currentVertex = nextNode
         path.append(nextNode)

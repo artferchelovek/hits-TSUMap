@@ -1,0 +1,129 @@
+[
+  {
+    "id": "001",
+    "name": "Абрикос",
+    "type": "product",
+    "address": "Московский тракт, 17",
+    "iconCord": { "row": 21, "col": 5 },
+    "entryCord": { "row": 20, "col": 8 },
+    "rating": 4.1
+  },
+  {
+    "id": "002",
+    "name": "Baba Roma",
+    "type": "coffee",
+    "address": "просп. Ленина, 63",
+    "iconCord": { "row": 28, "col": 123 },
+    "entryCord": { "row": 27, "col": 122 },
+    "rating": 5.0
+  },
+  {
+    "id": "003",
+    "name": "Батина Шаурма",
+    "type": "cafe",
+    "address": "Московский тракт",
+    "iconCord": { "row": 29, "col": 9 },
+    "entryCord": { "row": 29, "col": 7 },
+    "rating": 5.0
+  },
+  {
+    "id": "004",
+    "name": "Безумно",
+    "type": "cafe",
+    "address": "Московский тракт, 17",
+    "iconCord": { "row": 20, "col": 0 },
+    "entryCord": { "row": 20, "col": 8 },
+    "rating": 5.0
+  },
+  {
+    "id": "005",
+    "name": "Белка",
+    "type": "coffee",
+    "address": "просп. Ленина, 36Б",
+    "iconCord": { "row": 30, "col": 112 },
+    "entryCord": { "row": 30, "col": 113 },
+    "rating": 5.0
+  },
+  {
+    "id": "006",
+    "name": "Гербарий",
+    "type": "cafe",
+    "address": "просп. Ленина, 55",
+    "iconCord": { "row": 52, "col": 130 },
+    "entryCord": { "row": 52, "col": 127 },
+    "rating": 5.0
+  },
+  {
+    "id": "007",
+    "name": "Минутка",
+    "type": "cafe",
+    "address": "просп. Ленина, 36",
+    "iconCord": { "row": 68, "col": 73 },
+    "entryCord": { "row": 71, "col": 71 },
+    "rating": 5.0
+  },
+  {
+    "id": "008",
+    "name": "Магазин",
+    "type": "product",
+    "address": "просп. Ленина, 36, корп. 2",
+    "iconCord": { "row": 78, "col": 51 },
+    "entryCord": { "row": 80, "col": 55 },
+    "rating": 5.0
+  },
+  {
+    "id": "009",
+    "name": "Сибирские блины",
+    "type": "cafe",
+    "address": "просп. Ленина, 36",
+    "iconCord": { "row": 66, "col": 70 },
+    "entryCord": { "row": 71, "col": 71 },
+    "rating": 5.0
+  },
+  {
+    "id": "010",
+    "name": "Starbooks",
+    "type": "coffee",
+    "address": "просп. Ленина, 36, корп. 9",
+    "iconCord": { "row": 62, "col": 64 },
+    "entryCord": { "row": 61, "col": 66 },
+    "rating": 5.0
+  },
+  {
+    "id": "011",
+    "name": "Точка",
+    "type": "coffee",
+    "address": "просп. Ленина, 47А",
+    "iconCord": { "row": 103, "col": 124 },
+    "entryCord": { "row": 103, "col": 124 },
+    "rating": 5.0
+  },
+  {
+    "id": "013",
+    "name": "Xo bakery",
+    "type": "coffee",
+    "address": "просп. Ленина, 36, корп. 2",
+    "iconCord": { "row": 84, "col": 52 },
+    "entryCord": { "row": 84, "col": 56 },
+    "rating": 5.0
+  },
+  {
+    "id": "015",
+    "name": "Сыр-бор",
+    "type": "cafe",
+    "address": "Московский тракт, 2Г",
+    "iconCord": { "row": 35, "col": 64 },
+    "entryCord": { "row": 37, "col": 64 },
+    "rating": 5.0
+  },
+  {
+    "id": "016",
+    "name": "Rostics",
+    "type": "cafe",
+    "address": "просп. Ленина, 51А",
+    "iconCord": { "row": 72, "col": 124 },
+    "entryCord": { "row": 72, "col": 123 },
+    "rating": 5.0
+  }
+]
+
