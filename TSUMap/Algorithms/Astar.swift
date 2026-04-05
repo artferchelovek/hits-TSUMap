@@ -93,5 +93,5 @@ func createPath(parents: [GridPoint: GridPoint], start: GridPoint, end: GridPoin
         path.append(nextNode)
     }
 
-    return path
+    return path.reversed()
 }

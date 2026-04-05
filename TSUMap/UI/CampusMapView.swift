@@ -34,6 +34,8 @@ struct CampusMapView: View {
     @Binding var paths: [GridPoint]
     @Binding var selectedPlace: Place?
     
+    @State private var animationStartDate: Date?
+    
     @ObservedObject var placeManager: PlaceManager
     
     @State private var currentScale: CGFloat = 1.0
@@ -66,62 +68,70 @@ struct CampusMapView: View {
         self.placeManager.setGrid(grid: grid)
     }
     
+    fileprivate func drawStartPoint(_ start: GridPoint, _ context: GraphicsContext) {
+        let (x, y) = Normalize(point: start)
+        let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
+        
+        context.fill(Path(ellipseIn: rect), with: .color(.blue))
+        context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
+    }
+    
+    fileprivate func drawEndPoint(_ end: GridPoint, _ context: GraphicsContext) {
+        let (x, y) = Normalize(point: end)
+        
+        if let pin = context.resolveSymbol(id: "endPin") {
+                context.draw(pin, at: CGPoint(x: x, y: y), anchor: .bottom)
+            }
+    }
+    
     private func CanvasGrid() -> some View {
-        return Canvas { context, _ in
-            if let start = startLocation {
-                let (x, y) = Normalize(point: start)
-                let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
+        TimelineView(.animation) { timeline in
+            Canvas { context, _ in
                 
-                context.fill(Path(ellipseIn: rect), with: .color(.blue))
-                context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
+                let progress = calculateProgress(at: timeline.date)
                 
-                let coordinateText = Text("[\(start.row), \(start.col)]")
-                    .font(.body)
-                    .fontWeight(.bold)
-                    .foregroundColor(.blue)
+                if paths.count > 1 {
+                    PrintPath(in: context, progress: progress)
+                }
                 
-                context.draw(coordinateText, at: CGPoint(x: x, y: y - 15), anchor: .bottom)
+                PrintPlaces(in: context)
+                
+                if let start = startLocation {
+                    drawStartPoint(start, context)
+                }
+                
+                if let end = endLocation {
+                    drawEndPoint(end, context)
+                }
             }
-            
-            if let end = endLocation {
-                let (x, y) = Normalize(point: end)
-                let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
-                context.fill(Path(ellipseIn: rect), with: .color(.red))
-                context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
-                
-                let coordinateText = Text("[\(end.row), \(end.col)]")
-                    .font(.body)
-                    .fontWeight(.bold)
-                    .foregroundColor(.red)
-                
-                context.draw(coordinateText, at: CGPoint(x: x, y: y - 15), anchor: .bottom)
+            symbols: {
+                Image(systemName: "cup.and.saucer.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 25, height: 25)
+                    .foregroundStyle(.white)
+                    .tag(PlaceType.coffee)
+                Image(systemName: "fork.knife")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 25, height: 25)
+                    .foregroundStyle(.white)
+                    .tag(PlaceType.cafe)
+                Image(systemName: "basket")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 25, height: 25)
+                    .foregroundStyle(.white)
+                    .tag(PlaceType.product)
+                Image(systemName: "mappin.and.ellipse")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .foregroundStyle(.red)
+                        .tag("endPin")
             }
-            if paths.count > 1 {
-                PrintPath(in: context)
-            }
-            PrintPlaces(in: context)
+            .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
         }
-        symbols: {
-            Image(systemName: "cup.and.saucer.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 25, height: 25)
-                .foregroundStyle(.white)
-                .tag(PlaceType.coffee)
-            Image(systemName: "fork.knife")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 25, height: 25)
-                .foregroundStyle(.white)
-                .tag(PlaceType.cafe)
-            Image(systemName: "basket")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 25, height: 25)
-                .foregroundStyle(.white)
-                .tag(PlaceType.product)
-        }
-        .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
     }
     
     var body: some View {
@@ -169,10 +179,15 @@ struct CampusMapView: View {
         guard let start = startLocation, let end = endLocation else { return }
         
         let newPath = AStar(graph: grid, start: start, end: end)
-        
-        withAnimation(.spring()) {
-            self.paths = newPath
-        }
+        self.paths = newPath
+        self.animationStartDate = Date()
+    }
+    
+    private func calculateProgress(at now: Date) -> CGFloat {
+        guard let start = animationStartDate else { return 0 }
+        let duration: TimeInterval = 1.5
+        let elapsed = now.timeIntervalSince(start)
+        return min(CGFloat(elapsed / duration), 1.0)
     }
     
     private func PrintPlaces(in context: GraphicsContext) {
@@ -198,14 +213,48 @@ struct CampusMapView: View {
         }
     }
     
-    private func PrintPath(in context: GraphicsContext) {
+    private func PrintPath(in context: GraphicsContext, progress: CGFloat) {
+        guard paths.count > 1 else { return }
+        
         var myPath = Path()
-        guard let first = paths.first else {return}
-        myPath.move(to: CGPoint(x: CGFloat(first.col) * cellSize + cellSize / 2, y: CGFloat(first.row) * cellSize + cellSize / 2))
-        for i in 1..<paths.count {
-            myPath.addLine(to: CGPoint(x: CGFloat(paths[i].col) * cellSize + cellSize / 2, y: CGFloat(paths[i].row) * cellSize + cellSize / 2))
+        
+        let points = paths.map { CGPoint(
+            x: CGFloat($0.col) * cellSize + cellSize / 2,
+            y: CGFloat($0.row) * cellSize + cellSize / 2
+        )}
+        
+        myPath.move(to: points[0])
+        
+        for i in 1..<points.count - 1 {
+            let current = points[i]
+            let next = points[i + 1]
+            let midPoint = CGPoint(
+                x: (current.x + next.x) / 2,
+                y: (current.y + next.y) / 2
+            )
+
+            myPath.addQuadCurve(to: midPoint, control: current)
         }
-        context.stroke(myPath, with: .color(.blue), style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round, dash: [5, 10]))
+        
+        if let last = points.last {
+            myPath.addLine(to: last)
+        }
+        
+        let fullRect = CGRect(x: 0, y: 0, width: mapWidth, height: mapHeight)
+        let trimmedPath = myPath.trim(from: 0, to: progress).path(in: fullRect)
+        
+        let style = StrokeStyle(
+            lineWidth: 5,
+            lineCap: .round,
+            lineJoin: .round
+        )
+        
+        let appleGradient = LinearGradient(
+            colors: [Color.blue, Color.blue.opacity(0.8)],
+            startPoint: .top, endPoint: .bottom
+        )
+        
+        context.stroke(trimmedPath, with: .style(appleGradient), style: style)
     }
     
     private func Normalize(point: GridPoint) -> (Double, Double) {
@@ -221,7 +270,6 @@ struct CampusMapView: View {
         if startLocation != nil {
             let tapThreshold: CGFloat = 22.0
             if let tappedPlace = placeManager.places.values.first(where: { place in
-                print(place.entryCord)
                 let (x, y) = Normalize(point: place.iconCord)
                 let distance = sqrt(pow(x - location.x, 2) + pow(y - location.y, 2))
                 return distance < tapThreshold
