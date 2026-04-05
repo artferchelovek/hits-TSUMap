@@ -32,17 +32,27 @@ struct CampusMapView: View {
     @Binding var startLocation: GridPoint?
     @Binding var endLocation: GridPoint?
     @Binding var paths: [GridPoint]
+    @Binding var selectedPlace: Place?
+    
     @ObservedObject var placeManager: PlaceManager
+    
     @State private var currentScale: CGFloat = 1.0
     @State private var finalScale: CGFloat = 1.0
-
-    init(startLocation: Binding<GridPoint?>, endLocation: Binding<GridPoint?>, paths: Binding<[GridPoint]>, placeManager: PlaceManager) {
-
+    
+    init(
+        startLocation: Binding<GridPoint?>,
+        endLocation: Binding<GridPoint?>,
+        paths: Binding<[GridPoint]>,
+        placeManager: PlaceManager,
+        selectedPlace: Binding<Place?>
+    ) {
+        
         self._startLocation = startLocation
         self._endLocation = endLocation
         self._paths = paths
         self.placeManager = placeManager
-
+        self._selectedPlace = selectedPlace
+        
         if tsuCampusGrid.isEmpty {
             _grid = State(initialValue: Array(repeating: Array(repeating: .obstacle, count: columnsCount), count: rowsCount))
         } else {
@@ -55,7 +65,7 @@ struct CampusMapView: View {
         }
         self.placeManager.setGrid(grid: grid)
     }
-
+    
     private func CanvasGrid() -> some View {
         return Canvas { context, _ in
             if let start = startLocation {
@@ -74,7 +84,7 @@ struct CampusMapView: View {
             }
             
             if let end = endLocation {
-               let (x, y) = Normalize(point: end)
+                let (x, y) = Normalize(point: end)
                 let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
                 context.fill(Path(ellipseIn: rect), with: .color(.red))
                 context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
@@ -118,7 +128,7 @@ struct CampusMapView: View {
         VStack {
             ScrollView([.horizontal, .vertical], showsIndicators: false) {
                 ZStack(alignment: .topLeading) {
-
+                    
                     Map(
                         initialPosition: .region(
                             MKCoordinateRegion(
@@ -131,9 +141,9 @@ struct CampusMapView: View {
                     .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
                     .allowsHitTesting(false)
                     .frame(width: mapWidth, height: mapHeight)
-
+                    
                     CanvasGrid()
-
+                    
                     Color.white.opacity(0.001)
                         .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
                         .onTapGesture(coordinateSpace: .local) { location in
@@ -151,6 +161,17 @@ struct CampusMapView: View {
                 )
             }
             .defaultScrollAnchor(.center)
+            .onChange(of: endLocation) { calculatePath() }
+        }
+    }
+    
+    private func calculatePath() {
+        guard let start = startLocation, let end = endLocation else { return }
+        
+        let newPath = AStar(graph: grid, start: start, end: end)
+        
+        withAnimation(.spring()) {
+            self.paths = newPath
         }
     }
     
@@ -178,12 +199,12 @@ struct CampusMapView: View {
     }
     
     private func PrintPath(in context: GraphicsContext) {
-            var myPath = Path()
-            guard let first = paths.first else {return}
-            myPath.move(to: CGPoint(x: CGFloat(first.col) * cellSize + cellSize / 2, y: CGFloat(first.row) * cellSize + cellSize / 2))
-            for i in 1..<paths.count {
-                myPath.addLine(to: CGPoint(x: CGFloat(paths[i].col) * cellSize + cellSize / 2, y: CGFloat(paths[i].row) * cellSize + cellSize / 2))
-            }
+        var myPath = Path()
+        guard let first = paths.first else {return}
+        myPath.move(to: CGPoint(x: CGFloat(first.col) * cellSize + cellSize / 2, y: CGFloat(first.row) * cellSize + cellSize / 2))
+        for i in 1..<paths.count {
+            myPath.addLine(to: CGPoint(x: CGFloat(paths[i].col) * cellSize + cellSize / 2, y: CGFloat(paths[i].row) * cellSize + cellSize / 2))
+        }
         context.stroke(myPath, with: .color(.blue), style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round, dash: [5, 10]))
     }
     
@@ -192,14 +213,29 @@ struct CampusMapView: View {
         let y = CGFloat(point.row) * cellSize + (cellSize / 2)
         return (x, y)
     }
-
+    
     private func Tap(at location: CGPoint) {
         let col = Int(location.x / cellSize)
         let row = Int(location.y / cellSize)
-
+        
+        if startLocation != nil {
+            let tapThreshold: CGFloat = 22.0
+            if let tappedPlace = placeManager.places.values.first(where: { place in
+                print(place.entryCord)
+                let (x, y) = Normalize(point: place.iconCord)
+                let distance = sqrt(pow(x - location.x, 2) + pow(y - location.y, 2))
+                return distance < tapThreshold
+            }) {
+                withAnimation {
+                    selectedPlace = tappedPlace
+                }
+                return
+            }
+        }
+        
         guard row >= 0 && row < rowsCount && col >= 0 && col < columnsCount else { return }
         if tsuCampusGrid[row][col] == 1 { return }
-
+        
         if startLocation == nil {
             withAnimation(.spring()) {
                 startLocation = GridPoint(row: row, col: col)
@@ -207,9 +243,6 @@ struct CampusMapView: View {
         } else if endLocation == nil {
             endLocation = GridPoint(row: row, col: col)
         }
-
-        guard let start = startLocation, let end = endLocation else { return }
-        self.paths = AStar(graph: grid, start: start, end: end)
     }
 }
 
@@ -218,6 +251,7 @@ struct CampusMapView: View {
         startLocation: .constant(nil as GridPoint?),
         endLocation: .constant(nil as GridPoint?),
         paths: .constant([]),
-        placeManager: PlaceManager()
+        placeManager: PlaceManager(),
+        selectedPlace: .constant(nil as Place?)
     )
 }

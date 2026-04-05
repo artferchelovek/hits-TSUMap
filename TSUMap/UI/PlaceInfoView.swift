@@ -6,39 +6,20 @@
 //
 import SwiftUI
 
-private struct Place: Identifiable {
-    var id: String
-    var iconCord: GridPoint
-    var entryCord: GridPoint
-    var name: String
-    var type: PlaceType
-    var address: String
-    var rating: Double
-}
-
-enum PlaceType: String, Hashable, Codable {
-    case coffee
-    case product
-    case cafe
-    
-    func iconName() -> String {
-        switch self {
-        case .coffee: "cup.and.saucer.fill"
-        case .cafe: "fork.knife"
-        case .product: "basket"
-        }
-    }
-}
-
-private var newPlace: Place = .init(id: "001", iconCord: .init(row: 10, col: 10), entryCord: .init(row: 15, col: 21), name: "Абрикос", type: .cafe, address: "Московский тракт, 17", rating: 9.0)
-
 struct PlaceInfoView: View {
+    @Environment(\.dismiss) var dismiss
+    
+    let newPlace: Place
+    
+    @Binding var currentDetent: PresentationDetent
+    @Binding var endLocation: GridPoint?
+    
     fileprivate func PlaceInfo() -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(newPlace.name)
                 .font(.title)
                 .bold()
-                
+            
             Text(newPlace.address)
                 .foregroundColor(.secondary)
             
@@ -60,10 +41,32 @@ struct PlaceInfoView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    fileprivate func PlaceFooter() -> HStack<some View> {
-        return HStack {
+    fileprivate func ExpandedContent() -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Divider()
+            Text("О заведении")
+                .font(.headline)
+            Text("тут будет дикий флекс с меню")
+                .foregroundColor(.secondary)
+            
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.gray.opacity(0.2))
+                .frame(height: 150)
+                .overlay(Text("Здесь будет фото булочки из ярче").foregroundColor(.secondary))
+            
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.gray.opacity(0.2))
+                .frame(height: 150)
+                .overlay(Text("а здесь фото шаурмы из безумно").foregroundColor(.secondary))
+        }
+        .padding(.top)
+    }
+    
+    fileprivate func PlaceFooter() -> some View {
+        HStack {
             Button {
-                print("построить маршрут")
+                endLocation = newPlace.entryCord
+                dismiss()
             } label: {
                 HStack(alignment: .center) {
                     Image(systemName: "figure.walk")
@@ -78,17 +81,39 @@ struct PlaceInfoView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading) {
             PlaceInfo()
+                .padding(.top, 20)
             
-            Spacer()
+            if currentDetent == .large {
+                ScrollView {
+                    ExpandedContent()
+                }
+                .transition(.opacity)
+                
+                Spacer()
+            } else {
+                Color.clear.frame(height: 20)
+            }
             
             PlaceFooter()
         }
         .padding(.horizontal)
+        .padding(.vertical)
     }
 }
 
 #Preview {
-    PlaceInfoView()
+    PlaceInfoView(newPlace: Place(
+        id: "001",
+        iconCord: .init(row: 10, col: 10),
+        entryCord: .init(row: 15, col: 21),
+        name: "Абрикос",
+        type: .cafe,
+        address: "Московский тракт, 17",
+        rating: 9.0
+    ),
+                  currentDetent: .constant(.large),
+                  endLocation: .constant(nil as GridPoint?),
+    )
 }

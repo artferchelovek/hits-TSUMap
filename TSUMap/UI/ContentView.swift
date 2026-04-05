@@ -13,6 +13,8 @@ struct ContentView: View {
     @State private var endLocation: GridPoint?
     @State private var paths: [GridPoint] = []
     @State private var isShowingDecisionSheet = false
+    @State private var selectedPlace: Place?
+    @State private var sheetDetent: PresentationDetent = .height(180)
     
     @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
@@ -80,8 +82,15 @@ struct ContentView: View {
                 startLocation: $startLocation,
                 endLocation: $endLocation,
                 paths: $paths,
-                placeManager: placeManager
-            ).ignoresSafeArea()
+                placeManager: placeManager,
+                selectedPlace: $selectedPlace
+            )
+            .ignoresSafeArea()
+            .sheet(item: $selectedPlace) { place in
+                PlaceInfoView(newPlace: place, currentDetent: $sheetDetent, endLocation: $endLocation)
+                    .presentationDetents([.height(200), .large], selection: $sheetDetent)
+                    .presentationDragIndicator(.visible)
+            }
             
             VStack(spacing: 0) {
                 if startLocation == nil {
