@@ -137,7 +137,12 @@ struct ContentView: View {
                             }
                             .buttonStyle(.glassProminent)
                             .sheet(isPresented: $isShowingDecisionSheet) {
-                                DecisionTreeView(manager: manager, treeNode: treeNode) { prediction in
+                                DecisionTreeView(
+                                    manager: manager,
+                                    placeManager: placeManager,
+                                    treeNode: treeNode,
+                                    endLocation: $endLocation
+                                ) { prediction in
                                     self.predictionResult = prediction
                                 }
                                 .presentationDragIndicator(.visible)
@@ -179,9 +184,7 @@ struct ContentView: View {
             return
         }
         
-        let attributes = ["location", "budget", "time_available", "food_type", "queue_tolerance", "weather"]
-        
-        treeNode = buildTree(data: data, availableAttributes: attributes)
+        treeNode = buildTree(data: data, availableAttributes: AppConfig.aviableTreeAttributes)
         
         print("Дерево перестроено на основе \(data.count) записей")
     }

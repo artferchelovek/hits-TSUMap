@@ -1,7 +1,3 @@
-/*
-func getPlaceById(id: String) -> [Place]
-*/
-
 import Foundation
 import SwiftUI
 import Combine
@@ -12,6 +8,10 @@ final class PlaceManager: ObservableObject {
     
     init() {
         loadData()
+    }
+    
+    public func getPlaceById(_ result: String) -> Place? {
+        return places[result]
     }
     
     public func setGrid(grid: [[CellType]]) {
