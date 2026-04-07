@@ -28,8 +28,13 @@ struct DecisionTreeView: View {
     @Environment(\.dismiss) var dismiss
     
     @ObservedObject var manager: VenueManager
+    @ObservedObject var placeManager: PlaceManager
+    
+    @State private var selectedPlace: Place?
     
     let treeNode: TreeNode?
+    
+    @Binding var endLocation: GridPoint?
     
     var onPredictionCompleted: ((String) -> Void)?
     
@@ -104,7 +109,7 @@ struct DecisionTreeView: View {
                         Image(systemName: "document.badge.gearshape")
                     }
                     .sheet(isPresented: $isShowingSettingsSheet) {
-                        SettingsDecisionTreeView(manager: manager)
+                        SettingsDecisionTreeView(manager: manager, placeManager: placeManager)
                             .presentationDragIndicator(.visible)
                     }
                     .buttonStyle(.borderedProminent)
@@ -138,6 +143,7 @@ struct DecisionTreeView: View {
     
     private var finishButton: some View {
         Button {
+            endLocation = selectedPlace?.entryCord
             dismiss()
         } label: {
             Text("Показать маршрут")
@@ -179,7 +185,9 @@ struct DecisionTreeView: View {
                     let (result, _) = predictTree(tree: treeNode, situation: userAttribute)
                     withAnimation(.spring()) {
                         messages.append(ChatMessage(text: "Рекомендую посетить:", isUser: false))
-                        messages.append(ChatMessage(text: "\(result)", isUser: false))
+                        messages.append(ChatMessage(text: "\(result.components(separatedBy: "@")[0])", isUser: false))
+                        guard let parseResult = placeManager.getPlaceById(result.components(separatedBy: "@")[1]) else { return }
+                        selectedPlace = parseResult
                     }
                 }
             }
@@ -207,5 +215,10 @@ struct MessageBubble: View {
 }
 
 #Preview {
-    DecisionTreeView(manager: VenueManager(), treeNode: nil)
+    DecisionTreeView(
+        manager: VenueManager(),
+        placeManager: PlaceManager(),
+        treeNode: buildTree(data: VenueManager().allAttributes, availableAttributes: AppConfig.aviableTreeAttributes),
+        endLocation: .constant(nil as GridPoint?)
+    )
 }

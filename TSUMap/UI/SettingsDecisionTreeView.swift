@@ -13,6 +13,8 @@ struct IdentifiablePlace: Identifiable {
 
 struct SettingsDecisionTreeView: View {
     @ObservedObject var manager: VenueManager
+    @ObservedObject var placeManager: PlaceManager
+    
     @State private var activePlace: IdentifiablePlace?
     
     var body: some View {
@@ -23,7 +25,7 @@ struct SettingsDecisionTreeView: View {
                 ForEach(grouped.keys.sorted(), id: \.self) { name in
                     HStack {
                         VStack(alignment: .leading) {
-                            Text(name.replacingOccurrences(of: "_", with: " "))
+                            Text(name.components(separatedBy: "@").first ?? name)
                                 .font(.headline)
                             Text("Сценариев: \(grouped[name]?.count ?? 0)")
                                 .font(.caption)
@@ -69,7 +71,7 @@ struct SettingsDecisionTreeView: View {
             }
             .sheet(item: $activePlace) { place in
                 EditVenueView(
-                    manager: manager,
+                    manager: manager, placeManager: placeManager,
                     venueName: place.id == "NEW_VENUE" ? nil : place.id
                 )
                 .presentationDragIndicator(.visible)
@@ -80,6 +82,7 @@ struct SettingsDecisionTreeView: View {
 
 struct EditVenueView: View {
     @ObservedObject var manager: VenueManager
+    @ObservedObject var placeManager: PlaceManager
     @Environment(\.dismiss) var dismiss
     
     var venueName: String?
@@ -91,8 +94,19 @@ struct EditVenueView: View {
         NavigationView {
             Form {
                 Section(header: Text("ИНФОРМАЦИЯ О ЗАВЕДЕНИИ")) {
-                    TextField("Название (например, Абрикос)", text: $placeName)
-                        .disabled(venueName != nil)
+                    Picker("Выберите место", selection: $placeName) {
+                        if placeName.isEmpty {
+                            Text("Не выбрано").tag("")
+                        }
+                        
+                        ForEach(placeManager.places.values.sorted(by: { $0.name < $1.name })) { place in
+                            let formattedValue = "\(place.name)@\(place.id)"
+                            Text(place.name)
+                                .tag(formattedValue)
+                        }
+                    }
+                    .pickerStyle(.navigationLink)
+                    .disabled(venueName != nil)
                 }
                 
                 ForEach(AppConfig.questions) { question in
@@ -206,6 +220,7 @@ struct EditVenueView: View {
                                     recommended_place: placeName
                                 )
                                 newEntries.append(newAttr)
+                                print(newAttr)
                             }
                         }
                     }
@@ -220,5 +235,8 @@ struct EditVenueView: View {
 }
 
 #Preview {
-    SettingsDecisionTreeView(manager: VenueManager())
+    SettingsDecisionTreeView(
+        manager: VenueManager(),
+        placeManager: PlaceManager()
+    )
 }

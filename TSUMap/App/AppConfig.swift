@@ -22,6 +22,10 @@ struct QuestionConfig: Identifiable {
 }
 
 struct AppConfig {
+    static let cellScale = 4.5
+    
+    static let aviableTreeAttributes = ["location", "budget", "time_available", "food_type", "queue_tolerance", "weather"]
+    
     static let questions: [QuestionConfig] = [
         QuestionConfig(
             key: "location",
