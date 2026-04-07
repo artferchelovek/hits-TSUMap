@@ -28,7 +28,7 @@ private func h(_ point: GridPoint, _ target: GridPoint) -> Double {
     return sqrt(pow(dx, 2) + pow(dy, 2))
 }
 
-private func isValidStep(graph: [[CellType]], vertex: GridPoint, isVisited: Set<GridPoint>, prepatstvie: [GridPoint]) -> Bool {
+private func isValidStep(graph: [[CellType]], vertex: GridPoint, isVisited: Set<GridPoint>, obstacle: [GridPoint]) -> Bool {
 
     return vertex.col >= 0
         && vertex.row >= 0
@@ -36,10 +36,10 @@ private func isValidStep(graph: [[CellType]], vertex: GridPoint, isVisited: Set<
         && vertex.col < graph[0].count
         && !isVisited.contains(vertex)
         && graph[vertex.row][vertex.col] == .path
-        && !prepatstvie.contains(vertex)
+        && !obstacle.contains(vertex)
 }
 
-private func AStarAlgorithm(graph: [[CellType]], start: GridPoint, end: GridPoint, prepatstvie: [GridPoint]) -> [GridPoint] {
+private func AStarAlgorithm(graph: [[CellType]], start: GridPoint, end: GridPoint, obstacle: [GridPoint]) -> [GridPoint] {
 
     var isVisited: Set<GridPoint> = []
     var distance: [GridPoint: Double] = [start: 0]
@@ -66,7 +66,7 @@ private func AStarAlgorithm(graph: [[CellType]], start: GridPoint, end: GridPoin
         for (row, col) in neighbors {
             let neighborPos = GridPoint(row: currentVertex.point.row + row, col: currentVertex.point.col + col)
 
-            if !isValidStep(graph: graph, vertex: neighborPos, isVisited: isVisited, prepatstvie: prepatstvie) {continue}
+            if !isValidStep(graph: graph, vertex: neighborPos, isVisited: isVisited, obstacle: obstacle) {continue}
 
             let step = (row == 0 || col == 0) ? 1.0 : sqrt(2.0)
             let neighborDist = distance[currentVertex.point]! + step
@@ -100,20 +100,20 @@ func createPath(parents: [GridPoint: GridPoint], start: GridPoint, end: GridPoin
     return path.reversed()
 }
 
-func AStar(graph: [[CellType]], start: GridPoint, points: [GridPoint]? = nil, end: GridPoint, prepatstvie: [GridPoint] = []) -> [GridPoint] {
-    var objects: [GridPoint] = [start]
-    objects += points ?? []
-    objects.append(end)
+func AStar(graph: [[CellType]], start: GridPoint, points: [GridPoint]? = nil, end: GridPoint, obstacle: [GridPoint] = []) -> [GridPoint] {
+    var intermediatePoints: [GridPoint] = [start]
+    intermediatePoints += points ?? []
+    intermediatePoints.append(end)
     
     var path: [GridPoint] = []
     var from: GridPoint
     var to: GridPoint
     
-    for i in 0..<objects.count - 1 {
-        from = objects[i]
-        to = objects[i + 1]
+    for i in 0..<intermediatePoints.count - 1 {
+        from = intermediatePoints[i]
+        to = intermediatePoints[i + 1]
         
-        var part = AStarAlgorithm(graph: graph, start: from, end: to, prepatstvie: prepatstvie)
+        var part = AStarAlgorithm(graph: graph, start: from, end: to, obstacle: obstacle)
         if part.isEmpty {
             return []
         }
