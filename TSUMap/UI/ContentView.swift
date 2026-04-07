@@ -14,7 +14,10 @@ struct ContentView: View {
     @State private var paths: [GridPoint] = []
     @State private var isShowingDecisionSheet = false
     @State private var selectedPlace: Place?
+    @State private var selectedCluster: Cluster?
     @State private var sheetDetent: PresentationDetent = .height(180)
+    
+    @State private var clusters: [Cluster] = []
     
     @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
@@ -83,12 +86,19 @@ struct ContentView: View {
                 endLocation: $endLocation,
                 paths: $paths,
                 placeManager: placeManager,
-                selectedPlace: $selectedPlace
+                selectedPlace: $selectedPlace,
+                selectedCluster: $selectedCluster,
+                clusters: $clusters
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
-                PlaceInfoView(newPlace: place, currentDetent: $sheetDetent, endLocation: $endLocation)
+                PlaceInfoView(newPlace: place, currentDetent: $sheetDetent, endLocation: $endLocation, clusters: $clusters)
                     .presentationDetents([.height(200), .large], selection: $sheetDetent)
+                    .presentationDragIndicator(.visible)
+            }
+            .sheet(item: $selectedCluster) { cluster in
+                ClusterInfoView(cluster: cluster, selectedPlace: $selectedPlace)
+                    .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }
             
@@ -105,7 +115,8 @@ struct ContentView: View {
                     }.transition(.move(edge: .top).combined(with: .opacity))
                 } else {
                     HStack {
-                        FloatingSearchBar()
+                        FloatingSearchBar(placeManager: placeManager,
+                                          clusters: $clusters)
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }

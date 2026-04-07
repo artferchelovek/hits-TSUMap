@@ -13,6 +13,7 @@ struct PlaceInfoView: View {
     
     @Binding var currentDetent: PresentationDetent
     @Binding var endLocation: GridPoint?
+    @Binding var clusters: [Cluster]
     
     fileprivate func PlaceInfo() -> some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -65,6 +66,7 @@ struct PlaceInfoView: View {
     fileprivate func PlaceFooter() -> some View {
         HStack {
             Button {
+                self.clusters = []
                 endLocation = newPlace.entryCord
                 dismiss()
             } label: {
@@ -115,5 +117,6 @@ struct PlaceInfoView: View {
     ),
                   currentDetent: .constant(.large),
                   endLocation: .constant(nil as GridPoint?),
+                  clusters: .constant([]),
     )
 }

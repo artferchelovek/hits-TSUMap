@@ -18,25 +18,28 @@ enum CellType {
     case obstacle
 }
 
+let columnsCount = 150
+let rowsCount = 150
+
+let cellSize: CGFloat = 14.0
+
+var mapWidth: CGFloat { CGFloat(columnsCount) * cellSize }
+var mapHeight: CGFloat { CGFloat(rowsCount) * cellSize }
+
 struct CampusMapView: View {
-    let columnsCount = 150
-    let rowsCount = 150
-    
-    let cellSize: CGFloat = 14.0
-    
-    var mapWidth: CGFloat { CGFloat(columnsCount) * cellSize }
-    var mapHeight: CGFloat { CGFloat(rowsCount) * cellSize }
-    
     @State private var grid: [[CellType]]
     
     @Binding var startLocation: GridPoint?
     @Binding var endLocation: GridPoint?
     @Binding var paths: [GridPoint]
     @Binding var selectedPlace: Place?
+    @Binding var selectedCluster: Cluster?
     
     @State private var animationStartDate: Date?
     
     @ObservedObject var placeManager: PlaceManager
+    
+    @Binding var clusters: [Cluster]
     
     @State private var currentScale: CGFloat = 1.0
     @State private var finalScale: CGFloat = 1.0
@@ -46,7 +49,9 @@ struct CampusMapView: View {
         endLocation: Binding<GridPoint?>,
         paths: Binding<[GridPoint]>,
         placeManager: PlaceManager,
-        selectedPlace: Binding<Place?>
+        selectedPlace: Binding<Place?>,
+        selectedCluster: Binding<Cluster?>,
+        clusters: Binding<[Cluster]>,
     ) {
         
         self._startLocation = startLocation
@@ -65,23 +70,9 @@ struct CampusMapView: View {
             }
             _grid = State(initialValue: loadedGrid)
         }
+        self._selectedCluster = selectedCluster
+        self._clusters = clusters
         self.placeManager.setGrid(grid: grid)
-    }
-    
-    fileprivate func drawStartPoint(_ start: GridPoint, _ context: GraphicsContext) {
-        let (x, y) = Normalize(point: start)
-        let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
-        
-        context.fill(Path(ellipseIn: rect), with: .color(.blue))
-        context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
-    }
-    
-    fileprivate func drawEndPoint(_ end: GridPoint, _ context: GraphicsContext) {
-        let (x, y) = Normalize(point: end)
-        
-        if let pin = context.resolveSymbol(id: "endPin") {
-                context.draw(pin, at: CGPoint(x: x, y: y), anchor: .bottom)
-            }
     }
     
     private func CanvasGrid() -> some View {
@@ -94,7 +85,26 @@ struct CampusMapView: View {
                     PrintPath(in: context, progress: progress)
                 }
                 
-                PrintPlaces(in: context)
+                if !clusters.isEmpty {
+                    for cluster in clusters {
+                        let point: GridPoint = cluster.medoid.iconCord
+                        let (x, y) = Normalize(point: point)
+                        
+                        let size: CGFloat = 45
+                        let rect = CGRect(x: x - size / 2, y: y - size / 2, width: size, height: size)
+                        
+                        context.drawLayer { dotContext in
+                            dotContext.addFilter(.shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 3))
+                            
+                            let mainPath = Path(ellipseIn: rect)
+                            dotContext.fill(mainPath, with: .color(cluster.color.opacity(0.8)))
+                            
+                            dotContext.stroke(mainPath, with: .color(.white), lineWidth: 3)
+                        }
+                    }
+                } else {
+                    PrintPlaces(in: context)
+                }
                 
                 if let start = startLocation {
                     drawStartPoint(start, context)
@@ -262,6 +272,24 @@ struct CampusMapView: View {
         let y = CGFloat(point.row) * cellSize + (cellSize / 2)
         return (x, y)
     }
+}
+
+extension CampusMapView {
+    fileprivate func drawStartPoint(_ start: GridPoint, _ context: GraphicsContext) {
+        let (x, y) = Normalize(point: start)
+        let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
+        
+        context.fill(Path(ellipseIn: rect), with: .color(.blue))
+        context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
+    }
+    
+    fileprivate func drawEndPoint(_ end: GridPoint, _ context: GraphicsContext) {
+        let (x, y) = Normalize(point: end)
+        
+        if let pin = context.resolveSymbol(id: "endPin") {
+                context.draw(pin, at: CGPoint(x: x, y: y), anchor: .bottom)
+            }
+    }
     
     private func Tap(at location: CGPoint) {
         let col = Int(location.x / cellSize)
@@ -269,15 +297,29 @@ struct CampusMapView: View {
         
         if startLocation != nil {
             let tapThreshold: CGFloat = 22.0
-            if let tappedPlace = placeManager.places.values.first(where: { place in
-                let (x, y) = Normalize(point: place.iconCord)
-                let distance = sqrt(pow(x - location.x, 2) + pow(y - location.y, 2))
-                return distance < tapThreshold
-            }) {
-                withAnimation {
-                    selectedPlace = tappedPlace
+            
+            if clusters.isEmpty {
+                if let tappedPlace = placeManager.places.values.first(where: { place in
+                    let (x, y) = Normalize(point: place.iconCord)
+                    let distance = hypot(x - location.x, y - location.y)
+                    return distance < tapThreshold
+                }) {
+                    withAnimation {
+                        selectedPlace = tappedPlace
+                    }
+                    return
                 }
-                return
+            } else {
+                if let tappedCluster = clusters.first(where: { cluster in
+                    let (x, y) = Normalize(point: cluster.medoid.iconCord)
+                    let distance = hypot(x - location.x, y - location.y)
+                    return distance < tapThreshold
+                }) {
+                    withAnimation {
+                        selectedCluster = tappedCluster
+                    }
+                    return
+                }
             }
         }
         
@@ -300,6 +342,8 @@ struct CampusMapView: View {
         endLocation: .constant(nil as GridPoint?),
         paths: .constant([]),
         placeManager: PlaceManager(),
-        selectedPlace: .constant(nil as Place?)
+        selectedPlace: .constant(nil as Place?),
+        selectedCluster: .constant(nil as Cluster?),
+        clusters: .constant([])
     )
 }
