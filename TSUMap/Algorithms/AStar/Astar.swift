@@ -21,14 +21,14 @@ import Foundation
     }
 }
 
-func h(_ point: GridPoint, _ target: GridPoint) -> Double {
+private func h(_ point: GridPoint, _ target: GridPoint) -> Double {
     let dx = Double(point.row - target.row)
     let dy = Double(point.col - target.col)
 
     return sqrt(pow(dx, 2) + pow(dy, 2))
 }
 
-func isValidStep(graph: [[CellType]], vertex: GridPoint, isVisited: Set<GridPoint>, prepatstvie: [GridPoint]) -> Bool {
+private func isValidStep(graph: [[CellType]], vertex: GridPoint, isVisited: Set<GridPoint>, prepatstvie: [GridPoint]) -> Bool {
 
     return vertex.col >= 0
         && vertex.row >= 0
@@ -39,7 +39,7 @@ func isValidStep(graph: [[CellType]], vertex: GridPoint, isVisited: Set<GridPoin
         && !prepatstvie.contains(vertex)
 }
 
-func AStar(graph: [[CellType]], start: GridPoint, end: GridPoint, onTrip: [GridPoint] = [], prepatstvie: [GridPoint] = []) -> [GridPoint] {
+private func AStarAlgorithm(graph: [[CellType]], start: GridPoint, end: GridPoint, prepatstvie: [GridPoint]) -> [GridPoint] {
 
     var isVisited: Set<GridPoint> = []
     var distance: [GridPoint: Double] = [start: 0]
@@ -98,4 +98,28 @@ func createPath(parents: [GridPoint: GridPoint], start: GridPoint, end: GridPoin
     }
 
     return path.reversed()
+}
+
+func AStar(graph: [[CellType]], start: GridPoint, points: [GridPoint]? = nil, end: GridPoint, prepatstvie: [GridPoint] = []) -> [GridPoint] {
+    var objects: [GridPoint] = [start]
+    objects += points ?? []
+    objects.append(end)
+    
+    var path: [GridPoint] = []
+    var from: GridPoint
+    var to: GridPoint
+    
+    for i in 0..<objects.count - 1 {
+        from = objects[i]
+        to = objects[i + 1]
+        
+        var part = AStarAlgorithm(graph: graph, start: from, end: to, prepatstvie: prepatstvie)
+        if part.isEmpty {
+            return []
+        }
+        part.removeFirst()
+        path += part
+    }
+    
+    return path
 }
