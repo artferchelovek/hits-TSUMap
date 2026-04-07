@@ -12,7 +12,6 @@ struct NeuralView: View {
     
     @State private var grid: [[Double]]
     @State private var predictedDigit: Int?
-    
     @ObservedObject private var manager = NeuralManager.shared
     
     init() {
@@ -21,7 +20,7 @@ struct NeuralView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text(manager.isTraining ? "Идёт обучение сети..." : "Нарисуйте оценку от 0 до 9")
+            Text("Нарисуйте оценку от 0 до 9")
                 .font(.title2)
                 .bold()
             
@@ -39,7 +38,7 @@ struct NeuralView: View {
                         drawnPath.addRect(rect)
                     }
                 }
-                context.fill(drawnPath, with: .color(.primary))
+                context.fill(drawnPath, with: .color(.blue))
             }
             .frame(width: CGFloat(gridSize) * CGFloat(cellSize), height: CGFloat(gridSize) * CGFloat(cellSize))
             .border(Color.blue, width: 1)
@@ -57,12 +56,11 @@ struct NeuralView: View {
                         fillPixel(row: row - 1, col: col - 1)
                         fillPixel(row: row + 1, col: col - 1)
                         fillPixel(row: row - 1, col: col + 1)
-                        
                     }
             )
             
             if let digit = predictedDigit {
-                Text(digit == -1 ? "Ошибка: Сеть выдала NaN" : "Ваша оценка: \(digit)")
+                Text(digit == -1 ? "Ошибка" : "Ваша оценка: \(digit)")
                     .font(.title)
                     .bold()
                     .foregroundColor(digit == -1 ? .red : .blue)
@@ -77,18 +75,10 @@ struct NeuralView: View {
                 
                 Button("Оценить") {
                     let networkInput = getNeuralNetworkInput()
-                    predictedDigit = manager.network.predict(input: networkInput)
+                    predictedDigit = manager.neuralNetworkPredict(input: networkInput)
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(manager.isTraining)
             }
-            
-            Button("Переобучить заново") {
-                manager.trainFromScratch()
-            }
-            .buttonStyle(.bordered)
-            .tint(.orange)
-            .disabled(manager.isTraining)
         }
         .padding()
     }
@@ -108,6 +98,5 @@ struct NeuralView: View {
     }
 }
 #Preview {
-    ContentView()
+    NeuralView()
 }
-
