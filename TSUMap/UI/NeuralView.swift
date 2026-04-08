@@ -1,5 +1,5 @@
 //
-//  Untitled.swift
+//  NeuralView.swift
 //  TSUMap
 //
 //  Created by Екатерина Кондрашова on 30.03.2026.
@@ -25,40 +25,7 @@ struct NeuralView: View {
                 .font(.title2)
                 .bold()
             
-            Canvas { context, _ in
-                var drawnPath = Path()
-                
-                for row in 0..<gridSize {
-                    for col in 0..<gridSize where grid[row][col] == 1.0 {
-                        let rect = CGRect(
-                            x: CGFloat(col) * CGFloat(cellSize),
-                            y: CGFloat(row) * CGFloat(cellSize),
-                            width: CGFloat(cellSize),
-                            height: CGFloat(cellSize)
-                        )
-                        drawnPath.addRect(rect)
-                    }
-                }
-                context.fill(drawnPath, with: .color(.blue))
-            }
-            .frame(width: CGFloat(gridSize) * CGFloat(cellSize), height: CGFloat(gridSize) * CGFloat(cellSize))
-            .border(Color.blue, width: 1)
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        let row = Int(value.location.y / CGFloat(cellSize))
-                        let col = Int(value.location.x / CGFloat(cellSize))
-                        fillPixel(row: row, col: col)
-                        fillPixel(row: row + 1, col: col)
-                        fillPixel(row: row - 1, col: col)
-                        fillPixel(row: row, col: col + 1)
-                        fillPixel(row: row, col: col - 1)
-                        fillPixel(row: row + 1, col: col + 1)
-                        fillPixel(row: row - 1, col: col - 1)
-                        fillPixel(row: row + 1, col: col - 1)
-                        fillPixel(row: row - 1, col: col + 1)
-                    }
-            )
+            drawingCanvas
             
             if let digit = predictedDigit {
                 Text(digit == -1 ? "Ошибка" : "Ваша оценка: \(digit)")
@@ -67,21 +34,95 @@ struct NeuralView: View {
                     .foregroundColor(digit == -1 ? .red : .blue)
             }
             
-            HStack(spacing: 15) {
-                Button("Очистить") {
+            NeuralActionButtons(
+                onClear: {
                     clearCanvas()
                     predictedDigit = nil
-                }
-                .buttonStyle(.bordered)
-                
-                Button("Оценить") {
+                },
+                onEvaluate: {
                     let networkInput = getNeuralNetworkInput()
                     predictedDigit = manager.neuralNetworkPredict(input: networkInput)
                 }
-                .buttonStyle(.borderedProminent)
-            }
+            )
         }
         .padding()
+    }
+   
+    private var drawingCanvas: some View {
+        Canvas { context, _ in
+            var drawnPath = Path()
+            
+            for row in 0..<gridSize {
+                for col in 0..<gridSize where grid[row][col] == 1.0 {
+                    let rect = CGRect(
+                        x: CGFloat(col) * CGFloat(cellSize),
+                        y: CGFloat(row) * CGFloat(cellSize),
+                        width: CGFloat(cellSize),
+                        height: CGFloat(cellSize)
+                    )
+                    drawnPath.addRect(rect)
+                }
+            }
+            context.fill(drawnPath, with: .color(.blue))
+        }
+        .frame(width: CGFloat(gridSize) * CGFloat(cellSize), height: CGFloat(gridSize) * CGFloat(cellSize))
+        .border(Color.blue, width: 1)
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    handleDrag(at: value.location)
+                }
+        )
+    }
+}
+
+struct NeuralActionButtons: View {
+    @Environment(\.dismiss) var dismiss
+    
+    let onClear: () -> Void
+    let onEvaluate: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 15) {
+            Button(
+                action: {
+                    onClear()
+                },
+                label: {
+                    Text("Очистить")
+                }
+            )
+            .buttonStyle(.bordered)
+            
+            Button(
+                action: {
+                    onEvaluate()
+                    dismiss()
+                },
+                label: {
+                    Text("Оценить")
+                }
+            )
+            .buttonStyle(.borderedProminent)
+        }
+    }
+}
+
+extension NeuralView {
+    
+    private func handleDrag(at location: CGPoint) {
+        let row = Int(location.y / CGFloat(cellSize))
+        let col = Int(location.x / CGFloat(cellSize))
+        
+        fillPixel(row: row, col: col)
+        fillPixel(row: row + 1, col: col)
+        fillPixel(row: row - 1, col: col)
+        fillPixel(row: row, col: col + 1)
+        fillPixel(row: row, col: col - 1)
+        fillPixel(row: row + 1, col: col + 1)
+        fillPixel(row: row - 1, col: col - 1)
+        fillPixel(row: row + 1, col: col - 1)
+        fillPixel(row: row - 1, col: col + 1)
     }
     
     private func fillPixel(row: Int, col: Int) {
@@ -98,6 +139,7 @@ struct NeuralView: View {
         return grid.flatMap { $0 }
     }
 }
+
 #Preview {
     NeuralView()
 }
