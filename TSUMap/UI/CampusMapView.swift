@@ -54,7 +54,6 @@ struct CampusMapView: View {
     @ObservedObject var placeManager: PlaceManager
     @Binding var clusters: [Cluster]
 
-    // Флаг для авто-масштабирования при построении маршрута
     @State private var hasAutoFitRoute: Bool = false
 
     @State private var baseScale: CGFloat = 1.0
@@ -64,14 +63,12 @@ struct CampusMapView: View {
     @State private var activeZoom: CGFloat = 1.0
     @State private var pinchAnchor: CGPoint = .zero
 
-    // Размер видимой области (экрана)
     @State private var viewSize: CGSize = .zero
 
     var currentScale: CGFloat {
         clamp(baseScale * activeZoom, min: 0.5, max: 4.0)
     }
 
-    // Ограниченный offset, чтобы не было белых полос
     var currentOffset: CGSize {
         var off = baseOffset
 
@@ -84,7 +81,6 @@ struct CampusMapView: View {
         off.width += activePan.width
         off.height += activePan.height
 
-        // Ограничиваем offset, чтобы не было белых полос
         return clampOffset(off)
     }
     
