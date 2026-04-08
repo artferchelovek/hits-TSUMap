@@ -191,7 +191,6 @@ struct CampusMapView: View {
 
                 .gesture(mapGesture)
                 .onAppear {
-                    // Сохраняем размер видимой области
                     viewSize = geo.size
                 }
                 .onChange(of: geo.size) { _, newValue in
@@ -241,7 +240,6 @@ struct CampusMapView: View {
         baseOffset.width += activePan.width
         baseOffset.height += activePan.height
 
-        // Ограничиваем offset, чтобы не было белых полос
         let scale = currentScale
         let scaledWidth = mapWidth * scale
         let scaledHeight = mapHeight * scale
@@ -267,7 +265,6 @@ struct CampusMapView: View {
         Swift.max(minValue, Swift.min(value, maxValue))
     }
 
-    // Ограничиваем offset, чтобы не было белых полос за пределами карты
     private func clampOffset(_ offset: CGSize) -> CGSize {
         let scale = currentScale
         let scaledWidth = mapWidth * scale
@@ -277,10 +274,8 @@ struct CampusMapView: View {
         var clampedHeight: CGFloat
 
         if scaledWidth > viewSize.width {
-            // Карта больше экрана — ограничиваем в пределах видимости
             clampedWidth = clamp(offset.width, min: viewSize.width - scaledWidth, max: 0)
         } else {
-            // Карта меньше экрана — центрируем
             clampedWidth = (viewSize.width - scaledWidth) / 2
         }
 
@@ -295,7 +290,6 @@ struct CampusMapView: View {
     
     private func calculatePath() {
         guard let start = startLocation, let end = endLocation else {
-            // Если маршрут сброшен, разрешаем авто-масштабирование снова
             if startLocation == nil {
                 hasAutoFitRoute = false
             }
@@ -306,7 +300,6 @@ struct CampusMapView: View {
         let newPath = AStar(graph: grid, start: start, points: intermediatePoints, end: end)
         self.paths = newPath
 
-        // Авто-масштабирование для показа всего маршрута
         if !hasAutoFitRoute {
             autoFitToPath(newPath)
         }
@@ -316,11 +309,9 @@ struct CampusMapView: View {
         }
     }
 
-    // MARK: - Авто-масштабирование маршрута
     private func autoFitToPath(_ path: [GridPoint]) {
         guard !path.isEmpty else { return }
 
-        // Вычисляем bounding box маршрута
         var minRow = path[0].row
         var maxRow = path[0].row
         var minCol = path[0].col
@@ -333,33 +324,26 @@ struct CampusMapView: View {
             maxCol = max(maxCol, point.col)
         }
 
-        // Добавляем отступы (25%)
         let padding: CGFloat = 0.25
         let rowRange = CGFloat(maxRow - minRow) + 1
         let colRange = CGFloat(maxCol - minCol) + 1
         let paddedRowRange = rowRange * (1 + padding) * cellSize
         let paddedColRange = colRange * (1 + padding) * cellSize
 
-        // Вычисляем масштаб, чтобы маршрут влез на экран
         let screenWidth = viewSize.width > 0 ? viewSize.width : 400
         let screenHeight = viewSize.height > 0 ? viewSize.height : 700
         let scaleByWidth = screenWidth / paddedColRange
         let scaleByHeight = screenHeight / paddedRowRange
         let targetScale = min(scaleByWidth, scaleByHeight)
 
-        // Ограничиваем масштаб
         let clampedScale = clamp(targetScale, min: 0.5, max: 3.0)
 
-        // Вычисляем центр маршрута в координатах карты
         let centerCol = CGFloat(minCol + maxCol + 1) / 2 * cellSize
         let centerRow = CGFloat(minRow + maxRow + 1) / 2 * cellSize
 
-        // Вычисляем offset для центрирования маршрута на экране
-        // При scaleEffect от .topLeading, центр экрана должен совпадать с центром маршрута
         let offsetX = screenWidth / 2 - centerCol * clampedScale
         let offsetY = screenHeight / 2 - centerRow * clampedScale
 
-        // Анимируем переход
         withAnimation(.easeInOut(duration: 0.6)) {
             baseScale = clampedScale
             baseOffset = CGSize(width: offsetX, height: offsetY)
