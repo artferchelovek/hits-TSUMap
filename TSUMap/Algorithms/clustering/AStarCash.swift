@@ -8,7 +8,7 @@ class AStarCash {
         self.grid = grid
     }
     
-    public func getDistance(firstPlace: Place, secondPlace: Place) -> Int {
+    public func getDistance(firstPlace: Cafe, secondPlace: Cafe) -> Int {
         let firstId = firstPlace.id
         let secondId = secondPlace.id
         if firstPlace.entryCord == secondPlace.entryCord { return 0 }
