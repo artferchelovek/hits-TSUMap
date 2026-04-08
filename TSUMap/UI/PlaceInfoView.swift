@@ -9,7 +9,7 @@ import SwiftUI
 struct PlaceInfoView: View {
     @Environment(\.dismiss) var dismiss
     
-    let newPlace: Place
+    let newPlace: (any MapItem)
     
     @Binding var currentDetent: PresentationDetent
     @Binding var endLocation: GridPoint?
@@ -122,18 +122,20 @@ struct PlaceInfoView: View {
 }
 
 #Preview {
-    PlaceInfoView(newPlace: Place(
+    /*
+    PlaceInfoView(newPlace: Cafe(
         id: "001",
         iconCord: .init(row: 10, col: 10),
         entryCord: .init(row: 15, col: 21),
         name: "Абрикос",
         type: .cafe,
         address: "Московский тракт, 17",
+        timeEntry:
         rating: 9.0
     ),
                   currentDetent: .constant(.large),
                   endLocation: .constant(nil as GridPoint?),
                   intermediatePoints: .constant([]),
                   clusters: .constant([]),
-    )
+    )*/
 }

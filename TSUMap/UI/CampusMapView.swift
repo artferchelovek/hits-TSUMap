@@ -46,7 +46,7 @@ struct CampusMapView: View {
     @Binding var endLocation: GridPoint?
     @Binding var intermediatePoints: [GridPoint]
     @Binding var paths: [GridPoint]
-    @Binding var selectedPlace: Place?
+    @Binding var selectedPlace: IdentifiableItem?
     @Binding var selectedCluster: Cluster?
     
     @State private var pathProgress: CGFloat = 0.0
@@ -90,7 +90,7 @@ struct CampusMapView: View {
         intermediatePoints: Binding<[GridPoint]>,
         paths: Binding<[GridPoint]>,
         placeManager: PlaceManager,
-        selectedPlace: Binding<Place?>,
+        selectedPlace: Binding<IdentifiableItem?>,
         selectedCluster: Binding<Cluster?>,
         clusters: Binding<[Cluster]>
     ) {
@@ -348,7 +348,7 @@ struct CampusMapView: View {
     }
 
     private func PrintPlaces(in context: GraphicsContext) {
-        let places = placeManager.places
+        let places = placeManager.cafes
         for place in places.values {
             let point: GridPoint = place.iconCord
             let x = CGFloat(point.col) * cellSize + (cellSize / 2)
@@ -431,11 +431,11 @@ extension CampusMapView {
         if startLocation != nil {
             let tapThreshold: CGFloat = 22.0
             if clusters.isEmpty {
-                if let tappedPlace = placeManager.places.values.first(where: { place in
-                    let (x, y) = Normalize(point: place.iconCord)
+                if let tappedPlace = placeManager.getAllPlaces().values.first(where: { place in
+                    let (x, y) = Normalize(point: place.item.iconCord)
                     return hypot(x - location.x, y - location.y) < tapThreshold
                 }) {
-                    withAnimation { selectedPlace = tappedPlace }
+                    withAnimation { selectedPlace = tappedPlace}
                     return
                 }
             } else {
@@ -472,7 +472,7 @@ extension CampusMapView {
         intermediatePoints: .constant([]),
         paths: .constant([]),
         placeManager: PlaceManager(),
-        selectedPlace: .constant(nil as Place?),
+        selectedPlace: .constant(nil as IdentifiableItem?),
         selectedCluster: .constant(nil as Cluster?),
         clusters: .constant([])
     )

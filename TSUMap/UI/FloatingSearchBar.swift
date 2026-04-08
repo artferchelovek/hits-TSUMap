@@ -92,7 +92,7 @@ struct FloatingSearchBar: View {
                     
                     VStack {
                         Button {
-                            self.clusters = placeManager.clustering(numberClusters: 5, typeClustering: .byStraight, data: Array(placeManager.places.values))
+                            self.clusters = placeManager.clustering(numberClusters: 5, typeClustering: .byStraight, data: Array(placeManager.cafes.values))
                             withAnimation(.spring()) {
                                 isShowingList = false
                                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)

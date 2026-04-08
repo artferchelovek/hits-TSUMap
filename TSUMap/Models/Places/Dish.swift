@@ -20,5 +20,5 @@ struct Dish: Codable, Identifiable, Hashable {
 }
 
 enum DishType: String, Codable, Hashable {
-    case breakfast, lunch, dinner, drink, snack
+    case breakfast, lunch, dinner, drink, snack, desert
 }

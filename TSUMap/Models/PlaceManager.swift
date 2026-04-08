@@ -12,10 +12,6 @@ final class PlaceManager: ObservableObject {
         loadData()
     }
     
-    public func getPlaceById(_ result: String) -> Place? {
-        return places[result]
-    }
-    
     public func setGrid(grid: [[CellType]]) {
         self.aStarPaths = AStarCash(grid: grid)
     }
@@ -56,22 +52,19 @@ final class PlaceManager: ObservableObject {
             return []
         }
         
-        let typeForClustering: [PlaceType] = [.coffee, .product, .cafe]
-        let placesForClustering = data.filter({typeForClustering.contains($0.type)})
-        
-        return Clustering(data: placesForClustering, numberOfClusters: numberClusters, clusteringType: typeClustering, aStarPaths: paths).startClustering()
+        return Clustering(data: data, numberOfClusters: numberClusters, clusteringType: typeClustering, aStarPaths: paths).startClustering()
     }
     
-    public func getAllPlaces() -> [String: any MapItem] {
-        var allPlace: [String: any MapItem] = [:]
-        cafes.forEach({allPlace[$0.key] = $0.value})
-        sights.forEach({allPlace[$0.key] = $0.value})
-        coworkings.forEach({allPlace[$0.key] = $0.value})
+    public func getAllPlaces() -> [String: IdentifiableItem] {
+        var allPlace: [String: IdentifiableItem] = [:]
+        cafes.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
+        sights.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
+        coworkings.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
         
         return allPlace
     }
     
-    public func getById(_ id: String) -> (any MapItem)? {
+    public func getPlaceById(_ id: String) -> (IdentifiableItem)? {
         let allPlaces = getAllPlaces()
         return allPlaces[id]
     }

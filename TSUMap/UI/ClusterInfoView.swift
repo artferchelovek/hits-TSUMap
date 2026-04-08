@@ -11,7 +11,7 @@ struct ClusterInfoView: View {
     @Environment(\.dismiss) var dismiss
     
     let cluster: Cluster
-    @Binding var selectedPlace: Place?
+    @Binding var selectedPlace: IdentifiableItem?
     
     var body: some View {
         NavigationView {
@@ -21,7 +21,7 @@ struct ClusterInfoView: View {
                         PlaceRow(place: place)
                             .onTapGesture {
                                 dismiss()
-                                selectedPlace = place
+                                selectedPlace = IdentifiableItem(item: place)
                             }
                     }
                 }
@@ -33,7 +33,7 @@ struct ClusterInfoView: View {
 }
 
 struct PlaceRow: View {
-    let place: Place
+    let place: Cafe
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -45,29 +45,38 @@ struct PlaceRow: View {
 }
 
 #Preview {
-    let mockMedoid = Place(
-        id: "1",
+    let mockTime = Time(hour: 9, minute: 0)
+    let mockDishes: [Dish] = []
+
+    let mockMedoid = Cafe(
+        tempId: "001",
         iconCord: GridPoint(row: 10, col: 10),
         entryCord: GridPoint(row: 11, col: 11),
         name: "Кофейня Абрикос",
-        type: .coffee,
+        type: PlaceType.coffee,
         address: "пр. Ленина, 36",
-        rating: 4.8
+        rating: 4.8,
+        timeEntry: mockTime,
+        timeClose: mockTime,
+        dishes: mockDishes
     )
-    
-    let mockPlace2 = Place(
-        id: "2",
+
+    let mockPlace2 = Cafe(
+        tempId: "2",
         iconCord: GridPoint(row: 12, col: 12),
         entryCord: GridPoint(row: 13, col: 13),
         name: "Столовая ТГУ",
         type: .cafe,
-        address: "Научная библиотека",
-        rating: 4.2
+        address: "пр. Ленина, 36",
+        rating: 4.2,
+        timeEntry: mockTime,
+        timeClose: mockTime,
+        dishes: []
     )
     
     let sampleCluster = Cluster(medoid: mockMedoid, color: .blue)
     sampleCluster.placesInClust = [mockMedoid, mockPlace2]
     
     return ClusterInfoView(cluster: sampleCluster,
-                           selectedPlace: .constant(nil as Place?))
+                           selectedPlace: .constant(nil as IdentifiableItem?))
 }

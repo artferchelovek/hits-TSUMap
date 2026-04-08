@@ -99,9 +99,9 @@ struct EditVenueView: View {
                             Text("Не выбрано").tag("")
                         }
                         
-                        ForEach(placeManager.places.values.sorted(by: { $0.name < $1.name })) { place in
-                            let formattedValue = "\(place.name)@\(place.id)"
-                            Text(place.name)
+                        ForEach(placeManager.getAllPlaces().values.sorted(by: { $0.item.name < $1.item.name })) {place in
+                            let formattedValue = "\(place.item.name)@\(place.id)"
+                            Text(place.item.name)
                                 .tag(formattedValue)
                         }
                     }
