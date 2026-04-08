@@ -31,6 +31,7 @@ struct CampusMapView: View {
     
     @Binding var startLocation: GridPoint?
     @Binding var endLocation: GridPoint?
+    @Binding var intermediatePoints: [GridPoint]
     @Binding var paths: [GridPoint]
     @Binding var selectedPlace: Place?
     @Binding var selectedCluster: Cluster?
@@ -47,6 +48,7 @@ struct CampusMapView: View {
     init(
         startLocation: Binding<GridPoint?>,
         endLocation: Binding<GridPoint?>,
+        intermediatePoints: Binding<[GridPoint]>,
         paths: Binding<[GridPoint]>,
         placeManager: PlaceManager,
         selectedPlace: Binding<Place?>,
@@ -56,6 +58,7 @@ struct CampusMapView: View {
         
         self._startLocation = startLocation
         self._endLocation = endLocation
+        self._intermediatePoints = intermediatePoints
         self._paths = paths
         self.placeManager = placeManager
         self._selectedPlace = selectedPlace
@@ -80,6 +83,10 @@ struct CampusMapView: View {
             Canvas { context, _ in
                 
                 let progress = calculateProgress(at: timeline.date)
+                
+                for point in intermediatePoints {
+                    drawIntermediatePoint(point, context)
+                }
                 
                 if paths.count > 1 {
                     PrintPath(in: context, progress: progress)
@@ -134,11 +141,11 @@ struct CampusMapView: View {
                     .foregroundStyle(.white)
                     .tag(PlaceType.product)
                 Image(systemName: "mappin.and.ellipse")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                        .foregroundStyle(.red)
-                        .tag("endPin")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 30, height: 30)
+                    .foregroundStyle(.red)
+                    .tag("endPin")
             }
             .frame(width: mapWidth, height: CGFloat(rowsCount) * cellSize)
         }
@@ -182,13 +189,20 @@ struct CampusMapView: View {
             }
             .defaultScrollAnchor(.center)
             .onChange(of: endLocation) { calculatePath() }
+            .onChange(of: intermediatePoints) { calculatePath() }
         }
     }
     
     private func calculatePath() {
         guard let start = startLocation, let end = endLocation else { return }
         
-        let newPath = AStar(graph: grid, start: start, end: end)
+        let newPath = AStar(
+            graph: grid,
+            start: start,
+            points: intermediatePoints,
+            end: end
+        )
+        
         self.paths = newPath
         self.animationStartDate = Date()
     }
@@ -242,7 +256,7 @@ struct CampusMapView: View {
                 x: (current.x + next.x) / 2,
                 y: (current.y + next.y) / 2
             )
-
+            
             myPath.addQuadCurve(to: midPoint, control: current)
         }
         
@@ -283,12 +297,22 @@ extension CampusMapView {
         context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
     }
     
+    fileprivate func drawIntermediatePoint(_ point: GridPoint, _ context: GraphicsContext) {
+        let (x, y) = Normalize(point: point)
+        let size: CGFloat = 12
+        let rect = CGRect(x: x - size / 2, y: y - size / 2, width: size, height: size)
+        
+        // Маленький белый кружок с синей обводкой (стиль Apple Maps для промежуточных точек)
+        context.stroke(Path(ellipseIn: rect), with: .color(.blue), lineWidth: 2)
+        context.fill(Path(ellipseIn: rect.insetBy(dx: 2, dy: 2)), with: .color(.white))
+    }
+    
     fileprivate func drawEndPoint(_ end: GridPoint, _ context: GraphicsContext) {
         let (x, y) = Normalize(point: end)
         
         if let pin = context.resolveSymbol(id: "endPin") {
-                context.draw(pin, at: CGPoint(x: x, y: y), anchor: .bottom)
-            }
+            context.draw(pin, at: CGPoint(x: x, y: y), anchor: .bottom)
+        }
     }
     
     private func Tap(at location: CGPoint) {
@@ -326,12 +350,20 @@ extension CampusMapView {
         guard row >= 0 && row < rowsCount && col >= 0 && col < columnsCount else { return }
         if tsuCampusGrid[row][col] == 1 { return }
         
+        let tappedPoint = GridPoint(row: row, col: col)
+        
         if startLocation == nil {
             withAnimation(.spring()) {
-                startLocation = GridPoint(row: row, col: col)
+                startLocation = tappedPoint
             }
         } else if endLocation == nil {
-            endLocation = GridPoint(row: row, col: col)
+            endLocation = tappedPoint
+        } else {
+            if !intermediatePoints.contains(tappedPoint) {
+                withAnimation(.snappy) {
+                    intermediatePoints.append(tappedPoint)
+                }
+            }
         }
     }
 }
@@ -340,6 +372,7 @@ extension CampusMapView {
     CampusMapView(
         startLocation: .constant(nil as GridPoint?),
         endLocation: .constant(nil as GridPoint?),
+        intermediatePoints: .constant([]),
         paths: .constant([]),
         placeManager: PlaceManager(),
         selectedPlace: .constant(nil as Place?),

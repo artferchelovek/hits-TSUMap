@@ -11,6 +11,7 @@ struct ContentView: View {
     
     @State private var startLocation: GridPoint?
     @State private var endLocation: GridPoint?
+    @State private var intermediatePoints: [GridPoint] = []
     @State private var paths: [GridPoint] = []
     @State private var isShowingDecisionSheet = false
     @State private var selectedPlace: Place?
@@ -65,6 +66,7 @@ struct ContentView: View {
                     paths = []
                     startLocation = nil
                     endLocation = nil
+                    intermediatePoints = []
                     animatePlusMinus = true
                 }
             } label: {
@@ -84,6 +86,7 @@ struct ContentView: View {
             CampusMapView(
                 startLocation: $startLocation,
                 endLocation: $endLocation,
+                intermediatePoints: $intermediatePoints,
                 paths: $paths,
                 placeManager: placeManager,
                 selectedPlace: $selectedPlace,
@@ -92,7 +95,11 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
-                PlaceInfoView(newPlace: place, currentDetent: $sheetDetent, endLocation: $endLocation, clusters: $clusters)
+                PlaceInfoView(newPlace: place,
+                              currentDetent: $sheetDetent,
+                              endLocation: $endLocation,
+                              intermediatePoints: $intermediatePoints,
+                              clusters: $clusters)
                     .presentationDetents([.height(200), .large], selection: $sheetDetent)
                     .presentationDragIndicator(.visible)
             }
@@ -115,8 +122,16 @@ struct ContentView: View {
                     }.transition(.move(edge: .top).combined(with: .opacity))
                 } else {
                     HStack {
-                        FloatingSearchBar(placeManager: placeManager,
-                                          clusters: $clusters)
+                        if !intermediatePoints.isEmpty {
+                            RouteSettingsView(
+                                placeManager: placeManager,
+                                startLocation: $startLocation,
+                                endLocation: $endLocation,
+                                intermediatePoints: $intermediatePoints)
+                        } else {
+                            FloatingSearchBar(placeManager: placeManager,
+                                              clusters: $clusters)
+                        }
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
