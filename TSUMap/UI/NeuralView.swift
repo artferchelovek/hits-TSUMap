@@ -12,6 +12,7 @@ struct NeuralView: View {
     
     @State private var grid: [[Double]]
     @State private var predictedDigit: Int?
+    
     @ObservedObject private var manager = NeuralManager.shared
     
     init() {
