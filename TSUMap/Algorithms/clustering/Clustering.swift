@@ -67,7 +67,7 @@ class Clustering {
         var isMedoidChanged = true
         let colors: [Color] = [.red, .blue, .green, .orange, .purple, .pink, .yellow, .cyan, .mint, .indigo]
         var iter = 0
-        let maxIter = 300
+        let maxIter = 1000
         while isMedoidChanged && iter < maxIter {
             isMedoidChanged = false
             

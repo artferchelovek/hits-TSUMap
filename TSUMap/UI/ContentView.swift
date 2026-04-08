@@ -11,10 +11,14 @@ struct ContentView: View {
     
     @State private var startLocation: GridPoint?
     @State private var endLocation: GridPoint?
+    @State private var intermediatePoints: [GridPoint] = []
     @State private var paths: [GridPoint] = []
     @State private var isShowingDecisionSheet = false
     @State private var selectedPlace: Place?
+    @State private var selectedCluster: Cluster?
     @State private var sheetDetent: PresentationDetent = .height(180)
+    
+    @State private var clusters: [Cluster] = []
     
     @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
@@ -62,6 +66,7 @@ struct ContentView: View {
                     paths = []
                     startLocation = nil
                     endLocation = nil
+                    intermediatePoints = []
                     animatePlusMinus = true
                 }
             } label: {
@@ -81,14 +86,26 @@ struct ContentView: View {
             CampusMapView(
                 startLocation: $startLocation,
                 endLocation: $endLocation,
+                intermediatePoints: $intermediatePoints,
                 paths: $paths,
                 placeManager: placeManager,
-                selectedPlace: $selectedPlace
+                selectedPlace: $selectedPlace,
+                selectedCluster: $selectedCluster,
+                clusters: $clusters
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
-                PlaceInfoView(newPlace: place, currentDetent: $sheetDetent, endLocation: $endLocation)
+                PlaceInfoView(newPlace: place,
+                              currentDetent: $sheetDetent,
+                              endLocation: $endLocation,
+                              intermediatePoints: $intermediatePoints,
+                              clusters: $clusters)
                     .presentationDetents([.height(200), .large], selection: $sheetDetent)
+                    .presentationDragIndicator(.visible)
+            }
+            .sheet(item: $selectedCluster) { cluster in
+                ClusterInfoView(cluster: cluster, selectedPlace: $selectedPlace)
+                    .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }
             
@@ -105,7 +122,16 @@ struct ContentView: View {
                     }.transition(.move(edge: .top).combined(with: .opacity))
                 } else {
                     HStack {
-                        FloatingSearchBar()
+                        if !intermediatePoints.isEmpty {
+                            RouteSettingsView(
+                                placeManager: placeManager,
+                                startLocation: $startLocation,
+                                endLocation: $endLocation,
+                                intermediatePoints: $intermediatePoints)
+                        } else {
+                            FloatingSearchBar(placeManager: placeManager,
+                                              clusters: $clusters)
+                        }
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }

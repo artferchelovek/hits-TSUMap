@@ -13,6 +13,8 @@ struct PlaceInfoView: View {
     
     @Binding var currentDetent: PresentationDetent
     @Binding var endLocation: GridPoint?
+    @Binding var intermediatePoints: [GridPoint]
+    @Binding var clusters: [Cluster]
     
     fileprivate func PlaceInfo() -> some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -64,19 +66,35 @@ struct PlaceInfoView: View {
     
     fileprivate func PlaceFooter() -> some View {
         HStack {
-            Button {
-                endLocation = newPlace.entryCord
-                dismiss()
-            } label: {
-                HStack(alignment: .center) {
-                    Image(systemName: "figure.walk")
-                        .symbolEffect(.drawOn.individually, options: .nonRepeating, isActive: false)
-                    Text("Маршрут")
-                        .font(.title3)
+            if endLocation == nil {
+                Button {
+                    self.clusters = []
+                    endLocation = newPlace.entryCord
+                    dismiss()
+                } label: {
+                    HStack(alignment: .center) {
+                        Image(systemName: "figure.walk")
+                            .symbolEffect(.drawOn.individually, options: .nonRepeating, isActive: false)
+                        Text("Маршрут")
+                            .font(.title3)
+                    }
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
+                .buttonStyle(.glassProminent)
+            } else {
+                Button {
+                    intermediatePoints.append(newPlace.entryCord)
+                    dismiss()
+                } label: {
+                    HStack {
+                        Image(systemName: "plus.app")
+                        Text("Зайти по пути")
+                            .font(.title3)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glassProminent)
             }
-            .buttonStyle(.glassProminent)
         }
     }
     
@@ -115,5 +133,7 @@ struct PlaceInfoView: View {
     ),
                   currentDetent: .constant(.large),
                   endLocation: .constant(nil as GridPoint?),
+                  intermediatePoints: .constant([]),
+                  clusters: .constant([]),
     )
 }

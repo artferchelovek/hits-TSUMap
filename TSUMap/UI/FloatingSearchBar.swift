@@ -24,6 +24,10 @@ struct FloatingSearchBar: View {
     @State private var searchText: String = ""
     @State private var isShowingList = false
     
+    @ObservedObject var placeManager: PlaceManager
+    
+    @Binding var clusters: [Cluster]
+    
     var body: some View {
         VStack {
             HStack(spacing: 12) {
@@ -82,13 +86,17 @@ struct FloatingSearchBar: View {
                         .padding(.vertical, 5)
                         
                         if venue.id != tempVenues.last?.id {
-                                        Divider()
-                                    }
+                            Divider()
+                        }
                     }
                     
                     VStack {
                         Button {
-                            print("Кластеризация")
+                            self.clusters = placeManager.clustering(numberClusters: 5, typeClustering: .byStraight, data: Array(placeManager.places.values))
+                            withAnimation(.spring()) {
+                                isShowingList = false
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
                         } label: {
                             HStack {
                                 Image(systemName: "fork.knife")
@@ -111,5 +119,8 @@ struct FloatingSearchBar: View {
 }
 
 #Preview {
-    FloatingSearchBar()
+    FloatingSearchBar(
+        placeManager: PlaceManager(),
+        clusters: .constant([])
+    )
 }
