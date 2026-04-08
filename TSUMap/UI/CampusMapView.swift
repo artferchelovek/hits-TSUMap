@@ -53,7 +53,10 @@ struct CampusMapView: View {
     
     @ObservedObject var placeManager: PlaceManager
     @Binding var clusters: [Cluster]
-    
+
+    // Флаг для авто-масштабирования при построении маршрута
+    @State private var hasAutoFitRoute: Bool = false
+
     @State private var baseScale: CGFloat = 1.0
     @State private var baseOffset: CGSize = .zero
 
@@ -61,10 +64,14 @@ struct CampusMapView: View {
     @State private var activeZoom: CGFloat = 1.0
     @State private var pinchAnchor: CGPoint = .zero
 
+    // Размер видимой области (экрана)
+    @State private var viewSize: CGSize = .zero
+
     var currentScale: CGFloat {
         clamp(baseScale * activeZoom, min: 0.5, max: 4.0)
     }
 
+    // Ограниченный offset, чтобы не было белых полос
     var currentOffset: CGSize {
         var off = baseOffset
 
@@ -77,7 +84,8 @@ struct CampusMapView: View {
         off.width += activePan.width
         off.height += activePan.height
 
-        return off
+        // Ограничиваем offset, чтобы не было белых полос
+        return clampOffset(off)
     }
     
     init(
@@ -147,7 +155,7 @@ struct CampusMapView: View {
     
     var body: some View {
         VStack {
-            GeometryReader { _ in
+            GeometryReader { geo in
                 ZStack(alignment: .topLeading) {
                     Map(
                         initialPosition: .region(MKCoordinateRegion(
@@ -177,11 +185,18 @@ struct CampusMapView: View {
                         }
                 }
                 .frame(width: mapWidth, height: mapHeight, alignment: .topLeading)
-                
+
                 .scaleEffect(currentScale, anchor: .topLeading)
                 .offset(currentOffset)
-                
+
                 .gesture(mapGesture)
+                .onAppear {
+                    // Сохраняем размер видимой области
+                    viewSize = geo.size
+                }
+                .onChange(of: geo.size) { _, newValue in
+                    viewSize = newValue
+                }
             }
             .defaultScrollAnchor(.center)
             .task(id: endLocation) { calculatePath() }
@@ -215,17 +230,34 @@ struct CampusMapView: View {
 
     private func commitTransform() {
         let newScale = clamp(baseScale * activeZoom, min: 0.5, max: 4.0)
-        
+
         if newScale != baseScale && baseScale > 0 && pinchAnchor != .zero {
             let scaleFactor = newScale / baseScale
             baseOffset.width = pinchAnchor.x - (pinchAnchor.x - baseOffset.width) * scaleFactor
             baseOffset.height = pinchAnchor.y - (pinchAnchor.y - baseOffset.height) * scaleFactor
         }
         baseScale = newScale
-        
+
         baseOffset.width += activePan.width
         baseOffset.height += activePan.height
-        
+
+        // Ограничиваем offset, чтобы не было белых полос
+        let scale = currentScale
+        let scaledWidth = mapWidth * scale
+        let scaledHeight = mapHeight * scale
+
+        if scaledWidth > viewSize.width {
+            baseOffset.width = clamp(baseOffset.width, min: viewSize.width - scaledWidth, max: 0)
+        } else {
+            baseOffset.width = (viewSize.width - scaledWidth) / 2
+        }
+
+        if scaledHeight > viewSize.height {
+            baseOffset.height = clamp(baseOffset.height, min: viewSize.height - scaledHeight, max: 0)
+        } else {
+            baseOffset.height = (viewSize.height - scaledHeight) / 2
+        }
+
         activePan = .zero
         activeZoom = 1.0
         pinchAnchor = .zero
@@ -234,19 +266,107 @@ struct CampusMapView: View {
     private func clamp(_ value: CGFloat, min minValue: CGFloat, max maxValue: CGFloat) -> CGFloat {
         Swift.max(minValue, Swift.min(value, maxValue))
     }
+
+    // Ограничиваем offset, чтобы не было белых полос за пределами карты
+    private func clampOffset(_ offset: CGSize) -> CGSize {
+        let scale = currentScale
+        let scaledWidth = mapWidth * scale
+        let scaledHeight = mapHeight * scale
+
+        var clampedWidth: CGFloat
+        var clampedHeight: CGFloat
+
+        if scaledWidth > viewSize.width {
+            // Карта больше экрана — ограничиваем в пределах видимости
+            clampedWidth = clamp(offset.width, min: viewSize.width - scaledWidth, max: 0)
+        } else {
+            // Карта меньше экрана — центрируем
+            clampedWidth = (viewSize.width - scaledWidth) / 2
+        }
+
+        if scaledHeight > viewSize.height {
+            clampedHeight = clamp(offset.height, min: viewSize.height - scaledHeight, max: 0)
+        } else {
+            clampedHeight = (viewSize.height - scaledHeight) / 2
+        }
+
+        return CGSize(width: clampedWidth, height: clampedHeight)
+    }
     
     private func calculatePath() {
-        guard let start = startLocation, let end = endLocation else { return }
-        
+        guard let start = startLocation, let end = endLocation else {
+            // Если маршрут сброшен, разрешаем авто-масштабирование снова
+            if startLocation == nil {
+                hasAutoFitRoute = false
+            }
+            return
+        }
+
         self.pathProgress = 0.0
         let newPath = AStar(graph: grid, start: start, points: intermediatePoints, end: end)
         self.paths = newPath
+
+        // Авто-масштабирование для показа всего маршрута
+        if !hasAutoFitRoute {
+            autoFitToPath(newPath)
+        }
 
         withAnimation(.easeInOut(duration: 1.5)) {
             self.pathProgress = 1.0
         }
     }
-    
+
+    // MARK: - Авто-масштабирование маршрута
+    private func autoFitToPath(_ path: [GridPoint]) {
+        guard !path.isEmpty else { return }
+
+        // Вычисляем bounding box маршрута
+        var minRow = path[0].row
+        var maxRow = path[0].row
+        var minCol = path[0].col
+        var maxCol = path[0].col
+
+        for point in path {
+            minRow = min(minRow, point.row)
+            maxRow = max(maxRow, point.row)
+            minCol = min(minCol, point.col)
+            maxCol = max(maxCol, point.col)
+        }
+
+        // Добавляем отступы (25%)
+        let padding: CGFloat = 0.25
+        let rowRange = CGFloat(maxRow - minRow) + 1
+        let colRange = CGFloat(maxCol - minCol) + 1
+        let paddedRowRange = rowRange * (1 + padding) * cellSize
+        let paddedColRange = colRange * (1 + padding) * cellSize
+
+        // Вычисляем масштаб, чтобы маршрут влез на экран
+        let screenWidth = viewSize.width > 0 ? viewSize.width : 400
+        let screenHeight = viewSize.height > 0 ? viewSize.height : 700
+        let scaleByWidth = screenWidth / paddedColRange
+        let scaleByHeight = screenHeight / paddedRowRange
+        let targetScale = min(scaleByWidth, scaleByHeight)
+
+        // Ограничиваем масштаб
+        let clampedScale = clamp(targetScale, min: 0.5, max: 3.0)
+
+        // Вычисляем центр маршрута в координатах карты
+        let centerCol = CGFloat(minCol + maxCol + 1) / 2 * cellSize
+        let centerRow = CGFloat(minRow + maxRow + 1) / 2 * cellSize
+
+        // Вычисляем offset для центрирования маршрута на экране
+        // При scaleEffect от .topLeading, центр экрана должен совпадать с центром маршрута
+        let offsetX = screenWidth / 2 - centerCol * clampedScale
+        let offsetY = screenHeight / 2 - centerRow * clampedScale
+
+        // Анимируем переход
+        withAnimation(.easeInOut(duration: 0.6)) {
+            baseScale = clampedScale
+            baseOffset = CGSize(width: offsetX, height: offsetY)
+            hasAutoFitRoute = true
+        }
+    }
+
     private func PrintPlaces(in context: GraphicsContext) {
         let places = placeManager.places
         for place in places.values {
