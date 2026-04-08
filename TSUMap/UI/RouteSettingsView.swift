@@ -83,10 +83,10 @@ struct RouteSettingsView: View {
                                     .font(.title3)
                                     .foregroundColor(.primary.opacity(0.7))
                             }
-                            .buttonStyle(.plain) // ВАЖНО: чтобы кнопка четко ловила нажатие
+                            .buttonStyle(.plain)
                         }
-                        .padding(.vertical, 4) // Добавил чуть отступа для удобства тапа
-                        .contentShape(Rectangle()) // ВАЖНО: делает пустое пространство кликабельным
+                        .padding(.vertical, 4)
+                        .contentShape(Rectangle())
                         .onDrag {
                             self.draggedPoint = point
                             return NSItemProvider(object: "\(point.row)-\(point.col)" as NSString)
@@ -120,7 +120,6 @@ struct RouteSettingsView: View {
     }
 }
 
-// ДЕЛЕГАТ ПЕРЕМЕЩЕНИЯ (Остался таким же)
 struct ReorderDropDelegate: DropDelegate {
     let item: GridPoint
     @Binding var list: [GridPoint]
