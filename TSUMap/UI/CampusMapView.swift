@@ -349,6 +349,7 @@ struct CampusMapView: View {
 
     private func PrintPlaces(in context: GraphicsContext) {
         let places = placeManager.cafes
+        
         for place in places.values {
             let point: GridPoint = place.iconCord
             let x = CGFloat(point.col) * cellSize + (cellSize / 2)

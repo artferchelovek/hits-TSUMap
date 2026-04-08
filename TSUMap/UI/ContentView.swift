@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+
 struct IdentifiableItem: Identifiable {
     var item: any MapItem
     var id: String {item.id}

@@ -45,20 +45,15 @@ struct PlaceRow: View {
 }
 
 #Preview {
-    let mockTime = Time(hour: 9, minute: 0)
-    let mockDishes: [Dish] = []
-
     let mockMedoid = Cafe(
         tempId: "001",
         iconCord: GridPoint(row: 10, col: 10),
         entryCord: GridPoint(row: 11, col: 11),
-        name: "Кофейня Абрикос",
+        name: "Абрикос",
         type: PlaceType.coffee,
         address: "пр. Ленина, 36",
         rating: 4.8,
-        timeEntry: mockTime,
-        timeClose: mockTime,
-        dishes: mockDishes
+        dishes: []
     )
 
     let mockPlace2 = Cafe(
@@ -69,14 +64,12 @@ struct PlaceRow: View {
         type: .cafe,
         address: "пр. Ленина, 36",
         rating: 4.2,
-        timeEntry: mockTime,
-        timeClose: mockTime,
         dishes: []
     )
-    
+
     let sampleCluster = Cluster(medoid: mockMedoid, color: .blue)
     sampleCluster.placesInClust = [mockMedoid, mockPlace2]
-    
+
     return ClusterInfoView(cluster: sampleCluster,
                            selectedPlace: .constant(nil as IdentifiableItem?))
 }

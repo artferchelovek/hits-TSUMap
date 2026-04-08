@@ -8,8 +8,18 @@ import Foundation
 
 struct Cafe: MapItem, Hashable, Codable, Identifiable {
     private let tempId: String
+    private let tempWorkSchedule: [String: Time]
     var id: String {
          "\(type.rawValue)_\(tempId)"
+    }
+    var workSchedule: [WeekDay: Time] {
+        var dict: [WeekDay: Time] = [:]
+        for (day, time) in tempWorkSchedule {
+            if let currentDay = WeekDay(rawValue: day) {
+                dict[currentDay] = time
+            }
+        }
+        return dict
     }
     var iconCord: GridPoint
     var entryCord: GridPoint
@@ -17,11 +27,9 @@ struct Cafe: MapItem, Hashable, Codable, Identifiable {
     var type: PlaceType
     var address: String
     var rating: Double
-    var timeEntry: Time
-    var timeClose: Time
     var dishes: [Dish]
     
-    init(tempId: String, iconCord: GridPoint, entryCord: GridPoint, name: String, type: PlaceType, address: String, rating: Double, timeEntry: Time, timeClose: Time, dishes: [Dish]) {
+    init(tempId: String, iconCord: GridPoint, entryCord: GridPoint, name: String, type: PlaceType, address: String, rating: Double, dishes: [Dish]) {
             self.tempId = tempId
             self.iconCord = iconCord
             self.entryCord = entryCord
@@ -29,13 +37,13 @@ struct Cafe: MapItem, Hashable, Codable, Identifiable {
             self.type = type
             self.address = address
             self.rating = rating
-            self.timeEntry = timeEntry
-            self.timeClose = timeClose
             self.dishes = dishes
+            self.tempWorkSchedule = [:]
         }
     
     enum CodingKeys: String, CodingKey {
             case tempId = "id"
-            case name, type, iconCord, entryCord, address, rating, timeEntry, timeClose, dishes
+            case tempWorkSchedule = "workSchedule"
+            case name, type, iconCord, entryCord, address, rating, dishes
         }
 }

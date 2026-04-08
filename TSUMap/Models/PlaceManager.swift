@@ -35,8 +35,8 @@ final class PlaceManager: ObservableObject {
             var dictCoworkings: [String: Coworking] = [:]
             var dictSights: [String: Sight] = [:]
             
-            try JSONDecoder().decode([Cafe].self, from: dataCafes).forEach({dictCafes[$0.id] = $0})
             try JSONDecoder().decode([Coworking].self, from: dataCoworkings).forEach({dictCoworkings[$0.id] = $0})
+            try JSONDecoder().decode([Cafe].self, from: dataCafes).forEach({dictCafes[$0.id] = $0})
             try JSONDecoder().decode([Sight].self, from: dataSights).forEach({dictSights[$0.id] = $0})
             
             self.coworkings = dictCoworkings

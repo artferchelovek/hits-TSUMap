@@ -7,6 +7,48 @@
 import Foundation
 
 struct Time: Codable, Hashable {
-    var hour: Int
-    var minute: Int
+    private var _timeEntry: String?
+    private var _timeClose: String?
+    
+    var isDayOff: Bool
+    
+    var timeEntry: DateComponents? {
+        guard let parts = _timeEntry?.split(separator: ":").compactMap({ Int($0) }), parts.count >= 2 else {
+            return nil
+        }
+        return DateComponents(hour: parts[0], minute: parts[1])
+    }
+    
+    var timeClose: DateComponents? {
+        guard let parts = _timeClose?.split(separator: ":").compactMap({ Int($0) }), parts.count >= 2 else {
+            return nil
+        }
+        return DateComponents(hour: parts[0], minute: parts[1])
+    }
+
+    var isClosed: Bool {
+        return isDayOff || _timeEntry == nil || _timeClose == nil
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case _timeEntry = "timeEntry"
+        case _timeClose = "timeClose"
+        case isDayOff = "isDayOff"
+    }
+    
+    init(entry: String?, close: String?, isDayOff: Bool = false) {
+        self._timeEntry = entry
+        self._timeClose = close
+        self.isDayOff = isDayOff
+    }
+}
+
+enum WeekDay: String, Codable {
+    case Sunday
+    case Monday
+    case Tuesday
+    case Wednesday
+    case Thursday
+    case Friday
+    case Saturday
 }
