@@ -8,33 +8,35 @@ import SwiftUI
 
 struct PlaceInfoView: View {
     @Environment(\.dismiss) var dismiss
-    
+
+    @State private var isShowingNeuralSheet = false
+
     let newPlace: (any MapItem)
-    
+
     @Binding var currentDetent: PresentationDetent
     @Binding var endLocation: GridPoint?
     @Binding var intermediatePoints: [GridPoint]
     @Binding var clusters: [Cluster]
-    
+
     fileprivate func PlaceInfo() -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(newPlace.name)
                 .font(.title)
                 .bold()
-            
+
             Text(newPlace.address)
                 .foregroundColor(.secondary)
-            
+
             HStack {
                 Image(systemName: "star.fill")
                     .foregroundStyle(.yellow)
                     .symbolEffect(.appear.down.byLayer, options: .nonRepeating, isActive: false)
-                
+
                 Text("\(newPlace.rating, specifier: "%.1f")")
                     .fontWeight(.medium)
-                
+
                 Button {
-                    print("добавить оценку")
+                    isShowingNeuralSheet.toggle()
                 } label: {
                     Text("Добавить оценку")
                 }
@@ -118,6 +120,13 @@ struct PlaceInfoView: View {
         }
         .padding(.horizontal)
         .padding(.vertical)
+        .sheet(isPresented: $isShowingNeuralSheet) {
+            NeuralView(
+                place: .constant(newPlace),
+                isPresented: $isShowingNeuralSheet
+            )
+            .presentationDragIndicator(.visible)
+        }
     }
 }
 
