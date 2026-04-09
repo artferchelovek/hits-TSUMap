@@ -122,20 +122,19 @@ struct PlaceInfoView: View {
 }
 
 #Preview {
-    /*
     PlaceInfoView(newPlace: Cafe(
-        id: "001",
-        iconCord: .init(row: 10, col: 10),
-        entryCord: .init(row: 15, col: 21),
+        tempId: "001",
+        iconCord: GridPoint(row: 10, col: 10),
+        entryCord: GridPoint(row: 11, col: 11),
         name: "Абрикос",
-        type: .cafe,
-        address: "Московский тракт, 17",
-        timeEntry:
-        rating: 9.0
+        type: PlaceType.coffee,
+        address: "пр. Ленина, 36",
+        rating: 4.8,
+        dishes: []
     ),
                   currentDetent: .constant(.large),
                   endLocation: .constant(nil as GridPoint?),
                   intermediatePoints: .constant([]),
                   clusters: .constant([]),
-    )*/
+    )
 }
