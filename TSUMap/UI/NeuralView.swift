@@ -25,10 +25,10 @@ struct NeuralView: View {
     
     @ObservedObject private var manager = NeuralManager.shared
     
-    @Binding var place: Place
+    @Binding var place: any MapItem
     @Binding var isPresented: Bool
-    
-    init(place: Binding<Place>, isPresented: Binding<Bool>) {
+
+    init(place: Binding<any MapItem>, isPresented: Binding<Bool>) {
         _grid = State(initialValue: Array(repeating: Array(repeating: 0.0, count: gridSize), count: gridSize))
         self._place = place
         self._isPresented = isPresented
@@ -267,14 +267,15 @@ extension NeuralView {
 
 #Preview {
     NeuralView(
-        place: .constant(Place(
-            id: "001",
+        place: .constant(Cafe(
+            tempId: "001",
             iconCord: .init(row: 10, col: 10),
             entryCord: .init(row: 15, col: 21),
             name: "Абрикос",
             type: .cafe,
             address: "Московский тракт, 17",
-            rating: 9.0
+            rating: 9.0,
+            dishes: []
         )),
         isPresented: .constant(true)
     )
