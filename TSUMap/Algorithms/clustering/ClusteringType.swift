@@ -4,7 +4,7 @@ enum ClusteringType: String {
     case aStar = "AStar"
     case byStraight = "EuclideanDistance"
 
-    func metric(_ firstPoint: Place, _ secondPoint: Place, _ cashe: AStarCash) -> Double {
+    func metric(_ firstPoint: Cafe, _ secondPoint: Cafe, _ cashe: AStarCash) -> Double {
         switch self {
         case .aStar:
             let dist = cashe.getDistance(firstPlace: firstPoint, secondPlace: secondPoint)

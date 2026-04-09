@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+struct IdentifiableItem: Identifiable {
+    var item: any MapItem
+    var id: String {item.id}
+}
 struct ContentView: View {
     
     @State private var startLocation: GridPoint?
@@ -14,7 +18,7 @@ struct ContentView: View {
     @State private var intermediatePoints: [GridPoint] = []
     @State private var paths: [GridPoint] = []
     @State private var isShowingDecisionSheet = false
-    @State private var selectedPlace: Place?
+    @State private var selectedPlace: IdentifiableItem?
     @State private var selectedCluster: Cluster?
     @State private var sheetDetent: PresentationDetent = .height(180)
     
@@ -95,7 +99,7 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
-                PlaceInfoView(newPlace: place,
+                PlaceInfoView(newPlace: place.item,
                               currentDetent: $sheetDetent,
                               endLocation: $endLocation,
                               intermediatePoints: $intermediatePoints,

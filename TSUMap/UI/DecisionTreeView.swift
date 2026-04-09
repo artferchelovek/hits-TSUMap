@@ -30,7 +30,7 @@ struct DecisionTreeView: View {
     @ObservedObject var manager: VenueManager
     @ObservedObject var placeManager: PlaceManager
     
-    @State private var selectedPlace: Place?
+    @State private var selectedPlace: IdentifiableItem?
     
     let treeNode: TreeNode?
     
@@ -143,7 +143,7 @@ struct DecisionTreeView: View {
     
     private var finishButton: some View {
         Button {
-            endLocation = selectedPlace?.entryCord
+            endLocation = selectedPlace?.item.entryCord
             dismiss()
         } label: {
             Text("Показать маршрут")

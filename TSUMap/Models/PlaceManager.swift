@@ -3,15 +3,13 @@ import SwiftUI
 import Combine
 @MainActor
 final class PlaceManager: ObservableObject {
-    @Published var places: [String: Place] = [:]
+    @Published var cafes: [String: Cafe] = [:]
+    @Published var coworkings: [String: Coworking] = [:]
+    @Published var sights: [String: Sight] = [:]
     private var aStarPaths: AStarCash?
     
     init() {
         loadData()
-    }
-    
-    public func getPlaceById(_ result: String) -> Place? {
-        return places[result]
     }
     
     public func setGrid(grid: [[CellType]]) {
@@ -19,29 +17,55 @@ final class PlaceManager: ObservableObject {
     }
     
     private func loadData() {
-        guard let jsonURL = Bundle.main.url(forResource: "dataPlace", withExtension: "json") else {
+        guard let jsonCafesURL = Bundle.main.url(forResource: "cafesData", withExtension: "json") else {
+            return
+        }
+        guard let jsonCoworkingsURL = Bundle.main.url(forResource: "coworkingsData", withExtension: "json") else {
+            return
+        }
+        guard let jsonSightsURL = Bundle.main.url(forResource: "sightData", withExtension: "json") else {
             return
         }
         do {
-            let data = try Data(contentsOf: jsonURL)
+            let dataCafes = try Data(contentsOf: jsonCafesURL)
+            let dataCoworkings = try Data(contentsOf: jsonCoworkingsURL)
+            let dataSights = try Data(contentsOf: jsonSightsURL)
             
-            let decoderPlaces = try JSONDecoder().decode([Place].self, from: data)
-            var dict: [String: Place] = [:]
-            for place in decoderPlaces {
-                dict[place.id] = place
-            }
+            var dictCafes: [String: Cafe] = [:]
+            var dictCoworkings: [String: Coworking] = [:]
+            var dictSights: [String: Sight] = [:]
             
-            self.places = dict
+            try JSONDecoder().decode([Coworking].self, from: dataCoworkings).forEach({dictCoworkings[$0.id] = $0})
+            try JSONDecoder().decode([Cafe].self, from: dataCafes).forEach({dictCafes[$0.id] = $0})
+            try JSONDecoder().decode([Sight].self, from: dataSights).forEach({dictSights[$0.id] = $0})
+            
+            self.coworkings = dictCoworkings
+            self.sights = dictSights
+            self.cafes = dictCafes
         } catch {
             print(error)
         }
     }
     
-    public func clustering(numberClusters: Int, typeClustering: ClusteringType, data: [Place]) -> [Cluster] {
+    public func clustering(numberClusters: Int, typeClustering: ClusteringType, data: [Cafe]) -> [Cluster] {
         guard let paths = aStarPaths else {
             return []
         }
         
         return Clustering(data: data, numberOfClusters: numberClusters, clusteringType: typeClustering, aStarPaths: paths).startClustering()
+    }
+    
+    public func getAllPlaces() -> [String: IdentifiableItem] {
+        var allPlace: [String: IdentifiableItem] = [:]
+        cafes.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
+        sights.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
+        coworkings.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
+        
+        return allPlace
+    }
+    
+    public func getPlaceById(_ id: String) -> (IdentifiableItem)? {
+        let allPlaces = getAllPlaces()
+        return allPlaces[id]
     }
 }

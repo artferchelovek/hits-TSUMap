@@ -3,23 +3,23 @@ import SwiftUI
 
 class Clustering {
     private var clusteringType: ClusteringType
-    private var dataPlace: [Place]
+    private var dataPlace: [Cafe]
     private var numberOfClusters: Int
     private var aStarPaths: AStarCash
     
-    init (data: [Place], numberOfClusters: Int, clusteringType: ClusteringType, aStarPaths: AStarCash) {
+    init (data: [Cafe], numberOfClusters: Int, clusteringType: ClusteringType, aStarPaths: AStarCash) {
         self.clusteringType = clusteringType
         self.dataPlace = data
         self.numberOfClusters = numberOfClusters
         self.aStarPaths = aStarPaths
     }
     
-    private func TotalSumDist(cluster: Cluster, candidateMedoid: Place) -> Double {
+    private func TotalSumDist(cluster: Cluster, candidateMedoid: Cafe) -> Double {
         return cluster.placesInClust.reduce(0) {sum, place in sum + clusteringType.metric(candidateMedoid, place, aStarPaths)}
     }
     
-    private func findCenters() -> [Place] {
-        var centers: [Place] = []
+    private func findCenters() -> [Cafe] {
+        var centers: [Cafe] = []
         
         guard let firstCenter = dataPlace.randomElement() else {
             return []
@@ -27,7 +27,7 @@ class Clustering {
         centers.append(firstCenter)
         
         while centers.count < numberOfClusters {
-            var dist: [(place: Place, dist: Double)] = []
+            var dist: [(place: Cafe, dist: Double)] = []
             var sumDist: Double = 0
             
             for place in dataPlace {
@@ -89,7 +89,7 @@ class Clustering {
                 minClust.placesInClust.append(place)
             }
             
-            var newCentroids: [Place] = []
+            var newCentroids: [Cafe] = []
             for cluster in clusters {
                 var currentMedoid = cluster.medoid
                 var currentCost = TotalSumDist(cluster: cluster, candidateMedoid: currentMedoid)

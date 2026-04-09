@@ -12,8 +12,8 @@ struct RouteSettingsView: View {
     @Binding var intermediatePoints: [GridPoint]
     
     private func getPlaceName(for point: GridPoint) -> String {
-        if let place = placeManager.places.values.first(where: { $0.entryCord == point }) {
-            return place.name
+        if let place = placeManager.getAllPlaces().values.first(where: { $0.item.entryCord == point }) {
+            return place.item.name
         }
         return "\(point.col), \(point.row)"
     }
