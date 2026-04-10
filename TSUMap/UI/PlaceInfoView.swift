@@ -4,6 +4,7 @@
 //
 //  Created by Artem on 04.04.2026.
 //
+
 import SwiftUI
 
 struct PlaceInfoView: View {
@@ -45,78 +46,46 @@ struct PlaceInfoView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-    
-    fileprivate func ExpandedContent() -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Divider()
-            Text("О заведении")
+
+    @ViewBuilder
+    private func menuSection(for cafe: Cafe) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Меню")
                 .font(.headline)
-            Text("тут будет дикий флекс с меню")
-                .foregroundColor(.secondary)
-            
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.gray.opacity(0.2))
-                .frame(height: 150)
-                .overlay(Text("Здесь будет фото булочки из ярче").foregroundColor(.secondary))
-            
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.gray.opacity(0.2))
-                .frame(height: 150)
-                .overlay(Text("а здесь фото шаурмы из безумно").foregroundColor(.secondary))
-        }
-        .padding(.top)
-    }
-    
-    fileprivate func PlaceFooter() -> some View {
-        HStack {
-            if endLocation == nil {
-                Button {
-                    self.clusters = []
-                    endLocation = newPlace.entryCord
-                    dismiss()
-                } label: {
-                    HStack(alignment: .center) {
-                        Image(systemName: "figure.walk")
-                            .symbolEffect(.drawOn.individually, options: .nonRepeating, isActive: false)
-                        Text("Маршрут")
-                            .font(.title3)
-                    }
-                    .frame(maxWidth: .infinity)
+
+            VStack(spacing: 8) {
+                ForEach(cafe.dishes) { dish in
+                    DishRow(dish: dish)
                 }
-                .buttonStyle(.glassProminent)
-            } else {
-                Button {
-                    intermediatePoints.append(newPlace.entryCord)
-                    dismiss()
-                } label: {
-                    HStack {
-                        Image(systemName: "plus.app")
-                        Text("Зайти по пути")
-                            .font(.title3)
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.glassProminent)
             }
         }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             PlaceInfo()
                 .padding(.top, 20)
             
+            Divider()
+
             if currentDetent == .large {
                 ScrollView {
-                    ExpandedContent()
+                    VStack(alignment: .leading, spacing: 20) {
+                        if let cafe = newPlace as? Cafe, !cafe.dishes.isEmpty {
+                            menuSection(for: cafe)
+                        }
+
+                        Spacer(minLength: 40)
+                    }
+                    .padding(.top)
                 }
                 .transition(.opacity)
-                
-                Spacer()
             } else {
                 Color.clear.frame(height: 20)
             }
-            
+
+            Spacer()
+
             PlaceFooter()
         }
         .padding(.horizontal)
@@ -132,16 +101,101 @@ struct PlaceInfoView: View {
     }
 }
 
+struct DishRow: View {
+    let dish: Dish
+
+    private var dishIcon: String {
+        switch dish.type {
+        case .breakfast: "sun.max.fill"
+        case .lunch: "fork.knife"
+        case .dinner: "fork.knife"
+        case .drink: "cup.and.heat.waves.fill"
+        case .snack: "bag.fill"
+        case .desert: "star.fill"
+        }
+    }
+
+    private var dishIconColor: Color {
+        switch dish.type {
+        case .breakfast: .orange
+        case .lunch, .dinner: .green
+        case .drink: .brown
+        case .snack: .yellow
+        case .desert: .pink
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: dishIcon)
+                .font(.title2)
+                .foregroundStyle(dishIconColor)
+                .frame(width: 32, height: 32)
+                .background(dishIconColor.opacity(0.12), in: Circle())
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(dish.name)
+                    .font(.body)
+                Text("\(dish.price, specifier: "%.0f") ₽")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+        }
+        .padding(12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+extension PlaceInfoView {
+    fileprivate func PlaceFooter() -> some View {
+        HStack(spacing: 12) {
+            if endLocation == nil {
+                Button {
+                    self.clusters = []
+                    endLocation = newPlace.entryCord
+                    dismiss()
+                } label: {
+                    HStack {
+                        Image(systemName: "figure.walk")
+                        Text("Маршрут")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glassProminent)
+            } else {
+                Button {
+                    intermediatePoints.append(newPlace.entryCord)
+                    dismiss()
+                } label: {
+                    HStack {
+                        Image(systemName: "plus.app")
+                        Text("Зайти по пути")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glassProminent)
+            }
+        }
+    }
+}
+
 #Preview {
     PlaceInfoView(newPlace: Cafe(
         tempId: "001",
         iconCord: GridPoint(row: 10, col: 10),
         entryCord: GridPoint(row: 11, col: 11),
         name: "Абрикос",
-        type: PlaceType.coffee,
+        type: PlaceType.cafe,
         address: "пр. Ленина, 36",
         rating: 4.8,
-        dishes: []
+        dishes: [
+            Dish(name: "Флэт уайт", price: 199, type: .drink),
+            Dish(name: "Круассан с миндалём", price: 179, type: .breakfast),
+            Dish(name: "Боул с лососем", price: 420, type: .lunch),
+            Dish(name: "Тирамису", price: 280, type: .desert)
+        ]
     ),
                   placeManager: PlaceManager(),
                   currentDetent: .constant(.large),
