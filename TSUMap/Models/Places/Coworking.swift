@@ -21,10 +21,11 @@ struct Coworking: MapItem, Codable, Identifiable {
     var type: PlaceType
     var address: String
     var rating: Double
-    
+    var ratingCount: Int = 0
+
     var capacity: Int
     var comfort: Int
-    
+
     enum CodingKeys: String, CodingKey {
         case tempId = "id"
         case tempWorkSchedule = "workSchedule"

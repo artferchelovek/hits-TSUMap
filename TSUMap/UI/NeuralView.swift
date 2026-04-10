@@ -15,21 +15,23 @@ enum RatingStage {
 struct NeuralView: View {
     let gridSize = 50
     let cellSize = 7.0
-    
+
     @State private var grid: [[Double]]
     @State private var predictedDigit: Int?
     @State private var stage: RatingStage = .drawing
     @State private var oldRating: Double = 0
     @State private var newRating: Double = 0
     @State private var showArrow = false
-    
+
     @ObservedObject private var manager = NeuralManager.shared
-    
+    @ObservedObject var placeManager: PlaceManager
+
     @Binding var place: any MapItem
     @Binding var isPresented: Bool
 
-    init(place: Binding<any MapItem>, isPresented: Binding<Bool>) {
+    init(place: Binding<any MapItem>, placeManager: PlaceManager, isPresented: Binding<Bool>) {
         _grid = State(initialValue: Array(repeating: Array(repeating: 0.0, count: gridSize), count: gridSize))
+        self.placeManager = placeManager
         self._place = place
         self._isPresented = isPresented
     }
@@ -75,12 +77,36 @@ struct NeuralView: View {
                 .background(.ultraThinMaterial, in: Capsule())
             }
             
-            Label("1 оценка", systemImage: "person.fill")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            HStack(spacing: 4) {
+                Image(systemName: "person.fill")
+                    .font(.caption)
+                Text(ratingCountText)
+                    .font(.caption)
+            }
+            .foregroundColor(.secondary)
         }
         .padding()
         .padding(.horizontal)
+    }
+
+    private var ratingCountText: String {
+        let count = showArrow ? place.ratingCount + 1 : place.ratingCount
+        return pluralizeRatingCount(count)
+    }
+
+    private func pluralizeRatingCount(_ count: Int) -> String {
+        let mod10 = count % 10
+        let mod100 = count % 100
+
+        if mod100 >= 11 && mod100 <= 19 {
+            return "\(count) оценок"
+        } else if mod10 == 1 {
+            return "\(count) оценка"
+        } else if mod10 >= 2 && mod10 <= 4 {
+            return "\(count) оценки"
+        } else {
+            return "\(count) оценок"
+        }
     }
     
     private var drawingCanvas: some View {
@@ -183,6 +209,9 @@ struct NeuralView: View {
                 .buttonStyle(.glass)
                 
                 Button {
+                    if let digit = predictedDigit {
+                        placeManager.updateRating(for: place.id, newRating: Double(digit))
+                    }
                     withAnimation {
                         stage = .confirmed
                     }
@@ -277,6 +306,7 @@ extension NeuralView {
             rating: 9.0,
             dishes: []
         )),
+        placeManager: PlaceManager(),
         isPresented: .constant(true)
     )
 }

@@ -13,4 +13,5 @@ protocol MapItem: Identifiable {
     var type: PlaceType {get}
     var address: String {get}
     var rating: Double {get set}
+    var ratingCount: Int {get set}
 }

@@ -100,6 +100,7 @@ struct ContentView: View {
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
                 PlaceInfoView(newPlace: place.item,
+                              placeManager: placeManager,
                               currentDetent: $sheetDetent,
                               endLocation: $endLocation,
                               intermediatePoints: $intermediatePoints,
