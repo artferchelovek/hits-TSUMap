@@ -16,7 +16,8 @@ struct Sight: MapItem, Codable, Identifiable {
     var type: PlaceType
     var address: String
     var rating: Double
-    
+    var ratingCount: Int = 0
+
     enum CodingKeys: String, CodingKey {
         case tempId = "id"
         case iconCord, entryCord, name, type, address, rating

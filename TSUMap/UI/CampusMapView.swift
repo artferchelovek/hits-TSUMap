@@ -130,8 +130,6 @@ struct CampusMapView: View {
                         dotContext.stroke(mainPath, with: .color(.white), lineWidth: 3)
                     }
                 }
-            } else {
-                PrintPlaces(in: context)
             }
             
             if let start = startLocation { drawStartPoint(start, context) }
@@ -144,6 +142,8 @@ struct CampusMapView: View {
             Image(systemName: "cup.and.saucer.fill").resizable().scaledToFit().frame(width: 25, height: 25).foregroundStyle(.white).tag(PlaceType.coffee)
             Image(systemName: "fork.knife").resizable().scaledToFit().frame(width: 25, height: 25).foregroundStyle(.white).tag(PlaceType.cafe)
             Image(systemName: "basket").resizable().scaledToFit().frame(width: 25, height: 25).foregroundStyle(.white).tag(PlaceType.product)
+            Image(systemName: "star.fill").resizable().scaledToFit().frame(width: 25, height: 25).foregroundStyle(.white).tag(PlaceType.sight)
+            Image(systemName: "person.3.fill").resizable().scaledToFit().frame(width: 25, height: 25).foregroundStyle(.white).tag(PlaceType.coworkingSpace)
             Image(systemName: "mappin.and.ellipse").resizable().scaledToFit().frame(width: 30, height: 30).foregroundStyle(.red).tag("endPin")
         }
         .frame(width: mapWidth, height: mapHeight)
@@ -165,13 +165,17 @@ struct CampusMapView: View {
                     .frame(width: mapWidth, height: mapHeight)
 
                     staticCanvas()
-                    
+
                     if paths.count > 1 {
                         AnimatedPathShape(path: buildRoutePath(), progress: pathProgress)
                             .stroke(
                                 LinearGradient(colors: [Color.blue, Color.blue.opacity(0.8)], startPoint: .top, endPoint: .bottom),
                                 style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round)
                             )
+                    }
+                    
+                    if clusters.isEmpty {
+                        PlaceMarkersOverlay()
                     }
 
                     Color.white.opacity(0.001)
@@ -347,24 +351,39 @@ struct CampusMapView: View {
         }
     }
 
-    private func PrintPlaces(in context: GraphicsContext) {
-        let places = placeManager.cafes
-        
-        for place in places.values {
-            let point: GridPoint = place.iconCord
-            let x = CGFloat(point.col) * cellSize + (cellSize / 2)
-            let y = CGFloat(point.row) * cellSize + (cellSize / 2)
-            if let symbol = context.resolveSymbol(id: place.type) {
-                let targetColor: Color = .black
-                var tintedContext = context
-                tintedContext.addFilter(.colorMultiply(targetColor))
-                tintedContext.draw(symbol, at: CGPoint(x: x, y: y), anchor: .center)
+    @ViewBuilder
+    private func PlaceMarkersOverlay() -> some View {
+        ForEach(Array(placeManager.cafes.values), id: \.id) { place in
+            PlaceMarker(place: place, currentScale: currentScale) {
+                withAnimation { selectedPlace = IdentifiableItem(item: place) }
             }
-            let label = Text(place.name).font(.system(size: 15)).fontWeight(.semibold)
-            context.draw(label, at: CGPoint(x: x + 15, y: y - 5), anchor: .leading)
+            .position(
+                x: CGFloat(place.iconCord.col) * cellSize + cellSize / 2,
+                y: CGFloat(place.iconCord.row) * cellSize + cellSize / 2
+            )
+        }
+
+        ForEach(Array(placeManager.coworkings.values), id: \.id) { place in
+            PlaceMarker(place: place, currentScale: currentScale) {
+                withAnimation { selectedPlace = IdentifiableItem(item: place) }
+            }
+            .position(
+                x: CGFloat(place.iconCord.col) * cellSize + cellSize / 2,
+                y: CGFloat(place.iconCord.row) * cellSize + cellSize / 2
+            )
+        }
+
+        ForEach(Array(placeManager.sights.values), id: \.id) { place in
+            PlaceMarker(place: place, currentScale: currentScale) {
+                withAnimation { selectedPlace = IdentifiableItem(item: place) }
+            }
+            .position(
+                x: CGFloat(place.iconCord.col) * cellSize + cellSize / 2,
+                y: CGFloat(place.iconCord.row) * cellSize + cellSize / 2
+            )
         }
     }
-    
+
     private func buildRoutePath() -> Path {
         guard paths.count > 1 else { return Path() }
         
@@ -477,4 +496,80 @@ extension CampusMapView {
         selectedCluster: .constant(nil as Cluster?),
         clusters: .constant([])
     )
+}
+
+struct PlaceMarker: View {
+    let place: any MapItem
+    let currentScale: CGFloat
+    let onTap: () -> Void
+
+    private var iconSize: CGFloat {
+        Swift.max(9, Swift.min(44 - currentScale * 8, 44))
+    }
+
+    private var fontSize: CGFloat {
+        Swift.max(6, Swift.min(12 - currentScale * 3, 13))
+    }
+
+    private var nameLines: [String] {
+        let words = place.name.split(separator: " ")
+        var lines: [String] = []
+        var currentLine = ""
+
+        for word in words {
+            if currentLine.isEmpty {
+                currentLine = String(word)
+            } else if currentLine.count + word.count + 1 <= 16 {
+                currentLine += " " + word
+            } else {
+                lines.append(currentLine)
+                currentLine = String(word)
+            }
+        }
+        if !currentLine.isEmpty { lines.append(currentLine) }
+        return lines.isEmpty ? [place.name] : lines
+    }
+
+    var placeColor: Color {
+        switch place.type {
+        case .coffee: .orange
+        case .cafe: .red
+        case .product: .green
+        case .sight: .purple
+        case .coworkingSpace: .blue
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Image(systemName: place.type.iconName())
+                .font(.system(size: iconSize * 0.44, weight: .semibold))
+                .foregroundStyle(placeColor)
+
+            if nameLines.count > 1 {
+                VStack(spacing: 1) {
+                    ForEach(Array(nameLines.enumerated()), id: \.offset) { _, line in
+                        Text(line)
+                            .font(.system(size: fontSize, weight: .bold))
+                            .lineLimit(1)
+                            .foregroundStyle(placeColor)
+                            .bold()
+                    }
+                }
+            } else {
+                Text(nameLines.first ?? place.name)
+                    .font(.system(size: fontSize, weight: .bold))
+                    .lineLimit(1)
+                    .foregroundStyle(placeColor)
+            }
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(.regularMaterial)
+        .cornerRadius(8)
+        .shadow(color: .black.opacity(0.12), radius: 3, x: 0, y: 1)
+        .onTapGesture {
+            onTap()
+        }
+    }
 }

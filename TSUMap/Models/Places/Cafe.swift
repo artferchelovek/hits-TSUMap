@@ -27,9 +27,10 @@ struct Cafe: MapItem, Hashable, Codable, Identifiable {
     var type: PlaceType
     var address: String
     var rating: Double
+    var ratingCount: Int = 0
     var dishes: [Dish]
-    
-    init(tempId: String, iconCord: GridPoint, entryCord: GridPoint, name: String, type: PlaceType, address: String, rating: Double, dishes: [Dish]) {
+
+    init(tempId: String, iconCord: GridPoint, entryCord: GridPoint, name: String, type: PlaceType, address: String, rating: Double, ratingCount: Int = 0, dishes: [Dish]) {
             self.tempId = tempId
             self.iconCord = iconCord
             self.entryCord = entryCord
@@ -37,10 +38,11 @@ struct Cafe: MapItem, Hashable, Codable, Identifiable {
             self.type = type
             self.address = address
             self.rating = rating
+            self.ratingCount = ratingCount
             self.dishes = dishes
             self.tempWorkSchedule = [:]
         }
-    
+
     enum CodingKeys: String, CodingKey {
             case tempId = "id"
             case tempWorkSchedule = "workSchedule"

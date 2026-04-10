@@ -12,6 +12,7 @@ struct PlaceInfoView: View {
     @State private var isShowingNeuralSheet = false
 
     let newPlace: (any MapItem)
+    let placeManager: PlaceManager
 
     @Binding var currentDetent: PresentationDetent
     @Binding var endLocation: GridPoint?
@@ -123,6 +124,7 @@ struct PlaceInfoView: View {
         .sheet(isPresented: $isShowingNeuralSheet) {
             NeuralView(
                 place: .constant(newPlace),
+                placeManager: placeManager,
                 isPresented: $isShowingNeuralSheet
             )
             .presentationDragIndicator(.visible)
@@ -141,6 +143,7 @@ struct PlaceInfoView: View {
         rating: 4.8,
         dishes: []
     ),
+                  placeManager: PlaceManager(),
                   currentDetent: .constant(.large),
                   endLocation: .constant(nil as GridPoint?),
                   intermediatePoints: .constant([]),
