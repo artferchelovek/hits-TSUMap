@@ -103,6 +103,13 @@ final class PlaceManager: ObservableObject {
         return allPlace
     }
     
+    public func getAllCafes() -> [String: IdentifiableItem] {
+        var allPlace: [String: IdentifiableItem] = [:]
+        cafes.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
+                
+        return allPlace
+    }
+    
     public func getPlaceById(_ id: String) -> (IdentifiableItem)? {
         let allPlaces = getAllPlaces()
         return allPlaces[id]

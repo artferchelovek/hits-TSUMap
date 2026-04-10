@@ -363,7 +363,7 @@
           "type": "coffee",
           "address": "просп. Ленина, 36, корп. 9",
           "iconCord": { "row": 62, "col": 64 },
-          "entryCord": { "row": 61, "col": 66 },
+          "entryCord": { "row": 62, "col": 66 },
           "rating": 5.0,
           "workSchedule": {
               "Monday": { "timeEntry": "08:00", "timeClose": "19:00", "isDayOff": false },

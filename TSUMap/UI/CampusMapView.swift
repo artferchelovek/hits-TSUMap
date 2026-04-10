@@ -424,7 +424,8 @@ struct CampusMapView: View {
 extension CampusMapView {
     fileprivate func drawStartPoint(_ start: GridPoint, _ context: GraphicsContext) {
         let (x, y) = Normalize(point: start)
-        let rect = CGRect(x: x - 10, y: y - 10, width: 20, height: 20)
+        let size: CGFloat = 20
+        let rect = CGRect(x: x - size / 2, y: y - size / 2, width: size, height: size)
         context.fill(Path(ellipseIn: rect), with: .color(.blue))
         context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
     }
@@ -447,6 +448,8 @@ extension CampusMapView {
     private func Tap(at location: CGPoint) {
         let col = Int(location.x / cellSize)
         let row = Int(location.y / cellSize)
+        
+        print(col, row)
         
         if startLocation != nil {
             let tapThreshold: CGFloat = 22.0
