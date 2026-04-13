@@ -5,7 +5,7 @@
 //  Created by Сергей Лихачев on 08.04.2026.
 //
 
-struct Sight: MapItem, Codable, Identifiable {
+struct Sight: MapItem, Codable, Identifiable, Hashable {
     private let tempId: String
     var id: String {
              "\(type.rawValue)_\(tempId)"
