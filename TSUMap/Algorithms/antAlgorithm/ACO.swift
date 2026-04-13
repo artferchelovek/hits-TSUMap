@@ -4,8 +4,8 @@
 //
 //  Created by Сергей Лихачев on 09.04.2026.
 //
-import
-Foundation
+import Foundation
+
 class ACO {
     
     private let alpha: Double = 2.0
@@ -97,6 +97,9 @@ class ACO {
     private func createPath(path: AntPath) -> [GridPoint] {
         let start = points[path.places[0]]
         var intermediatePoint: [GridPoint] = []
+        for i in path.places where i != 0 {
+            intermediatePoint.append(points[i])
+        }
         
         return AStar(graph: grid, start: start, points: intermediatePoint, end: start)
     }
