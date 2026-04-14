@@ -134,7 +134,11 @@ struct ContentView: View {
                                 intermediatePoints: $intermediatePoints)
                         } else {
                             FloatingSearchBar(placeManager: placeManager,
-                                              clusters: $clusters)
+                                              clusters: $clusters,
+                                              startLocation: $startLocation,
+                                              endLocation: $endLocation,
+                                              intermediatePoints: $intermediatePoints,
+                                              paths: $paths)
                         }
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
