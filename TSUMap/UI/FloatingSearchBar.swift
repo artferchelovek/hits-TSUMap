@@ -90,7 +90,7 @@ struct FloatingSearchBar: View {
                         }
                     }
                     
-                    VStack {
+                    VStack(spacing: 10) {
                         Button {
                             self.clusters = placeManager.clustering(numberClusters: 5, typeClustering: .byStraight, data: Array(placeManager.cafes.values))
                             withAnimation(.spring()) {
@@ -101,6 +101,16 @@ struct FloatingSearchBar: View {
                             HStack {
                                 Image(systemName: "fork.knife")
                                 Text("Определить зоны еды")
+                                Spacer()
+                            }
+                        }
+                        
+                        Button {
+                            print("Туристический маршрут")
+                        } label: {
+                            HStack {
+                                Image(systemName: "figure.walk")
+                                Text("Построить туристический маршрут")
                                 Spacer()
                             }
                         }
