@@ -6,30 +6,31 @@ class Clustering {
     private var dataPlace: [Cafe]
     private var numberOfClusters: Int
     private var aStarPaths: AStarCash
-    
-    init (data: [Cafe], numberOfClusters: Int, clusteringType: ClusteringType, aStarPaths: AStarCash) {
+
+    init(data: [Cafe], numberOfClusters: Int, clusteringType: ClusteringType, aStarPaths: AStarCash) {
         self.clusteringType = clusteringType
-        self.dataPlace = data
+        dataPlace = data
         self.numberOfClusters = numberOfClusters
         self.aStarPaths = aStarPaths
     }
-    
+
     private func TotalSumDist(cluster: Cluster, candidateMedoid: Cafe) -> Double {
-        return cluster.placesInClust.reduce(0) {sum, place in sum + clusteringType.metric(candidateMedoid, place, aStarPaths)}
+        cluster.placesInClust
+            .reduce(0) { sum, place in sum + clusteringType.metric(candidateMedoid, place, aStarPaths) }
     }
-    
+
     private func findCenters() -> [Cafe] {
         var centers: [Cafe] = []
-        
+
         guard let firstCenter = dataPlace.randomElement() else {
             return []
         }
         centers.append(firstCenter)
-        
+
         while centers.count < numberOfClusters {
             var dist: [(place: Cafe, dist: Double)] = []
             var sumDist: Double = 0
-            
+
             for place in dataPlace {
                 var minDist = Double.infinity
                 for center in centers {
@@ -42,14 +43,14 @@ class Clustering {
                 sumDist += minDist
                 dist.append((place, minDist))
             }
-            
+
             if sumDist == 0 {
                 break
             }
-            
+
             var currentDist: Double = 0
-            let target = Double.random(in: 0...1) * sumDist
-            
+            let target = Double.random(in: 0 ... 1) * sumDist
+
             for (place, dist) in dist {
                 currentDist += dist
                 if currentDist >= target {
@@ -71,14 +72,14 @@ class Clustering {
         
         while isMedoidChanged && iter < maxIter {
             isMedoidChanged = false
-            
-            clusters = centroids.enumerated().map { (i, medoid) in
+
+            clusters = centroids.enumerated().map { i, medoid in
                 let color = colors[i % colors.count]
                 return Cluster(medoid: medoid, color: color)
             }
             
             for place in dataPlace {
-                var minDist: Double = Double.infinity
+                var minDist = Double.infinity
                 var minClust: Cluster = clusters[0]
                 
                 for cluster in clusters {
@@ -91,15 +92,15 @@ class Clustering {
                 }
                 minClust.placesInClust.append(place)
             }
-            
+
             var newCentroids: [Cafe] = []
             for cluster in clusters {
                 var currentMedoid = cluster.medoid
                 var currentCost = TotalSumDist(cluster: cluster, candidateMedoid: currentMedoid)
-                
+
                 for place in cluster.placesInClust {
                     let newCost = TotalSumDist(cluster: cluster, candidateMedoid: place)
-                    
+
                     if newCost < currentCost {
                         currentCost = newCost
                         currentMedoid = place

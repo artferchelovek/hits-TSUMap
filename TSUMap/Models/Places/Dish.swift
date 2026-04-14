@@ -7,16 +7,16 @@
 import Foundation
 
 struct Dish: Codable, Identifiable, Hashable {
-    var id: UUID = UUID()
+    var id: UUID = .init()
     var name: String
     var price: Double
     var type: DishType
-    
+
     enum CodingKeys: String, CodingKey {
-            case name
-            case price
-            case type
-        }
+        case name
+        case price
+        case type
+    }
 }
 
 enum DishType: String, Codable, Hashable {

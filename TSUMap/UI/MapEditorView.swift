@@ -1,5 +1,5 @@
-import SwiftUI
 import MapKit
+import SwiftUI
 
 struct MapEditorView: View {
     let columnsCount = 150
@@ -7,8 +7,13 @@ struct MapEditorView: View {
 
     let baseCellSize: CGFloat = 14.0
 
-    var baseWidth: CGFloat { CGFloat(columnsCount) * baseCellSize }
-    var baseHeight: CGFloat { CGFloat(rowsCount) * baseCellSize }
+    var baseWidth: CGFloat {
+        CGFloat(columnsCount) * baseCellSize
+    }
+
+    var baseHeight: CGFloat {
+        CGFloat(rowsCount) * baseCellSize
+    }
 
     @State private var grid: [[CellType]]
     @State private var isDrawMode: Bool = true
@@ -17,7 +22,10 @@ struct MapEditorView: View {
 
     init() {
         if tsuCampusGrid.isEmpty {
-            _grid = State(initialValue: Array(repeating: Array(repeating: .obstacle, count: columnsCount), count: rowsCount))
+            _grid = State(initialValue: Array(
+                repeating: Array(repeating: .obstacle, count: columnsCount),
+                count: rowsCount
+            ))
         } else {
             let loadedGrid = tsuCampusGrid.map { row in
                 row.map { value in
@@ -52,7 +60,6 @@ struct MapEditorView: View {
 
             ScrollView([.horizontal, .vertical], showsIndicators: true) {
                 ZStack(alignment: .topLeading) {
-
                     Map(
                         initialPosition: .region(
                             MKCoordinateRegion(
@@ -68,12 +75,12 @@ struct MapEditorView: View {
 
                     Canvas { context, size in
                         var gridLines = Path()
-                        for col in 0...columnsCount {
+                        for col in 0 ... columnsCount {
                             let x = CGFloat(col) * baseCellSize
                             gridLines.move(to: CGPoint(x: x, y: 0))
                             gridLines.addLine(to: CGPoint(x: x, y: size.height))
                         }
-                        for row in 0...rowsCount {
+                        for row in 0 ... rowsCount {
                             let y = CGFloat(row) * baseCellSize
                             gridLines.move(to: CGPoint(x: 0, y: y))
                             gridLines.addLine(to: CGPoint(x: size.width, y: y))
@@ -81,9 +88,8 @@ struct MapEditorView: View {
                         context.stroke(gridLines, with: .color(.black.opacity(0.15)), lineWidth: 0.3)
 
                         var obstaclesPath = Path()
-                        for row in 0..<rowsCount {
-                            for col in 0..<columnsCount where grid[row][col] == .obstacle {
-
+                        for row in 0 ..< rowsCount {
+                            for col in 0 ..< columnsCount where grid[row][col] == .obstacle {
                                 let rect = CGRect(
                                     x: CGFloat(col) * baseCellSize,
                                     y: CGFloat(row) * baseCellSize,
@@ -103,7 +109,7 @@ struct MapEditorView: View {
                             .onTapGesture(coordinateSpace: .local) { location in
                                 let col = Int(location.x / baseCellSize)
                                 let row = Int(location.y / baseCellSize)
-                                if row >= 0 && row < rowsCount && col >= 0 && col < columnsCount {
+                                if row >= 0, row < rowsCount, col >= 0, col < columnsCount {
                                     grid[row][col] = grid[row][col] == .obstacle ? .path : .obstacle
                                 }
                             }
@@ -112,7 +118,7 @@ struct MapEditorView: View {
                                     .onChanged { value in
                                         let col = Int(value.location.x / baseCellSize)
                                         let row = Int(value.location.y / baseCellSize)
-                                        if row >= 0 && row < rowsCount && col >= 0 && col < columnsCount {
+                                        if row >= 0, row < rowsCount, col >= 0, col < columnsCount {
                                             grid[row][col] = .path
                                         }
                                     }

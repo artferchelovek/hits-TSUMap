@@ -26,18 +26,18 @@ struct QuestionStep {
 
 struct DecisionTreeView: View {
     @Environment(\.dismiss) var dismiss
-    
+
     @ObservedObject var manager: VenueManager
     @ObservedObject var placeManager: PlaceManager
-    
+
     @State private var selectedPlace: IdentifiableItem?
-    
+
     let treeNode: TreeNode?
-    
+
     @Binding var endLocation: GridPoint?
-    
+
     var onPredictionCompleted: ((String) -> Void)?
-    
+
     @State private var isShowingSettingsSheet = false
     @State private var userAttribute = TreeAttribute(
         location: "",
@@ -51,13 +51,13 @@ struct DecisionTreeView: View {
     @State private var currentIndex = 0
     @State private var messages: [ChatMessage] = []
     @State private var isFinished = false
-    
+    @State private var isAnswering = false
+
     let questions = AppConfig.questions
-    
+
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                
                 ScrollViewReader { proxy in
                     ScrollView {
                         VStack(spacing: 12) {
@@ -77,14 +77,17 @@ struct DecisionTreeView: View {
                         }
                     }
                 }
-                
+
                 if !isFinished {
                     answerOptionsPicker
+                        .disabled(isAnswering)
+                        .opacity(isAnswering ? 0.4 : 1)
+                        .animation(.easeInOut(duration: 0.2), value: isAnswering)
                 } else {
                     finishButton
                 }
             }
-            
+
             .onAppear {
                 if messages.isEmpty {
                     messages.append(ChatMessage(text: questions[0].chatText, isUser: false))
@@ -101,7 +104,7 @@ struct DecisionTreeView: View {
                             .foregroundColor(.secondary)
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         isShowingSettingsSheet.toggle()
@@ -117,7 +120,7 @@ struct DecisionTreeView: View {
             }
         }
     }
-    
+
     private var answerOptionsPicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
@@ -140,7 +143,7 @@ struct DecisionTreeView: View {
         }
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
-    
+
     private var finishButton: some View {
         Button {
             endLocation = selectedPlace?.item.entryCord
@@ -156,11 +159,12 @@ struct DecisionTreeView: View {
         }
         .padding()
     }
-    
+
     private func handleAnswer(option: QuestionConfig.Option) {
+        isAnswering = true
         let userMessage = ChatMessage(text: option.title, isUser: true)
         withAnimation(.spring()) { messages.append(userMessage) }
-        
+
         switch currentIndex {
         case 0: userAttribute.location = option.value
         case 1: userAttribute.budget = option.value
@@ -170,8 +174,10 @@ struct DecisionTreeView: View {
         case 5: userAttribute.weather = option.value
         default: break
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.spring()) { isAnswering = false }
+
             if currentIndex < questions.count - 1 {
                 currentIndex += 1
                 let botMessage = ChatMessage(text: questions[currentIndex].chatText, isUser: false)
@@ -180,13 +186,15 @@ struct DecisionTreeView: View {
                 withAnimation(.spring()) {
                     isFinished = true
                 }
-                
-                if let treeNode = treeNode {
+
+                if let treeNode {
                     let (result, _) = predictTree(tree: treeNode, situation: userAttribute)
                     withAnimation(.spring()) {
                         messages.append(ChatMessage(text: "Рекомендую посетить:", isUser: false))
                         messages.append(ChatMessage(text: "\(result.components(separatedBy: "@")[0])", isUser: false))
-                        guard let parseResult = placeManager.getPlaceById(result.components(separatedBy: "@")[1]) else { return }
+                        guard let parseResult = placeManager.getPlaceById(result.components(separatedBy: "@")[1])
+                        else { return }
+                        print(parseResult)
                         selectedPlace = parseResult
                     }
                 }
@@ -197,18 +205,18 @@ struct DecisionTreeView: View {
 
 struct MessageBubble: View {
     let message: ChatMessage
-    
+
     var body: some View {
         HStack {
             if message.isUser { Spacer() }
-            
+
             Text(message.text)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(message.isUser ? Color.blue : Color(UIColor.systemGray6))
                 .foregroundColor(message.isUser ? .white : .primary)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
-            
+
             if !message.isUser { Spacer() }
         }
     }

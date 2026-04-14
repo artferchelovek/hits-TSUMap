@@ -3,21 +3,21 @@ import UniformTypeIdentifiers
 
 struct RouteSettingsView: View {
     @ObservedObject var placeManager: PlaceManager
-    
+
     @State var isShowOptionalView: Bool = false
     @State private var draggedPoint: GridPoint?
-    
+
     @Binding var startLocation: GridPoint?
     @Binding var endLocation: GridPoint?
     @Binding var intermediatePoints: [GridPoint]
-    
+
     private func getPlaceName(for point: GridPoint) -> String {
         if let place = placeManager.getAllPlaces().values.first(where: { $0.item.entryCord == point }) {
             return place.item.name
         }
         return "\(point.col), \(point.row)"
     }
-    
+
     fileprivate func Topper() -> some View {
         HStack {
             Text("Изменить маршрут")
@@ -37,8 +37,7 @@ struct RouteSettingsView: View {
             }
         }
     }
-    
-    @ViewBuilder
+
     private func PointRow(title: String, icon: String, color: Color) -> some View {
         HStack {
             Image(systemName: icon)
@@ -48,32 +47,32 @@ struct RouteSettingsView: View {
             Spacer()
         }
     }
-    
+
     var body: some View {
         VStack {
             Topper()
                 .zIndex(2)
-            
+
             if isShowOptionalView {
                 VStack(spacing: 10) {
                     PointRow(title: "Стартовая позиция", icon: "location.circle.fill", color: .blue)
-                    
+
                     Divider()
-                    
+
                     ForEach(intermediatePoints, id: \.self) { point in
                         HStack {
                             Image(systemName: "arrow.turn.down.right")
                                 .font(.title3)
                                 .foregroundColor(.primary.opacity(0.7))
-                            
+
                             Text(getPlaceName(for: point))
                                 .bold()
-                            
+
                             Spacer()
-                            
+
                             Image(systemName: "list.dash")
                                 .foregroundColor(.primary.opacity(0.7))
-                            
+
                             Button {
                                 withAnimation {
                                     intermediatePoints.removeAll(where: { $0 == point })
@@ -88,7 +87,7 @@ struct RouteSettingsView: View {
                         .padding(.vertical, 4)
                         .contentShape(Rectangle())
                         .onDrag {
-                            self.draggedPoint = point
+                            draggedPoint = point
                             return NSItemProvider(object: "\(point.row)-\(point.col)" as NSString)
                         }
                         .onDrop(of: [.text], delegate: ReorderDropDelegate(
@@ -96,10 +95,10 @@ struct RouteSettingsView: View {
                             list: $intermediatePoints,
                             draggedItem: $draggedPoint
                         ))
-                        
+
                         Divider()
                     }
-                    
+
                     PointRow(title: "Конечная точка", icon: "mappin.circle.fill", color: .red)
                 }
                 .padding(.horizontal, 16)
@@ -110,8 +109,14 @@ struct RouteSettingsView: View {
                 .cornerRadius(20)
                 .transition(
                     .asymmetric(
-                        insertion: .opacity.combined(with: .move(edge: .top)).combined(with: .scale(scale: 0.95, anchor: .top)),
-                        removal: .opacity.combined(with: .move(edge: .top)).combined(with: .scale(scale: 0.95, anchor: .top))
+                        insertion: .opacity.combined(with: .move(edge: .top)).combined(with: .scale(
+                            scale: 0.95,
+                            anchor: .top
+                        )),
+                        removal: .opacity.combined(with: .move(edge: .top)).combined(with: .scale(
+                            scale: 0.95,
+                            anchor: .top
+                        ))
                     )
                 )
                 .zIndex(1)
@@ -124,28 +129,29 @@ struct ReorderDropDelegate: DropDelegate {
     let item: GridPoint
     @Binding var list: [GridPoint]
     @Binding var draggedItem: GridPoint?
-    
-    func dropEntered(info: DropInfo) {
-        guard let draggedItem = draggedItem,
+
+    func dropEntered(info _: DropInfo) {
+        guard let draggedItem,
               draggedItem != item,
               let from = list.firstIndex(of: draggedItem),
-              let to = list.firstIndex(of: item) else {
+              let to = list.firstIndex(of: item)
+        else {
             return
         }
-        
+
         if list[to] != draggedItem {
             withAnimation(.snappy) {
                 list.move(fromOffsets: IndexSet(integer: from), toOffset: to > from ? to + 1 : to)
             }
         }
     }
-    
-    func dropUpdated(info: DropInfo) -> DropProposal? {
-        return DropProposal(operation: .move)
+
+    func dropUpdated(info _: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
     }
-    
-    func performDrop(info: DropInfo) -> Bool {
-        self.draggedItem = nil
+
+    func performDrop(info _: DropInfo) -> Bool {
+        draggedItem = nil
         return true
     }
 }
@@ -155,5 +161,6 @@ struct ReorderDropDelegate: DropDelegate {
         placeManager: PlaceManager(),
         startLocation: .constant(.init(row: 12, col: 32)),
         endLocation: .constant(.init(row: 14, col: 32)),
-        intermediatePoints: .constant([.init(row: 12, col: 32), .init(row: 13, col: 32)]))
+        intermediatePoints: .constant([.init(row: 12, col: 32), .init(row: 13, col: 32)])
+    )
 }

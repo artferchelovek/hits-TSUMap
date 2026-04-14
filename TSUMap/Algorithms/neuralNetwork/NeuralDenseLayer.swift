@@ -10,10 +10,10 @@ struct NeuralDenseLayer: Codable {
     let weights: [[Double]]
     let biases: [Double]
     let isOutputLayer: Bool
-    
+
     func neuralForward(inputs: [Double]) -> [Double] {
         let z = NeuralMathUtils.dotProduct(inputs, weights, biases)
-        
+
         if isOutputLayer {
             return NeuralMathUtils.softmax(z)
         } else {
