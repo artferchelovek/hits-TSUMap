@@ -47,7 +47,7 @@ final class PlaceManager: ObservableObject {
         }
     }
     
-    public func clustering(numberClusters: Int, typeClustering: ClusteringType, typeAlgorithm: ClusteringAlghoritmType = .KMedoids, data: [Cafe]) -> [Cluster] {
+    public func clustering(numberClusters: Int, typeClustering: ClusteringType, typeAlgorithm: ClusteringAlgorithmType = .KMedoids, data: [Cafe]) -> [Cluster] {
         guard let paths = aStarPaths else {
             return []
         }
