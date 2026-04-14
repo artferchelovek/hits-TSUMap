@@ -47,12 +47,16 @@ final class PlaceManager: ObservableObject {
         }
     }
     
-    public func clustering(numberClusters: Int, typeClustering: ClusteringType, data: [Cafe]) -> [Cluster] {
+    public func clustering(numberClusters: Int, typeClustering: ClusteringType, typeAlgorithm: ClusteringAlghoritmType = .KMedoids, data: [Cafe]) -> [Cluster] {
         guard let paths = aStarPaths else {
             return []
         }
-        
-        return Clustering(data: data, numberOfClusters: numberClusters, clusteringType: typeClustering, aStarPaths: paths).startClustering()
+        switch typeAlgorithm {
+        case .DBScan:
+            return Clustering(data: data, numberOfClusters: numberClusters, clusteringType: typeClustering, aStarPaths: paths).startDBScan()
+        case .KMedoids:
+            return Clustering(data: data, numberOfClusters: numberClusters, clusteringType: typeClustering, aStarPaths: paths).startKMedoids()
+        }        
     }
     
     public func getAllPlaces() -> [String: IdentifiableItem] {
