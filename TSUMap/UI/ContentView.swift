@@ -9,10 +9,12 @@ import SwiftUI
 
 struct IdentifiableItem: Identifiable {
     var item: any MapItem
-    var id: String {item.id}
+    var id: String {
+        item.id
+    }
 }
+
 struct ContentView: View {
-    
     @State private var startLocation: GridPoint?
     @State private var endLocation: GridPoint?
     @State private var intermediatePoints: [GridPoint] = []
@@ -21,17 +23,17 @@ struct ContentView: View {
     @State private var selectedPlace: IdentifiableItem?
     @State private var selectedCluster: Cluster?
     @State private var sheetDetent: PresentationDetent = .height(180)
-    
+
     @State private var clusters: [Cluster] = []
-    
+
     @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
-    
+
     @State private var animatePlusMinus = true
-    
+
     @StateObject var manager = VenueManager()
     @StateObject var placeManager = PlaceManager()
-    
+
     fileprivate func PathsView() -> some View {
         VStack(spacing: 15) {
             HStack {
@@ -45,9 +47,11 @@ struct ContentView: View {
                         Spacer()
                         HStack {
                             Image(systemName: "plusminus")
-                                .symbolEffect(.drawOn.individually,
-                                              options: .nonRepeating,
-                                              isActive: animatePlusMinus)
+                                .symbolEffect(
+                                    .drawOn.individually,
+                                    options: .nonRepeating,
+                                    isActive: animatePlusMinus
+                                )
                                 .font(.title2)
                                 .foregroundStyle(Color.primary)
                             Text("\(Double(paths.count) * AppConfig.cellScale, specifier: "%.0f") м")
@@ -64,11 +68,10 @@ struct ContentView: View {
                     }
                 }
             }
-            
+
             Button {
                 withAnimation(.spring()) {
                     paths = []
-                    startLocation = nil
                     endLocation = nil
                     intermediatePoints = []
                     animatePlusMinus = true
@@ -84,7 +87,7 @@ struct ContentView: View {
         .frame(maxWidth: .infinity)
         .fixedSize(horizontal: false, vertical: true)
     }
-    
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             CampusMapView(
@@ -99,20 +102,23 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
-                PlaceInfoView(newPlace: place.item,
-                              currentDetent: $sheetDetent,
-                              endLocation: $endLocation,
-                              intermediatePoints: $intermediatePoints,
-                              clusters: $clusters)
-                    .presentationDetents([.height(200), .large], selection: $sheetDetent)
-                    .presentationDragIndicator(.visible)
+                PlaceInfoView(
+                    newPlace: place.item,
+                    placeManager: placeManager,
+                    currentDetent: $sheetDetent,
+                    endLocation: $endLocation,
+                    intermediatePoints: $intermediatePoints,
+                    clusters: $clusters
+                )
+                .presentationDetents([.height(200), .large], selection: $sheetDetent)
+                .presentationDragIndicator(.visible)
             }
             .sheet(item: $selectedCluster) { cluster in
                 ClusterInfoView(cluster: cluster, selectedPlace: $selectedPlace)
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }
-            
+
             VStack(spacing: 0) {
                 if startLocation == nil {
                     HStack {
@@ -121,7 +127,7 @@ struct ContentView: View {
                             .padding(.horizontal, 16).padding(.vertical, 8)
                             .background(.ultraThinMaterial, in: Capsule())
                             .shadow(color: .black.opacity(0.1), radius: 4)
-                        
+
                         Spacer()
                     }.transition(.move(edge: .top).combined(with: .opacity))
                 } else {
@@ -131,17 +137,24 @@ struct ContentView: View {
                                 placeManager: placeManager,
                                 startLocation: $startLocation,
                                 endLocation: $endLocation,
-                                intermediatePoints: $intermediatePoints)
+                                intermediatePoints: $intermediatePoints
+                            )
                         } else {
-                            FloatingSearchBar(placeManager: placeManager,
-                                              clusters: $clusters)
+                            FloatingSearchBar(
+                                placeManager: placeManager,
+                                clusters: $clusters,
+                                startLocation: $startLocation,
+                                endLocation: $endLocation,
+                                intermediatePoints: $intermediatePoints,
+                                paths: $paths
+                            )
                         }
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
-                
+
                 Spacer()
-                
+
                 VStack(spacing: 15) {
                     if startLocation == nil {
                         HStack(spacing: 8) {
@@ -173,11 +186,11 @@ struct ContentView: View {
                                     treeNode: treeNode,
                                     endLocation: $endLocation
                                 ) { prediction in
-                                    self.predictionResult = prediction
+                                    predictionResult = prediction
                                 }
                                 .presentationDragIndicator(.visible)
                             }
-                            
+
                             Button {
                                 withAnimation(.spring()) {
                                     startLocation = nil
@@ -205,17 +218,17 @@ struct ContentView: View {
             loadTree()
         }
     }
-    
+
     private func loadTree() {
         let data = manager.allAttributes
-        
+
         guard !data.isEmpty else {
             print("Данных для построения дерева нет")
             return
         }
-        
+
         treeNode = buildTree(data: data, availableAttributes: AppConfig.aviableTreeAttributes)
-        
+
         print("Дерево перестроено на основе \(data.count) записей")
     }
 }

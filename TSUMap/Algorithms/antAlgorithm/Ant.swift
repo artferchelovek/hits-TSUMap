@@ -12,7 +12,7 @@ struct Ant {
     var startPlace: Int
     var currentPlace: Int
     var canContinue: Bool
-    
+
     init(start: Int) {
         startPlace = start
         visited = []
@@ -20,11 +20,11 @@ struct Ant {
         path = AntPath()
         canContinue = true
     }
-    
+
     func getNeighbors(amountPoints: Int) -> [Int] {
         var neighbors: [Int] = []
-        for i in 0..<amountPoints where !visited.contains(i) {
-                neighbors.append(i)
+        for i in 0 ..< amountPoints where !visited.contains(i) {
+            neighbors.append(i)
         }
         return neighbors
     }
@@ -35,7 +35,7 @@ struct Ant {
             visited.append(currentPlace)
         }
         let neighbors = getNeighbors(amountPoints: distances.count)
-        
+
         if neighbors.isEmpty {
             canContinue = false
             if currentPlace != startPlace {
@@ -44,32 +44,32 @@ struct Ant {
             }
             return
         }
-        
+
         var wish: [Double] = Array(repeating: 0.0, count: distances.count)
         var sumAllWish = 0.0
-        
+
         for neighbor in neighbors {
-             let pheromon = pheromone[currentPlace][neighbor]
-             let dist = distances[currentPlace][neighbor]
-            
+            let pheromon = pheromone[currentPlace][neighbor]
+            let dist = distances[currentPlace][neighbor]
+
             let n: Double = 1 / Double(dist)
             let currentWish = pow(n, alpha) * pow(pheromon, beta)
             wish[neighbor] = currentWish
             sumAllWish += currentWish
         }
-        
-        let choosingProb = Double.random(in: 0...1)
+
+        let choosingProb = Double.random(in: 0 ... 1)
         var currentProb = 0.0
         var nextPlace = 0
-        
+
         for neighbor in neighbors {
             currentProb += wish[neighbor] / sumAllWish
             if currentProb >= choosingProb {
                 nextPlace = neighbor
                 path.dist += distances[currentPlace][neighbor]
-                self.currentPlace = nextPlace
-                self.visited.append(nextPlace)
-                self.path.places.append(nextPlace)
+                currentPlace = nextPlace
+                visited.append(nextPlace)
+                path.places.append(nextPlace)
                 return
             }
         }

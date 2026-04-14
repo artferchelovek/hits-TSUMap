@@ -11,6 +11,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run SwiftLint
-        run: swiftlint --strict
+      - name: Run SwiftFormat
+        run: swiftformat --lint . --swiftversion 6.0
 
