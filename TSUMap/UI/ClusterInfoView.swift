@@ -9,10 +9,10 @@ import SwiftUI
 
 struct ClusterInfoView: View {
     @Environment(\.dismiss) var dismiss
-    
+
     let cluster: Cluster
     @Binding var selectedPlace: IdentifiableItem?
-    
+
     var body: some View {
         NavigationView {
             List {
@@ -70,6 +70,8 @@ struct PlaceRow: View {
     let sampleCluster = Cluster(medoid: mockMedoid, color: .blue)
     sampleCluster.placesInClust = [mockMedoid, mockPlace2]
 
-    return ClusterInfoView(cluster: sampleCluster,
-                           selectedPlace: .constant(nil as IdentifiableItem?))
+    return ClusterInfoView(
+        cluster: sampleCluster,
+        selectedPlace: .constant(nil as IdentifiableItem?)
+    )
 }

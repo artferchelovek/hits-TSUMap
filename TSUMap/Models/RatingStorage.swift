@@ -3,9 +3,9 @@
 //  TSUMap
 //
 
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 
 struct PlaceRating: Codable {
     let placeId: String
@@ -28,11 +28,12 @@ final class RatingStorage: ObservableObject {
 
     private func loadRatings() {
         if let data = try? Data(contentsOf: Self.fileURL),
-           let decoded = try? JSONDecoder().decode([String: PlaceRating].self, from: data) {
-            self.ratings = decoded
+           let decoded = try? JSONDecoder().decode([String: PlaceRating].self, from: data)
+        {
+            ratings = decoded
             return
         }
-        self.ratings = [:]
+        ratings = [:]
     }
 
     func save() {
@@ -61,6 +62,6 @@ final class RatingStorage: ObservableObject {
     }
 
     func getRating(for placeId: String) -> PlaceRating? {
-        return ratings[placeId]
+        ratings[placeId]
     }
 }

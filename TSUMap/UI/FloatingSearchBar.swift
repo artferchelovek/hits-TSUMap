@@ -48,7 +48,12 @@ struct FloatingSearchBar: View {
                         withAnimation(.spring()) {
                             searchText = ""
                             isShowingList = false
-                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            UIApplication.shared.sendAction(
+                                #selector(UIResponder.resignFirstResponder),
+                                to: nil,
+                                from: nil,
+                                for: nil
+                            )
                         }
                     }
             }
@@ -61,10 +66,19 @@ struct FloatingSearchBar: View {
                 VStack {
                     VStack(spacing: 10) {
                         Button {
-                            self.clusters = placeManager.clustering(numberClusters: 5, typeClustering: .byStraight, data: Array(placeManager.cafes.values))
+                            clusters = placeManager.clustering(
+                                numberClusters: 5,
+                                typeClustering: .byStraight,
+                                data: Array(placeManager.cafes.values)
+                            )
                             withAnimation(.spring()) {
                                 isShowingList = false
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                UIApplication.shared.sendAction(
+                                    #selector(UIResponder.resignFirstResponder),
+                                    to: nil,
+                                    from: nil,
+                                    for: nil
+                                )
                             }
                         } label: {
                             HStack {
@@ -129,7 +143,7 @@ struct FloatingSearchBar: View {
         var optimizedOrder: [GridPoint] = []
 
         for point in acoPath {
-            if visitedSightCoords.contains(point) && !optimizedOrder.contains(point) {
+            if visitedSightCoords.contains(point), !optimizedOrder.contains(point) {
                 optimizedOrder.append(point)
             }
         }
@@ -172,8 +186,10 @@ struct SightSelectionView: View {
                                 }
                             } label: {
                                 HStack {
-                                    Image(systemName: selectedSights.contains(sight.id) ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(selectedSights.contains(sight.id) ? .blue : .secondary.opacity(0.3))
+                                    Image(systemName: selectedSights
+                                        .contains(sight.id) ? "checkmark.circle.fill" : "circle")
+                                        .foregroundStyle(selectedSights.contains(sight.id) ? .blue : .secondary
+                                            .opacity(0.3))
                                         .font(.title3)
 
                                     VStack(alignment: .leading, spacing: 2) {

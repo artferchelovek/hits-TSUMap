@@ -32,10 +32,10 @@ struct NeuralView: View {
     init(place: Binding<any MapItem>, placeManager: PlaceManager, isPresented: Binding<Bool>) {
         _grid = State(initialValue: Array(repeating: Array(repeating: 0.0, count: gridSize), count: gridSize))
         self.placeManager = placeManager
-        self._place = place
-        self._isPresented = isPresented
+        _place = place
+        _isPresented = isPresented
     }
-    
+
     fileprivate func placeHeader() -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
@@ -47,25 +47,25 @@ struct NeuralView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-                
+
                 Spacer()
-                
+
                 HStack(spacing: 4) {
                     Image(systemName: "star.fill")
                         .foregroundStyle(.yellow)
                         .font(.caption)
-                    
+
                     if showArrow {
                         Text("\(oldRating, specifier: "%.1f")")
                             .font(.headline)
                             .strikethrough(true, color: .secondary)
                             .foregroundColor(.secondary)
-                        
+
                         Image(systemName: "arrow.right")
                             .font(.caption)
                             .transition(.opacity)
                     }
-                    
+
                     Text("\(newRating > 0 ? newRating : place.rating, specifier: "%.1f")")
                         .font(.headline)
                         .foregroundStyle(.primary)
@@ -76,7 +76,7 @@ struct NeuralView: View {
                 .padding(.vertical, 6)
                 .background(.ultraThinMaterial, in: Capsule())
             }
-            
+
             HStack(spacing: 4) {
                 Image(systemName: "person.fill")
                     .font(.caption)
@@ -98,17 +98,17 @@ struct NeuralView: View {
         let mod10 = count % 10
         let mod100 = count % 100
 
-        if mod100 >= 11 && mod100 <= 19 {
+        if mod100 >= 11, mod100 <= 19 {
             return "\(count) оценок"
         } else if mod10 == 1 {
             return "\(count) оценка"
-        } else if mod10 >= 2 && mod10 <= 4 {
+        } else if mod10 >= 2, mod10 <= 4 {
             return "\(count) оценки"
         } else {
             return "\(count) оценок"
         }
     }
-    
+
     private var drawingCanvas: some View {
         VStack(spacing: 16) {
             VStack(spacing: 4) {
@@ -135,7 +135,7 @@ struct NeuralView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.3), value: stage)
-            
+
             Canvas { context, _ in
                 let canvasRect = CGRect(
                     x: 0, y: 0,
@@ -143,10 +143,10 @@ struct NeuralView: View {
                     height: CGFloat(gridSize) * cellSize
                 )
                 context.fill(Path(roundedRect: canvasRect, cornerRadius: 12), with: .color(.secondary.opacity(0.08)))
-                
+
                 var drawnPath = Path()
-                for row in 0..<gridSize {
-                    for col in 0..<gridSize where grid[row][col] == 1.0 {
+                for row in 0 ..< gridSize {
+                    for col in 0 ..< gridSize where grid[row][col] == 1.0 {
                         let rect = CGRect(
                             x: CGFloat(col) * cellSize,
                             y: CGFloat(row) * cellSize,
@@ -166,7 +166,7 @@ struct NeuralView: View {
         }
         .padding()
     }
-    
+
     @ViewBuilder
     private var actionButtons: some View {
         if stage == .drawing {
@@ -207,7 +207,7 @@ struct NeuralView: View {
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.glass)
-                
+
                 Button {
                     if let digit = predictedDigit {
                         placeManager.updateRating(for: place.id, newRating: Double(digit))
@@ -226,7 +226,7 @@ struct NeuralView: View {
             }
         } else {
             Button {
-                self.isPresented = false
+                isPresented = false
                 dismiss()
             } label: {
                 HStack {
@@ -238,19 +238,19 @@ struct NeuralView: View {
             .buttonStyle(.glassProminent)
         }
     }
-    
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
                 placeHeader()
-                
+
                 Divider()
                     .padding(.horizontal)
-                
+
                 drawingCanvas
-                
+
                 Spacer(minLength: 20)
-                
+
                 actionButtons
                     .padding(.horizontal)
                     .animation(.spring(response: 0.3), value: stage)
@@ -258,16 +258,15 @@ struct NeuralView: View {
             .padding(.vertical)
         }
     }
-    
+
     @Environment(\.dismiss) private var dismiss
 }
 
 extension NeuralView {
-    
     private func handleDrag(at location: CGPoint) {
         let row = Int(location.y / CGFloat(cellSize))
         let col = Int(location.x / CGFloat(cellSize))
-        
+
         fillPixel(row: row, col: col)
         fillPixel(row: row + 1, col: col)
         fillPixel(row: row - 1, col: col)
@@ -278,19 +277,19 @@ extension NeuralView {
         fillPixel(row: row + 1, col: col - 1)
         fillPixel(row: row - 1, col: col + 1)
     }
-    
+
     private func fillPixel(row: Int, col: Int) {
-        if row >= 0 && row < gridSize && col >= 0 && col < gridSize {
+        if row >= 0, row < gridSize, col >= 0, col < gridSize {
             grid[row][col] = 1.0
         }
     }
-    
+
     private func clearCanvas() {
         grid = Array(repeating: Array(repeating: 0.0, count: gridSize), count: gridSize)
     }
-    
+
     private func getNeuralNetworkInput() -> [Double] {
-        return grid.flatMap { $0 }
+        grid.flatMap(\.self)
     }
 }
 

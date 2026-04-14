@@ -11,7 +11,7 @@ enum PlaceType: String, Hashable, Codable {
     case cafe
     case sight
     case coworkingSpace
-    
+
     func iconName() -> String {
         switch self {
         case .coffee: "cup.and.saucer.fill"

@@ -12,7 +12,7 @@ struct PlaceInfoView: View {
 
     @State private var isShowingNeuralSheet = false
 
-    let newPlace: (any MapItem)
+    let newPlace: any MapItem
     let placeManager: PlaceManager
 
     @Binding var currentDetent: PresentationDetent
@@ -47,7 +47,6 @@ struct PlaceInfoView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    @ViewBuilder
     private func menuSection(for cafe: Cafe) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Меню")
@@ -65,7 +64,7 @@ struct PlaceInfoView: View {
         VStack(alignment: .leading) {
             PlaceInfo()
                 .padding(.top, 20)
-            
+
             Divider()
 
             if currentDetent == .large {
@@ -148,8 +147,8 @@ struct DishRow: View {
     }
 }
 
-extension PlaceInfoView {
-    fileprivate func PlaceFooter() -> some View {
+private extension PlaceInfoView {
+    func PlaceFooter() -> some View {
         HStack(spacing: 12) {
             if endLocation == nil {
                 Button {
@@ -182,25 +181,26 @@ extension PlaceInfoView {
 }
 
 #Preview {
-    PlaceInfoView(newPlace: Cafe(
-        tempId: "001",
-        iconCord: GridPoint(row: 10, col: 10),
-        entryCord: GridPoint(row: 11, col: 11),
-        name: "Абрикос",
-        type: PlaceType.cafe,
-        address: "пр. Ленина, 36",
-        rating: 4.8,
-        dishes: [
-            Dish(name: "Флэт уайт", price: 199, type: .drink),
-            Dish(name: "Круассан с миндалём", price: 179, type: .breakfast),
-            Dish(name: "Боул с лососем", price: 420, type: .lunch),
-            Dish(name: "Тирамису", price: 280, type: .desert)
-        ]
-    ),
-                  placeManager: PlaceManager(),
-                  currentDetent: .constant(.large),
-                  endLocation: .constant(nil as GridPoint?),
-                  intermediatePoints: .constant([]),
-                  clusters: .constant([]),
+    PlaceInfoView(
+        newPlace: Cafe(
+            tempId: "001",
+            iconCord: GridPoint(row: 10, col: 10),
+            entryCord: GridPoint(row: 11, col: 11),
+            name: "Абрикос",
+            type: PlaceType.cafe,
+            address: "пр. Ленина, 36",
+            rating: 4.8,
+            dishes: [
+                Dish(name: "Флэт уайт", price: 199, type: .drink),
+                Dish(name: "Круассан с миндалём", price: 179, type: .breakfast),
+                Dish(name: "Боул с лососем", price: 420, type: .lunch),
+                Dish(name: "Тирамису", price: 280, type: .desert),
+            ]
+        ),
+        placeManager: PlaceManager(),
+        currentDetent: .constant(.large),
+        endLocation: .constant(nil as GridPoint?),
+        intermediatePoints: .constant([]),
+        clusters: .constant([])
     )
 }

@@ -9,7 +9,7 @@ import Foundation
 struct AntPath {
     var places: [Int]
     var dist: Int
-    
+
     init(dist: Int = 0) {
         places = []
         self.dist = dist

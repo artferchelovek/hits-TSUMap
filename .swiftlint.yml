@@ -27,3 +27,4 @@ included:
 excluded:
   - Pods
   - Carthage
+  - TSUMap/Models/MapData.swift

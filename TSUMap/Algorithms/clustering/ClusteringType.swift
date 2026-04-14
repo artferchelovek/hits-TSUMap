@@ -9,12 +9,12 @@ enum ClusteringType: String {
         case .aStar:
             let dist = cashe.getDistance(firstPlace: firstPoint, secondPlace: secondPoint)
             return Double(dist)
-        case . byStraight:
+        case .byStraight:
             return EuclideanDistance(firstPoint.entryCord, secondPoint.entryCord)
         }
     }
 }
 
 func EuclideanDistance(_ firstPoint: GridPoint, _ secondPoint: GridPoint) -> Double {
-    return sqrt(pow(CGFloat(firstPoint.col - secondPoint.col), 2) + pow(CGFloat(firstPoint.row - secondPoint.row), 2))
+    sqrt(pow(CGFloat(firstPoint.col - secondPoint.col), 2) + pow(CGFloat(firstPoint.row - secondPoint.row), 2))
 }

@@ -9,16 +9,16 @@ import Foundation
 struct Time: Codable, Hashable {
     private var _timeEntry: String?
     private var _timeClose: String?
-    
+
     var isDayOff: Bool
-    
+
     var timeEntry: DateComponents? {
         guard let parts = _timeEntry?.split(separator: ":").compactMap({ Int($0) }), parts.count >= 2 else {
             return nil
         }
         return DateComponents(hour: parts[0], minute: parts[1])
     }
-    
+
     var timeClose: DateComponents? {
         guard let parts = _timeClose?.split(separator: ":").compactMap({ Int($0) }), parts.count >= 2 else {
             return nil
@@ -27,18 +27,18 @@ struct Time: Codable, Hashable {
     }
 
     var isClosed: Bool {
-        return isDayOff || _timeEntry == nil || _timeClose == nil
+        isDayOff || _timeEntry == nil || _timeClose == nil
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case _timeEntry = "timeEntry"
         case _timeClose = "timeClose"
-        case isDayOff = "isDayOff"
+        case isDayOff
     }
-    
+
     init(entry: String?, close: String?, isDayOff: Bool = false) {
-        self._timeEntry = entry
-        self._timeClose = close
+        _timeEntry = entry
+        _timeClose = close
         self.isDayOff = isDayOff
     }
 }

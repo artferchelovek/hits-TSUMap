@@ -14,14 +14,14 @@ struct IdentifiablePlace: Identifiable {
 struct SettingsDecisionTreeView: View {
     @ObservedObject var manager: VenueManager
     @ObservedObject var placeManager: PlaceManager
-    
+
     @State private var activePlace: IdentifiablePlace?
-    
+
     var body: some View {
         NavigationView {
             List {
                 let grouped = manager.groupedAttributes
-                
+
                 ForEach(grouped.keys.sorted(), id: \.self) { name in
                     HStack {
                         VStack(alignment: .leading) {
@@ -48,7 +48,7 @@ struct SettingsDecisionTreeView: View {
                     }
                 }
             }
-            
+
             .navigationTitle("Настроить предпочтения")
             .toolbarTitleDisplayMode(.inline)
             .toolbar {
@@ -60,7 +60,7 @@ struct SettingsDecisionTreeView: View {
                             .foregroundColor(.red)
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         activePlace = IdentifiablePlace(id: "NEW_VENUE")
@@ -84,12 +84,12 @@ struct EditVenueView: View {
     @ObservedObject var manager: VenueManager
     @ObservedObject var placeManager: PlaceManager
     @Environment(\.dismiss) var dismiss
-    
+
     var venueName: String?
-    
+
     @State private var placeName = ""
     @State private var selections: [String: Set<String>] = [:]
-    
+
     var body: some View {
         NavigationView {
             Form {
@@ -98,8 +98,10 @@ struct EditVenueView: View {
                         if placeName.isEmpty {
                             Text("Не выбрано").tag("")
                         }
-                        
-                        ForEach(placeManager.getAllCafes().values.sorted(by: { $0.item.name < $1.item.name })) {place in
+
+                        ForEach(placeManager.getAllCafes().values
+                            .sorted(by: { $0.item.name < $1.item.name }))
+                        { place in
                             let formattedValue = "\(place.item.name)@\(place.id)"
                             Text(place.item.name)
                                 .tag(formattedValue)
@@ -108,7 +110,7 @@ struct EditVenueView: View {
                     .pickerStyle(.navigationLink)
                     .disabled(venueName != nil)
                 }
-                
+
                 ForEach(AppConfig.questions) { question in
                     makeMultiSelectSection(
                         title: question.title,
@@ -119,7 +121,6 @@ struct EditVenueView: View {
                 }
             }
             .navigationTitle(venueName == nil ? "Новое место" : "Настройка")
-            
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Отмена") { dismiss() }
@@ -132,20 +133,25 @@ struct EditVenueView: View {
             .onAppear { loadExistingData() }
         }
     }
-    
+
     private var isSaveDisabled: Bool {
         let allSectionsSelected = AppConfig.questions.allSatisfy { q in
-                !(selections[q.key]?.isEmpty ?? true)
-            }
+            !(selections[q.key]?.isEmpty ?? true)
+        }
         return placeName.isEmpty || !allSectionsSelected
     }
-    
-    private func makeMultiSelectSection(title: String, options: [QuestionConfig.Option], key: String, color: Color) -> some View {
+
+    private func makeMultiSelectSection(
+        title: String,
+        options: [QuestionConfig.Option],
+        key: String,
+        color: Color
+    ) -> some View {
         Section(header: Text(title)) {
             ForEach(options) { option in
                 Button(action: {
                     if selections[key] == nil { selections[key] = [] }
-                    
+
                     if selections[key]!.contains(option.value) {
                         selections[key]!.remove(option.value)
                     } else {
@@ -168,42 +174,42 @@ struct EditVenueView: View {
             }
         }
     }
-    
+
     private func loadExistingData() {
         guard let name = venueName else { return }
         placeName = name
         let rows = manager.allAttributes.filter { $0.recommended_place == name }
-        
+
         for question in AppConfig.questions {
             let values = rows.map { row in
                 switch question.key {
-                case "location": return row.location
-                case "budget": return row.budget
-                case "time_available": return row.time_available
-                case "food_type": return row.food_type
-                case "queue_tolerance": return row.queue_tolerance
-                case "weather": return row.weather
-                default: return ""
+                case "location": row.location
+                case "budget": row.budget
+                case "time_available": row.time_available
+                case "food_type": row.food_type
+                case "queue_tolerance": row.queue_tolerance
+                case "weather": row.weather
+                default: ""
                 }
             }
             selections[question.key] = Set(values)
         }
     }
-    
+
     private func saveComplexAction() {
         if let name = venueName {
             manager.removeAllEntries(named: name)
         }
-        
+
         let locs = selections["location"] ?? []
         let buds = selections["budget"] ?? []
         let times = selections["time_available"] ?? []
         let foods = selections["food_type"] ?? []
         let queues = selections["queue_tolerance"] ?? []
         let weathers = selections["weather"] ?? []
-        
+
         var newEntries: [TreeAttribute] = []
-        
+
         for loc in locs {
             for bud in buds {
                 for tim in times {
@@ -227,7 +233,7 @@ struct EditVenueView: View {
                 }
             }
         }
-        
+
         manager.allAttributes.append(contentsOf: newEntries)
         manager.save()
         dismiss()

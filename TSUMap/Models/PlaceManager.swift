@@ -1,6 +1,7 @@
+import Combine
 import Foundation
 import SwiftUI
-import Combine
+
 @MainActor
 final class PlaceManager: ObservableObject {
     @Published var cafes: [String: Cafe] = [:]
@@ -13,8 +14,8 @@ final class PlaceManager: ObservableObject {
         loadData()
     }
 
-    public func setGrid(grid: [[CellType]]) {
-        self.aStarPaths = AStarCash(grid: grid)
+    func setGrid(grid: [[CellType]]) {
+        aStarPaths = AStarCash(grid: grid)
     }
 
     private func loadData() {
@@ -36,13 +37,13 @@ final class PlaceManager: ObservableObject {
             var dictCoworkings: [String: Coworking] = [:]
             var dictSights: [String: Sight] = [:]
 
-            try JSONDecoder().decode([Coworking].self, from: dataCoworkings).forEach({dictCoworkings[$0.id] = $0})
-            try JSONDecoder().decode([Cafe].self, from: dataCafes).forEach({dictCafes[$0.id] = $0})
-            try JSONDecoder().decode([Sight].self, from: dataSights).forEach({dictSights[$0.id] = $0})
+            try JSONDecoder().decode([Coworking].self, from: dataCoworkings).forEach { dictCoworkings[$0.id] = $0 }
+            try JSONDecoder().decode([Cafe].self, from: dataCafes).forEach { dictCafes[$0.id] = $0 }
+            try JSONDecoder().decode([Sight].self, from: dataSights).forEach { dictSights[$0.id] = $0 }
 
-            self.coworkings = dictCoworkings
-            self.sights = dictSights
-            self.cafes = dictCafes
+            coworkings = dictCoworkings
+            sights = dictSights
+            cafes = dictCafes
 
             applyStoredRatings()
         } catch {
@@ -68,7 +69,7 @@ final class PlaceManager: ObservableObject {
         }
     }
 
-    public func updateRating(for placeId: String, newRating: Double) {
+    func updateRating(for placeId: String, newRating: Double) {
         ratingStorage.updateRating(for: placeId, newRating: newRating)
 
         if var cafe = cafes[placeId] {
@@ -85,32 +86,37 @@ final class PlaceManager: ObservableObject {
             sights[placeId] = sight
         }
     }
-    
-    public func clustering(numberClusters: Int, typeClustering: ClusteringType, data: [Cafe]) -> [Cluster] {
+
+    func clustering(numberClusters: Int, typeClustering: ClusteringType, data: [Cafe]) -> [Cluster] {
         guard let paths = aStarPaths else {
             return []
         }
-        
-        return Clustering(data: data, numberOfClusters: numberClusters, clusteringType: typeClustering, aStarPaths: paths).startClustering()
+
+        return Clustering(
+            data: data,
+            numberOfClusters: numberClusters,
+            clusteringType: typeClustering,
+            aStarPaths: paths
+        ).startClustering()
     }
-    
-    public func getAllPlaces() -> [String: IdentifiableItem] {
+
+    func getAllPlaces() -> [String: IdentifiableItem] {
         var allPlace: [String: IdentifiableItem] = [:]
-        cafes.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
-        sights.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
-        coworkings.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
-        
+        cafes.forEach { allPlace[$0.key] = IdentifiableItem(item: $0.value) }
+        sights.forEach { allPlace[$0.key] = IdentifiableItem(item: $0.value) }
+        coworkings.forEach { allPlace[$0.key] = IdentifiableItem(item: $0.value) }
+
         return allPlace
     }
-    
-    public func getAllCafes() -> [String: IdentifiableItem] {
+
+    func getAllCafes() -> [String: IdentifiableItem] {
         var allPlace: [String: IdentifiableItem] = [:]
-        cafes.forEach({allPlace[$0.key] = IdentifiableItem(item: $0.value)})
-                
+        cafes.forEach { allPlace[$0.key] = IdentifiableItem(item: $0.value) }
+
         return allPlace
     }
-    
-    public func getPlaceById(_ id: String) -> (IdentifiableItem)? {
+
+    func getPlaceById(_ id: String) -> (IdentifiableItem)? {
         let allPlaces = getAllPlaces()
         return allPlaces[id]
     }

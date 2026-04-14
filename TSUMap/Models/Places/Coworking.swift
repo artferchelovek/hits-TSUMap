@@ -4,8 +4,9 @@ struct Coworking: MapItem, Codable, Identifiable {
     private let tempId: String
     private let tempWorkSchedule: [String: Time]
     var id: String {
-         "\(type.rawValue)_\(tempId)"
+        "\(type.rawValue)_\(tempId)"
     }
+
     var workSchedule: [WeekDay: Time] {
         var dict: [WeekDay: Time] = [:]
         for (day, time) in tempWorkSchedule {
@@ -15,6 +16,7 @@ struct Coworking: MapItem, Codable, Identifiable {
         }
         return dict
     }
+
     var iconCord: GridPoint
     var entryCord: GridPoint
     var name: String
