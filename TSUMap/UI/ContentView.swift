@@ -68,7 +68,6 @@ struct ContentView: View {
             Button {
                 withAnimation(.spring()) {
                     paths = []
-                    startLocation = nil
                     endLocation = nil
                     intermediatePoints = []
                     animatePlusMinus = true
