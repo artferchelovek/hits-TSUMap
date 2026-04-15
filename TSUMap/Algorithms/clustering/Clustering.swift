@@ -62,13 +62,14 @@ class Clustering {
         return centers
     }
 
-    func startClustering() -> [Cluster] {
+    func startKMedoids() -> [Cluster] {
         var centroids = findCenters()
         var clusters: [Cluster] = []
         var isMedoidChanged = true
         let colors: [Color] = [.red, .blue, .green, .orange, .purple, .pink, .yellow, .cyan, .mint, .indigo]
         var iter = 0
-        let maxIter = 1000
+        let maxIter = 100
+
         while isMedoidChanged, iter < maxIter {
             isMedoidChanged = false
 
@@ -76,9 +77,11 @@ class Clustering {
                 let color = colors[i % colors.count]
                 return Cluster(medoid: medoid, color: color)
             }
+
             for place in dataPlace {
                 var minDist = Double.infinity
                 var minClust: Cluster = clusters[0]
+
                 for cluster in clusters {
                     let clustMedoid = cluster.medoid
                     let dist = clusteringType.metric(place, clustMedoid, aStarPaths)
@@ -109,6 +112,67 @@ class Clustering {
             iter += 1
             centroids = newCentroids
         }
+        return clusters
+    }
+
+    func startDBScan() -> [Cluster] {
+        let eps = 32.5
+        let m = 3
+
+        var clusters: [Cluster] = []
+        var clusteredPlaces: Set<Cafe> = []
+        var visitedPlaces: Set<Cafe> = []
+        var noisePlaces: Set<Cafe> = []
+
+        let placeInVicinity = { (place: Cafe) -> [Cafe] in
+            var places: [Cafe] = []
+            self.dataPlace.forEach { self.clusteringType.metric($0, place, self.aStarPaths) <= eps ? places.append($0) : nil }
+            return places
+        }
+
+        for place in dataPlace {
+            if visitedPlaces.contains(place) { continue }
+            visitedPlaces.insert(place)
+
+            var vicinityObjects = placeInVicinity(place)
+
+            if vicinityObjects.count < m {
+                noisePlaces.insert(place)
+            } else {
+                let clust = Cluster(medoid: place, color: .red)
+                clusteredPlaces.insert(place)
+                clust.placesInClust.append(place)
+
+                while !vicinityObjects.isEmpty {
+                    guard let x = vicinityObjects.popLast() else {
+                        break
+                    }
+
+                    if !visitedPlaces.contains(x) {
+                        visitedPlaces.insert(x)
+                        let placesEps = placeInVicinity(x)
+
+                        if placesEps.count > m {
+                            let newNeighbors = placesEps.filter { !visitedPlaces.contains($0) }
+                            vicinityObjects.append(contentsOf: newNeighbors)
+                        }
+                    }
+
+                    if !clusteredPlaces.contains(x) {
+                        clusteredPlaces.insert(x)
+                        clust.placesInClust.append(x)
+                        noisePlaces.remove(x)
+                    }
+                }
+                clusters.append(clust)
+            }
+        }
+        for place in noisePlaces {
+            var clust = Cluster(medoid: place, color: .blue)
+            clust.placesInClust.append(place)
+            clusters.append(clust)
+        }
+
         return clusters
     }
 }

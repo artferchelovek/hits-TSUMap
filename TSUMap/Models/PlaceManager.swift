@@ -51,6 +51,18 @@ final class PlaceManager: ObservableObject {
         }
     }
 
+    func clustering(numberClusters: Int, typeClustering: ClusteringType, typeAlgorithm: ClusteringAlgorithmType = .KMedoids, data: [Cafe]) -> [Cluster] {
+        guard let paths = aStarPaths else {
+            return []
+        }
+        switch typeAlgorithm {
+        case .DBScan:
+            return Clustering(data: data, numberOfClusters: numberClusters, clusteringType: typeClustering, aStarPaths: paths).startDBScan()
+        case .KMedoids:
+            return Clustering(data: data, numberOfClusters: numberClusters, clusteringType: typeClustering, aStarPaths: paths).startKMedoids()
+        }
+    }
+
     private func applyStoredRatings() {
         for (placeId, ratingData) in ratingStorage.ratings {
             if var cafe = cafes[placeId] {
@@ -85,19 +97,6 @@ final class PlaceManager: ObservableObject {
             sight.ratingCount = ratingStorage.ratings[placeId]?.ratingCount ?? sight.ratingCount
             sights[placeId] = sight
         }
-    }
-
-    func clustering(numberClusters: Int, typeClustering: ClusteringType, data: [Cafe]) -> [Cluster] {
-        guard let paths = aStarPaths else {
-            return []
-        }
-
-        return Clustering(
-            data: data,
-            numberOfClusters: numberClusters,
-            clusteringType: typeClustering,
-            aStarPaths: paths
-        ).startClustering()
     }
 
     func getAllPlaces() -> [String: IdentifiableItem] {
