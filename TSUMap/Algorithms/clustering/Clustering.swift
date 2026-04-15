@@ -120,7 +120,7 @@ class Clustering {
         let m = 3
 
         var clusters: [Cluster] = []
-        var clusteredPlace: Set<Cafe> = []
+        var clusteredPlaces: Set<Cafe> = []
         var visitedPlaces: Set<Cafe> = []
         var noisePlaces: Set<Cafe> = []
 
@@ -140,7 +140,7 @@ class Clustering {
                 noisePlaces.insert(place)
             } else {
                 let clust = Cluster(medoid: place, color: .red)
-                clusteredPlace.insert(place)
+                clusteredPlaces.insert(place)
                 clust.placesInClust.append(place)
 
                 while !vicinityObjects.isEmpty {
@@ -158,8 +158,8 @@ class Clustering {
                         }
                     }
 
-                    if !clusteredPlace.contains(x) {
-                        clusteredPlace.insert(x)
+                    if !clusteredPlaces.contains(x) {
+                        clusteredPlaces.insert(x)
                         clust.placesInClust.append(x)
                         noisePlaces.remove(x)
                     }
