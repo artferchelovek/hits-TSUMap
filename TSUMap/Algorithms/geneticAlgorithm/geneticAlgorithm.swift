@@ -6,6 +6,21 @@
 //
 import Foundation
 
+extension WeekDay {
+    init(calendarIndex: Int) {
+        switch calendarIndex {
+        case 1: self = .Sunday
+        case 2: self = .Monday
+        case 3: self = .Tuesday
+        case 4: self = .Wednesday
+        case 5: self = .Thursday
+        case 6: self = .Friday
+        case 7: self = .Saturday
+        default: self = .Monday
+        }
+    }
+}
+
 struct Route {
     var cafesToVisit: [Cafe]
     var fitness: Double
@@ -25,17 +40,16 @@ class GeneticAlgorithm {
 
     var dishToCafes: [String: [Cafe]] = [:]
 
+    private let penaltyDistance = 10000
+    private let fitnessMultiplier = 10000.0
+
     init(cafes: [Cafe], grid: [[CellType]]) {
         allCafes = cafes
         self.grid = grid
 
         for cafe in cafes {
             for dish in cafe.dishes {
-                if dishToCafes[dish.name] != nil {
-                    dishToCafes[dish.name]?.append(cafe)
-                } else {
-                    dishToCafes[dish.name] = [cafe]
-                }
+                dishToCafes[dish.name, default: []].append(cafe)
             }
         }
     }
@@ -44,7 +58,7 @@ class GeneticAlgorithm {
         startDistances.removeAll()
         for cafe in allCafes {
             let path = AStar(graph: grid, start: startLocation, end: cafe.entryCord)
-            startDistances[cafe.id] = path.isEmpty ? 10000 : path.count
+            startDistances[cafe.id] = path.isEmpty ? penaltyDistance : path.count
         }
     }
 
@@ -60,7 +74,6 @@ class GeneticAlgorithm {
                     randomPath.append(randomCafe)
                 }
             }
-
             population.append(Route(cafesToVisit: randomPath, fitness: 0.0))
         }
     }
@@ -69,37 +82,34 @@ class GeneticAlgorithm {
         let currentDay = getCurrentWeekDay()
 
         for i in 0 ..< population.count {
-            let route = population[i]
-            var totalCost = 0.0
+            var route = population[i]
+            var totalTime = 0
 
-            var uniqueCafes: [Cafe] = []
-            for cafe in route.cafesToVisit {
-                if !uniqueCafes.contains(where: { $0.id == cafe.id }) {
-                    uniqueCafes.append(cafe)
+            for j in 0 ..< route.cafesToVisit.count {
+                let currentCafe = route.cafesToVisit[j]
+
+                if currentCafe.workSchedule[currentDay]?.isClosed == true {
+                    totalTime += penaltyDistance
                 }
-            }
 
-            if let firstCafe = uniqueCafes.first {
-                let distToFirst = Double(startDistances[firstCafe.id] ?? 10000)
-                totalCost += (distToFirst * 4.5) / 1.38
-            }
-
-            if uniqueCafes.count > 1 {
-                for index in 0 ..< (uniqueCafes.count - 1) {
-                    let cafeA = uniqueCafes[index]
-                    let cafeB = uniqueCafes[index + 1]
-
-                    let distance = Double(aStarCache?.getDistance(firstPlace: cafeA, secondPlace: cafeB) ?? 10000)
-
-                    totalCost += (distance * 4.5) / 1.38
-
-                    if cafeB.workSchedule[currentDay]?.isClosed == true {
-                        totalCost += 100_000.0
+                if j == 0 {
+                    if let dist = startDistances[currentCafe.id] {
+                        totalTime += dist
+                    } else {
+                        totalTime += penaltyDistance
+                    }
+                } else {
+                    let prevCafe = route.cafesToVisit[j - 1]
+                    if let cache = aStarCache {
+                        totalTime += cache.getDistance(firstPlace: prevCafe, secondPlace: currentCafe)
+                    } else {
+                        let directPath = AStar(graph: grid, start: prevCafe.entryCord, end: currentCafe.entryCord)
+                        totalTime += directPath.isEmpty ? penaltyDistance : directPath.count
                     }
                 }
             }
-
-            population[i].fitness = 10000.0 / (totalCost + 1.0)
+            route.fitness = fitnessMultiplier / Double(totalTime + 1)
+            population[i] = route
         }
     }
 
@@ -134,26 +144,13 @@ class GeneticAlgorithm {
         let contender2 = population.randomElement()!
         return contender1.fitness > contender2.fitness ? contender1 : contender2
     }
-    
-    private func getCurrentWeekDay() -> WeekDay {
-        let calendar = Calendar.current
-        let dayIndex = calendar.component(.weekday, from: Date())
 
-        switch dayIndex {
-        case 1: return .Sunday
-        case 2: return .Monday
-        case 3: return .Tuesday
-        case 4: return .Wednesday
-        case 5: return .Thursday
-        case 6: return .Friday
-        case 7: return .Saturday
-        default: return .Monday
-        }
+    private func getCurrentWeekDay() -> WeekDay {
+        let dayIndex = Calendar.current.component(.weekday, from: Date())
+        return WeekDay(calendarIndex: dayIndex)
     }
 
-    func startEvolution(neededDishes: [Dish], userLocation: GridPoint, onProgressUpdate: @escaping (Route) -> Void) -> Route? {
-        if neededDishes.isEmpty { return nil }
-
+    func startEvolution(neededDishes: [Dish], userLocation: GridPoint, onProgressUpdate: (Route) -> Void) -> Route? {
         initStartDistances(startLocation: userLocation)
         generateInitialPopulation(neededDishes: neededDishes)
 
