@@ -6,26 +6,6 @@
 //
 import Foundation
 
-extension WeekDay {
-    init(calendarIndex: Int) {
-        switch calendarIndex {
-        case 1: self = .Sunday
-        case 2: self = .Monday
-        case 3: self = .Tuesday
-        case 4: self = .Wednesday
-        case 5: self = .Thursday
-        case 6: self = .Friday
-        case 7: self = .Saturday
-        default: self = .Monday
-        }
-    }
-}
-
-struct Route {
-    var cafesToVisit: [Cafe]
-    var fitness: Double
-}
-
 class GeneticAlgorithm {
     var populationSize: Int = 50
     var mutationRate: Double = 0.1
@@ -150,7 +130,7 @@ class GeneticAlgorithm {
         return WeekDay(calendarIndex: dayIndex)
     }
 
-    func startEvolution(neededDishes: [Dish], userLocation: GridPoint, onProgressUpdate: (Route) -> Void) -> Route? {
+    func startEvolution(neededDishes: [Dish], userLocation: GridPoint, onProgressUpdate: (Route) -> Void) -> Route {
         initStartDistances(startLocation: userLocation)
         generateInitialPopulation(neededDishes: neededDishes)
 
