@@ -6,215 +6,187 @@
 //
 import Foundation
 
-struct RouteChromosome {
-    var cafes: [Cafe]
-    var fitness: Double = 0.0
-    var totalTime: Double = 0.0
+struct Route {
+    var cafesToVisit: [Cafe]
+    var fitness: Double
 }
 
-class FoodGeneticAlgorithm {
-    
-    private let startPoint: GridPoint
-    private let desiredDishes: [Dish]
-    private let allCafes: [Cafe]
-    
-    private let populationSize: Int
-    private let generations: Int
-    private let mutationRate: Double
-    
-    private let walkingSpeedKmH: Double = 5.0
-    private let metersPerGridCell: Double = 10.0
-    
-    var onBestRouteUpdated: (([Cafe]) -> Void)?
-    
-    init(startPoint: GridPoint, desiredDishes: [Dish], allCafes: [Cafe], populationSize: Int = 50, generations: Int = 100, mutationRate: Double = 0.1) {
-        self.startPoint = startPoint
-        self.desiredDishes = desiredDishes
-        self.allCafes = allCafes
-        self.populationSize = populationSize
-        self.generations = generations
-        self.mutationRate = mutationRate
+class GeneticAlgorithm {
+    var populationSize: Int = 50
+    var mutationRate: Double = 0.1
+    var generations: Int = 100
+
+    var population: [Route] = []
+
+    let allCafes: [Cafe]
+    var aStarCache: AStarCash?
+    let grid: [[CellType]]
+    private var startDistances: [String: Int] = [:]
+
+    var dishToCafes: [String: [Cafe]] = [:]
+
+    init(cafes: [Cafe], grid: [[CellType]]) {
+        allCafes = cafes
+        self.grid = grid
+
+        for cafe in cafes {
+            for dish in cafe.dishes {
+                if dishToCafes[dish.name] != nil {
+                    dishToCafes[dish.name]?.append(cafe)
+                } else {
+                    dishToCafes[dish.name] = [cafe]
+                }
+            }
+        }
+    }
+
+    private func initStartDistances(startLocation: GridPoint) {
+        startDistances.removeAll()
+        for cafe in allCafes {
+            let path = AStar(graph: grid, start: startLocation, end: cafe.entryCord)
+            startDistances[cafe.id] = path.isEmpty ? 10000 : path.count
+        }
+    }
+
+    private func generateInitialPopulation(neededDishes: [Dish]) {
+        population.removeAll()
+
+        for _ in 0 ..< populationSize {
+            var randomPath: [Cafe] = []
+
+            for dish in neededDishes {
+                if let availableCafes = dishToCafes[dish.name], !availableCafes.isEmpty {
+                    let randomCafe = availableCafes.randomElement()!
+                    randomPath.append(randomCafe)
+                }
+            }
+
+            population.append(Route(cafesToVisit: randomPath, fitness: 0.0))
+        }
+    }
+
+    private func calculateFitnessForAll() {
+        let currentDay = getCurrentWeekDay()
+
+        for i in 0 ..< population.count {
+            let route = population[i]
+            var totalCost = 0.0
+
+            var uniqueCafes: [Cafe] = []
+            for cafe in route.cafesToVisit {
+                if !uniqueCafes.contains(where: { $0.id == cafe.id }) {
+                    uniqueCafes.append(cafe)
+                }
+            }
+
+            if let firstCafe = uniqueCafes.first {
+                let distToFirst = Double(startDistances[firstCafe.id] ?? 10000)
+                totalCost += (distToFirst * 4.5) / 1.38
+            }
+
+            if uniqueCafes.count > 1 {
+                for index in 0 ..< (uniqueCafes.count - 1) {
+                    let cafeA = uniqueCafes[index]
+                    let cafeB = uniqueCafes[index + 1]
+
+                    let distance = Double(aStarCache?.getDistance(firstPlace: cafeA, secondPlace: cafeB) ?? 10000)
+
+                    totalCost += (distance * 4.5) / 1.38
+
+                    if cafeB.workSchedule[currentDay]?.isClosed == true {
+                        totalCost += 100_000.0
+                    }
+                }
+            }
+
+            population[i].fitness = 10000.0 / (totalCost + 1.0)
+        }
+    }
+
+    private func crossover(parent1: Route, parent2: Route) -> Route {
+        let splitIndex = Int.random(in: 0 ..< parent1.cafesToVisit.count)
+        var childCafes: [Cafe] = []
+
+        for i in 0 ..< parent1.cafesToVisit.count {
+            if i < splitIndex {
+                childCafes.append(parent1.cafesToVisit[i])
+            } else {
+                childCafes.append(parent2.cafesToVisit[i])
+            }
+        }
+        return Route(cafesToVisit: childCafes, fitness: 0.0)
+    }
+
+    private func mutate(route: inout Route, neededDishes: [Dish]) {
+        if Double.random(in: 0 ... 1) < mutationRate {
+            let mutateIndex = Int.random(in: 0 ..< route.cafesToVisit.count)
+            let dishToMutate = neededDishes[mutateIndex]
+
+            if let availableCafes = dishToCafes[dishToMutate.name] {
+                let randomCafe = availableCafes.randomElement()!
+                route.cafesToVisit[mutateIndex] = randomCafe
+            }
+        }
+    }
+
+    private func selectParent() -> Route {
+        let contender1 = population.randomElement()!
+        let contender2 = population.randomElement()!
+        return contender1.fitness > contender2.fitness ? contender1 : contender2
     }
     
-    func findOptimalRoute() -> [Cafe] {
-        let relevantCafes = filterRelevantCafes(for: desiredDishes, from: allCafes)
-        
-        guard !relevantCafes.isEmpty else { return [] }
-        
-        var population = generateInitialPopulation(cafes: relevantCafes)
-        var globalBestRoute: RouteChromosome?
-        
-        for _ in 0..<generations {
-            evaluatePopulation(&population)
-            
-            population.sort(by: { $0.fitness > $1.fitness })
-            
-            let currentBest = population.first!
-            if globalBestRoute == nil || currentBest.fitness > globalBestRoute!.fitness {
-                globalBestRoute = currentBest
+    private func getCurrentWeekDay() -> WeekDay {
+        let calendar = Calendar.current
+        let dayIndex = calendar.component(.weekday, from: Date())
+
+        switch dayIndex {
+        case 1: return .Sunday
+        case 2: return .Monday
+        case 3: return .Tuesday
+        case 4: return .Wednesday
+        case 5: return .Thursday
+        case 6: return .Friday
+        case 7: return .Saturday
+        default: return .Monday
+        }
+    }
+
+    func startEvolution(neededDishes: [Dish], userLocation: GridPoint, onProgressUpdate: @escaping (Route) -> Void) -> Route? {
+        if neededDishes.isEmpty { return nil }
+
+        initStartDistances(startLocation: userLocation)
+        generateInitialPopulation(neededDishes: neededDishes)
+
+        var bestRouteOverall = population[0]
+
+        for _ in 1 ... generations {
+            calculateFitnessForAll()
+
+            var currentBest = population[0]
+            for route in population {
+                if route.fitness > currentBest.fitness {
+                    currentBest = route
+                }
             }
-            
-            if let best = globalBestRoute {
-                onBestRouteUpdated?(best.cafes)
+
+            if currentBest.fitness > bestRouteOverall.fitness {
+                bestRouteOverall = currentBest
             }
-            
-            var newPopulation: [RouteChromosome] = [globalBestRoute!]
-            
+
+            onProgressUpdate(bestRouteOverall)
+
+            var newPopulation: [Route] = [bestRouteOverall]
             while newPopulation.count < populationSize {
-                let parent1 = selectParent(from: population)
-                let parent2 = selectParent(from: population)
+                let parent1 = selectParent()
+                let parent2 = selectParent()
+
                 var child = crossover(parent1: parent1, parent2: parent2)
-                mutate(&child, availableCafes: relevantCafes)
+                mutate(route: &child, neededDishes: neededDishes)
                 newPopulation.append(child)
             }
-            
             population = newPopulation
         }
-        
-        return globalBestRoute?.cafes ?? []
-    }
-    
-    private func generateInitialPopulation(cafes: [Cafe]) -> [RouteChromosome] {
-        var population: [RouteChromosome] = []
-        for _ in 0..<populationSize {
-            let randomRoute = generateValidRandomRoute(from: cafes)
-            population.append(RouteChromosome(cafes: randomRoute))
-        }
-        return population
-    }
-    
-    private func generateValidRandomRoute(from cafes: [Cafe]) -> [Cafe] {
-        var route: [Cafe] = []
-        var unsatisfiedDishes = Set(desiredDishes)
-        var availableCafes = cafes.shuffled()
-        
-        for cafe in availableCafes {
-            if unsatisfiedDishes.isEmpty { break }
-            let cafeDishes = Set(cafe.dishes)
-            let intersection = unsatisfiedDishes.intersection(cafeDishes)
-            
-            if !intersection.isEmpty {
-                route.append(cafe)
-                unsatisfiedDishes.subtract(intersection)
-            }
-        }
-        return route.shuffled()
-    }
-    
-    private func evaluatePopulation(_ population: inout [RouteChromosome]) {
-        for i in 0..<population.count {
-            population[i].fitness = calculateFitness(for: population[i])
-        }
-    }
-    
-    private func calculateFitness(for route: RouteChromosome) -> Double {
-        var totalMinutes: Double = 0.0
-        var currentPoint = startPoint
-        var penalty: Double = 0.0
-        
-        let startTime = Date()
-        var collectedDishes = Set<String>()
-        
-        for cafe in route.cafes {
-            let distanceMeters = calculateDistance(from: currentPoint, to: cafe.entryCord)
-            let travelTime = distanceMeters / 83.3
-            totalMinutes += travelTime
-            
-            let arrivalTime = startTime.addingTimeInterval(totalMinutes * 60)
-            
-            if isCafeClosed(cafe, at: arrivalTime) {
-                penalty += 5000
-            }
-            
-            let dishNames = cafe.dishes.map { $0.name }
-            collectedDishes.formUnion(dishNames)
-            
-            currentPoint = cafe.entryCord
-        }
-        
-        let desiredNames = Set(desiredDishes.map { $0.name })
-        let missingCount = desiredNames.subtracting(collectedDishes).count
-        
-        if missingCount > 0 {
-            penalty += Double(missingCount * 2000)
-        }
-        
-        let totalCost = totalMinutes + penalty
 
-        return 100000.0 / (totalCost + 1.0)
-    }
-
-    private func isCafeClosed(_ cafe: Cafe, at date: Date) -> Bool {
-        let calendar = Calendar.current
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEEE"
-        dateFormatter.locale = Locale(identifier: "en_US")
-        let dayName = dateFormatter.string(from: date)
-        
-        guard let weekDay = WeekDay(rawValue: dayName),
-              let schedule = cafe.workSchedule[weekDay] else {
-            return true
-        }
-        
-        if schedule.isClosed { return true }
-        
-        let components = calendar.dateComponents([.hour, .minute], from: date)
-        let arrivalMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
-        
-        let openMinutes = (schedule.timeEntry?.hour ?? 0) * 60 + (schedule.timeEntry?.minute ?? 0)
-        let closeMinutes = (schedule.timeClose?.hour ?? 23) * 60 + (schedule.timeClose?.minute ?? 59)
-        
-        return arrivalMinutes < openMinutes || arrivalMinutes >= closeMinutes
-    }
-    
-    private func selectParent(from population: [RouteChromosome]) -> RouteChromosome {
-        let tournamentSize = 3
-        var best: RouteChromosome?
-        for _ in 0..<tournamentSize {
-            let randomInd = population.randomElement()!
-            if best == nil || randomInd.fitness > best!.fitness {
-                best = randomInd
-            }
-        }
-        return best!
-    }
-    
-    private func crossover(parent1: RouteChromosome, parent2: RouteChromosome) -> RouteChromosome {
-        guard parent1.cafes.count > 1, parent2.cafes.count > 1 else { return parent1 }
-        
-        let crossoverPoint = Int.random(in: 1..<min(parent1.cafes.count, parent2.cafes.count))
-        let childCafes = Array(parent1.cafes.prefix(crossoverPoint) + parent2.cafes.suffix(from: crossoverPoint))
-        
-        return RouteChromosome(cafes: NSOrderedSet(array: childCafes).array as! [Cafe])
-    }
-    
-    private func mutate(_ route: inout RouteChromosome, availableCafes: [Cafe]) {
-        guard Double.random(in: 0..<1) < mutationRate else { return }
-        
-        if route.cafes.count > 1 && Bool.random() {
-            let idx1 = Int.random(in: 0..<route.cafes.count)
-            let idx2 = Int.random(in: 0..<route.cafes.count)
-            route.cafes.swapAt(idx1, idx2)
-        } else {
-            if let randomCafe = availableCafes.randomElement(), !route.cafes.contains(where: { $0.id == randomCafe.id }) {
-                route.cafes.append(randomCafe)
-            }
-        }
-    }
-
-    private func filterRelevantCafes(for dishes: [Dish], from cafes: [Cafe]) -> [Cafe] {
-        let desiredDishNames = Set(dishes.map { $0.name })
-        return cafes.filter { cafe in
-            let cafeDishNames = Set(cafe.dishes.map { $0.name })
-            return !cafeDishNames.isDisjoint(with: desiredDishNames)
-        }
-    }
-    
-    private func calculateDistance(from p1: GridPoint, to p2: GridPoint) -> Double {
-        let dRow = Double(p1.row - p2.row)
-        let dCol = Double(p1.col - p2.col)
-        let cellsDistance = sqrt(dRow * dRow + dCol * dCol)
-        return cellsDistance * metersPerGridCell
+        return bestRouteOverall
     }
 }
