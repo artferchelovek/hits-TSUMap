@@ -17,9 +17,35 @@
             "Sunday": { "timeEntry": "08:00", "timeClose": "23:00", "isDayOff": false }
         },
         "dishes": [
-            { "name": "Флэт уайт", "price": 79, "type": "drink" },
-            { "name": "Латте", "price": 79, "type": "drink" },
-            { "name": "Капучино", "price": 79, "type": "drink" }
+
+            { "name": "Балык Дымов с/к нарезка 70г", "price": 99.99, "type": "lunch" },
+            { "name": "Ветчина ЛАМА Нежная 800г", "price": 409.99, "type": "lunch" },
+            { "name": "Говядина ЛАМА Деликатесная к/в (за кг)", "price": 1399.9, "type": "lunch" },
+            { "name": "Грудинка СИБАГРО в/к 300г", "price": 259.99, "type": "lunch" },
+            { "name": "Колбаса Дымов Салями Экстра с/к нарезка 90г", "price": 99.99, "type": "lunch" },
+            { "name": "Колбаса ЛАМА Докторская ГОСТ вареная 380г", "price": 299.99, "type": "lunch" },
+            { "name": "Колбаса ЛАМА Краковская ГОСТ п/к 300г", "price": 329.99, "type": "lunch" },
+            { "name": "Колбаса Останкино Итальянское Ассорти с/в нарезка 90г", "price": 139.99, "type": "lunch" },
+            { "name": "Колбаса СИБАГРО Докторская ГОСТ вареная 450г", "price": 219.99, "type": "lunch" },
+            { "name": "Колбаса СИБАГРО Молочная по-Сибирски 450г", "price": 159.99, "type": "lunch" },
+            { "name": "Колбаса СИБАГРО Чоризо с/к черева 160г", "price": 229.99, "type": "lunch" },
+            { "name": "Колбаса Таврия Балыковая в/к 350г", "price": 349.99, "type": "lunch" },
+            { "name": "Желе питьевое BLIKE Личи 160г", "price": 99.99, "type": "snack" },
+            { "name": "Желе питьевое BLIKE Манго 160г", "price": 99.99, "type": "snack" },
+            { "name": "Желе Хетстия Зеленый виноград 160г", "price": 179.99, "type": "snack" },
+            { "name": "Желе Хетстия Клубника 160г", "price": 179.99, "type": "snack" },
+            { "name": "Желе Хетстия Личи 160г", "price": 179.99, "type": "snack" },
+            { "name": "Напиток SPAR Личи 0,33л", "price": 84.99, "type": "drink" },
+            { "name": "Напиток SPAR Манго 0,33л", "price": 84.99, "type": "drink" },
+            { "name": "Напиток SPAR Маракуйя 0,33л", "price": 84.99, "type": "drink" },
+            { "name": "Напиток SPAR Фейхоа 0,33л", "price": 84.99, "type": "drink" },
+            { "name": "Биолимонад RIDE Ананас-Кокос 0,5л", "price": 129.99, "type": "drink" },
+            { "name": "Биолимонад RIDE Имбирный 0,5л", "price": 129.99, "type": "drink" },
+            { "name": "Биолимонад RIDE Клюква 0,5л", "price": 129.99, "type": "drink" },
+            { "name": "Капучино 280мл", "price": 69.99, "type": "drink" },
+            { "name": "Латте 280мл", "price": 69.99, "type": "drink" },
+            { "name": "Американо 200мл", "price": 49.99, "type": "drink" },
+            { "name": "Флэт Уайт 280мл", "price": 79.99, "type": "drink" }
         ]
     },
   {
@@ -137,7 +163,44 @@
           "Sunday": { "timeEntry": "10:00", "timeClose": "22:00", "isDayOff": false }
       },
       "dishes": [
-          { "name": "не знаю", "price": 120, "type": "breakfast" }
+          { "name": "Шаурма Брусника XL", "price": 350, "type": "lunch" },
+          { "name": "Шаурма Студенческая L", "price": 220, "type": "lunch" },
+          { "name": "Шаурма Студенческая XL", "price": 260, "type": "lunch" },
+          { "name": "Шаурма Гранат XL", "price": 350, "type": "lunch" },
+          { "name": "Гавайская L", "price": 300, "type": "lunch" },
+          { "name": "Гавайская XL", "price": 350, "type": "lunch" },
+          { "name": "Острая L", "price": 270, "type": "lunch" },
+          { "name": "Острая XL", "price": 320, "type": "lunch" },
+          { "name": "Грибная L", "price": 280, "type": "lunch" },
+          { "name": "Грибная XL", "price": 340, "type": "lunch" },
+          { "name": "Кавказская L", "price": 240, "type": "lunch" },
+          { "name": "Кавказская XL", "price": 290, "type": "lunch" },
+          { "name": "Сырная L", "price": 280, "type": "lunch" },
+          { "name": "Сырная XL", "price": 340, "type": "lunch" },
+          { "name": "Пепперони L", "price": 300, "type": "lunch" },
+          { "name": "Пепперони XL", "price": 350, "type": "lunch" },
+          { "name": "Картофель фри", "price": 100, "type": "snack" },
+          { "name": "Картофель по-деревенски", "price": 120, "type": "snack" },
+          { "name": "Наггетсы (5 шт)", "price": 120, "type": "snack" },
+          { "name": "Эспрессо", "price": 50, "type": "drink" },
+          { "name": "Американо", "price": 60, "type": "drink" },
+          { "name": "Капучино", "price": 80, "type": "drink" },
+          { "name": "Латте", "price": 80, "type": "drink" },
+          { "name": "Глинтвейн", "price": 100, "type": "drink" },
+          { "name": "Чай хвойный", "price": 100, "type": "drink" },
+          { "name": "Чай облепиха-имбирь", "price": 100, "type": "drink" },
+          { "name": "Чай клюква-можжевельник", "price": 100, "type": "drink" },
+          { "name": "Чай черный/зеленый", "price": 50, "type": "drink" },
+          { "name": "Молочный коктейль (в ассорт.)", "price": 150, "type": "drink" },
+          { "name": "Лимонад домашний", "price": 80, "type": "drink" },
+          { "name": "Лимонад грузинский", "price": 120, "type": "drink" },
+          { "name": "Мохито", "price": 80, "type": "drink" },
+          { "name": "Морс", "price": 80, "type": "drink" },
+          { "name": "Айран", "price": 80, "type": "drink" },
+          { "name": "Кола/Фанта/Спрайт", "price": 80, "type": "drink" },
+          { "name": "Холодный чай", "price": 80, "type": "drink" },
+          { "name": "Энергетик", "price": 100, "type": "drink" },
+          { "name": "Вода", "price": 50, "type": "drink" }
       ]
   },
   {
@@ -467,7 +530,25 @@
             "Sunday": { "timeEntry": "", "timeClose": "", "isDayOff": true }
           },
           "dishes": [
-            { "name": "раф на ванильным", "price": 120, "type": "breakfast" }
+              { "name": "Эспрессо (45 мл)", "price": 120, "type": "drink" },
+              { "name": "Эспрессо (90 мл)", "price": 150, "type": "drink" },
+              { "name": "Американо (200 мл)", "price": 150, "type": "drink" },
+              { "name": "Капучино (300 мл)", "price": 180, "type": "drink" },
+              { "name": "Капучино (400 мл)", "price": 220, "type": "drink" },
+              { "name": "Латте hot/cold (300 мл)", "price": 195, "type": "drink" },
+              { "name": "Латте hot/cold (400 мл)", "price": 235, "type": "drink" },
+              { "name": "Раф (300 мл)", "price": 230, "type": "drink" },
+              { "name": "Флэт-уайт (220 мл)", "price": 170, "type": "drink" },
+              { "name": "Моккачино (300 мл)", "price": 230, "type": "drink" },
+              { "name": "Эспрессо-Тоник (400 мл)", "price": 220, "type": "drink" },
+              { "name": "Шмель hot/cold (400 мл)", "price": 230, "type": "drink" },
+              { "name": "Матча [milk] hot/cold (300 мл)", "price": 235, "type": "drink" },
+              { "name": "Какао (300 мл)", "price": 160, "type": "drink" },
+              { "name": "Морс (500 мл)", "price": 110, "type": "drink" },
+              { "name": "Чай", "price": 60, "type": "drink" },
+              { "name": "Лимонад Манго-Маракуйя (400 мл)", "price": 180, "type": "drink" },
+              { "name": "Лимонад Мята-Лайм (400 мл)", "price": 180, "type": "drink" },
+              { "name": "Лимонад Груша (400 мл)", "price": 180, "type": "drink" }
           ]
         },
         {
