@@ -137,10 +137,10 @@ struct CampusMapView: View {
         selectedCluster: Binding<Cluster?>,
         clusters: Binding<[Cluster]>,
         showLocationAlert: Binding<Bool>,
-        isFollowingUser: Binding<Bool>
+        isFollowingUser: Binding<Bool>,
         visitedPoints: Binding<Set<GridPoint>>,
         correctPoints: Binding<[GridPoint]>,
-        p: Binding<Set<GridPoint>>
+        pathToCurrentPoint: Binding<Set<GridPoint>>
 
     ) {
         _startLocation = startLocation
@@ -154,7 +154,7 @@ struct CampusMapView: View {
 
         _visitedPoints = visitedPoints
         _pointsInQueue = correctPoints
-        _pathToCurrentPoint = p
+        _pathToCurrentPoint = pathToCurrentPoint
         if tsuCampusGrid.isEmpty {
             _grid = State(initialValue: Array(
                 repeating: Array(repeating: .obstacle, count: columnsCount),
@@ -413,16 +413,16 @@ struct CampusMapView: View {
     private func calculatePath() {
         Task {
 
-           guard let rawStart = startLocation, let rawEnd = endLocation else {
-            if startLocation == nil {
-                hasAutoFitRoute = false
+            guard let rawStart = startLocation, let rawEnd = endLocation else {
+                if startLocation == nil {
+                    hasAutoFitRoute = false
                 }
                 return
             }
 
-        let start = findNearestPathPoint(from: rawStart)
-        let end = findNearestPathPoint(from: rawEnd)
-        let adjustedIntermediates = intermediatePoints.map { findNearestPathPoint(from: $0) }
+            let start = findNearestPathPoint(from: rawStart)
+            let end = findNearestPathPoint(from: rawEnd)
+            let adjustedIntermediates = intermediatePoints.map { findNearestPathPoint(from: $0) }
 
             pointsInQueue = []
             visitedPoints = []
@@ -664,10 +664,10 @@ private extension CampusMapView {
         selectedCluster: .constant(nil as Cluster?),
         clusters: .constant([]),
         showLocationAlert: .constant(false),
-        isFollowingUser: .constant(true)
+        isFollowingUser: .constant(true),
         visitedPoints: .constant([]),
         correctPoints: .constant([]),
-        p: .constant([])
+        pathToCurrentPoint: .constant([])
     )
 }
 

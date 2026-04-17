@@ -113,10 +113,10 @@ struct ContentView: View {
                 selectedCluster: $selectedCluster,
                 clusters: $clusters,
                 showLocationAlert: $showLocationAlert,
-                isFollowingUser: $isFollowingUser
+                isFollowingUser: $isFollowingUser,
                 visitedPoints: $visitedPoints,
                 correctPoints: $pointsInQueue,
-                p: $pathToCurrentPoint
+                pathToCurrentPoint: $pathToCurrentPoint
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
