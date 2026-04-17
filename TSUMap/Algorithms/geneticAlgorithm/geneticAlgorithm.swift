@@ -69,7 +69,7 @@ class GeneticAlgorithm {
 
             for j in 0 ..< route.cafesToVisit.count {
                 let currentCafe = route.cafesToVisit[j]
-                    
+
                 guard let schedule = currentCafe.workSchedule[currentDay] else {
                     totalCost += penaltyDistance
                     continue
@@ -80,7 +80,7 @@ class GeneticAlgorithm {
                 }
 
                 var distance = 0
-                
+
                 if j == 0 {
                     distance = startDistances[currentCafe.id] ?? penaltyDistance
                 } else {
@@ -98,12 +98,12 @@ class GeneticAlgorithm {
                 totalCost += distance
 
                 let closeTime = parseTimeStringToMinutes(schedule.timeClose)
-                    
+
                 if simulatedTime > closeTime {
                     totalCost += penaltyDistance * 2
                 }
             }
-                
+
             route.fitness = fitnessMultiplier / Double(totalCost + 1)
             population[i] = route
         }
@@ -145,21 +145,21 @@ class GeneticAlgorithm {
         let dayIndex = Calendar.current.component(.weekday, from: Date())
         return WeekDay(calendarIndex: dayIndex)
     }
-    
+
     private func getCurrentTimeInMinutes() -> Int {
-            let date = Date()
-            let calendar = Calendar.current
-            let hour = calendar.component(.hour, from: date)
-            let minute = calendar.component(.minute, from: date)
-            return hour * 60 + minute
-        }
+        let date = Date()
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: date)
+        let minute = calendar.component(.minute, from: date)
+        return hour * 60 + minute
+    }
 
     private func parseTimeStringToMinutes(_ timeComponents: DateComponents?) -> Int {
         guard let components = timeComponents else { return 24 * 60 }
-            
+
         let hours = components.hour ?? 0
         let minutes = components.minute ?? 0
-            
+
         return hours * 60 + minutes
     }
 
