@@ -31,20 +31,6 @@ enum CellType {
     case obstacle
 }
 
-enum MapConfig {
-    static let center = CLLocationCoordinate2D(latitude: 56.4690, longitude: 84.9470)
-    static let latitudeDelta: Double = 0.007
-    static let longitudeDelta: Double = latitudeDelta / cos(center.latitude * .pi / 180.0)
-    static let span = MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
-
-    static let region = MKCoordinateRegion(center: center, span: span)
-
-    static let minLat = region.minLat
-    static let maxLat = region.maxLat
-    static let minLon = region.minLon
-    static let maxLon = region.maxLon
-}
-
 let columnsCount = 150
 let rowsCount = 150
 
@@ -350,7 +336,7 @@ struct CampusMapView: View {
     }
 
     private func centerOnGridPoint(_ point: GridPoint) {
-        let targetScale: CGFloat = 2.0
+        let targetScale: CGFloat = 1.3
         let screenWidth = viewSize.width > 0 ? viewSize.width : 400
         let screenHeight = viewSize.height > 0 ? viewSize.height : 700
 
@@ -698,23 +684,5 @@ struct PlaceMarker: View {
         .onTapGesture {
             onTap()
         }
-    }
-}
-
-extension MKCoordinateRegion {
-    var minLat: Double {
-        center.latitude - span.latitudeDelta / 2
-    }
-
-    var maxLat: Double {
-        center.latitude + span.latitudeDelta / 2
-    }
-
-    var minLon: Double {
-        center.longitude - span.longitudeDelta / 2
-    }
-
-    var maxLon: Double {
-        center.longitude + span.longitudeDelta / 2
     }
 }

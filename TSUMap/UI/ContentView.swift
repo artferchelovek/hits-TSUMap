@@ -175,42 +175,66 @@ struct ContentView: View {
                         .cornerRadius(24)
                         .shadow(color: .black.opacity(0.1), radius: 10)
                     } else if endLocation == nil {
-                        HStack(spacing: 10) {
-                            Button {
-                                withAnimation(.spring()) {
-                                    isShowingDecisionSheet.toggle()
+                        VStack {
+                            if !isFollowingUser, locationManager.userLocation != nil {
+                                Button(action: {
+                                    withAnimation(.spring()) {
+                                        isFollowingUser = true
+                                    }
+                                }) {
+                                    Image(systemName: "location.fill")
+                                        .font(.system(size: 20, weight: .medium))
+                                        .foregroundColor(.blue)
+                                        .padding(12)
+                                        .background(.ultraThinMaterial)
+                                        .clipShape(Circle())
+                                        .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
                                 }
-                            } label: {
-                                Text("Куда пойдём?")
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 6)
-                            }
-                            .buttonStyle(.glassProminent)
-                            .sheet(isPresented: $isShowingDecisionSheet) {
-                                DecisionTreeView(
-                                    manager: manager,
-                                    placeManager: placeManager,
-                                    treeNode: treeNode,
-                                    endLocation: $endLocation
-                                ) { prediction in
-                                    predictionResult = prediction
+                                .padding(.trailing, 20)
+                                .padding(.bottom, 20)
+                                .transition(.scale.combined(with: .opacity))
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                                
+                                HStack(spacing: 10) {
+                                    Button {
+                                        withAnimation(.spring()) {
+                                            isShowingDecisionSheet.toggle()
+                                        }
+                                    } label: {
+                                        Text("Куда пойдём?")
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 6)
+                                    }
+                                    .buttonStyle(.glassProminent)
+                                    .sheet(isPresented: $isShowingDecisionSheet) {
+                                        DecisionTreeView(
+                                            manager: manager,
+                                            placeManager: placeManager,
+                                            treeNode: treeNode,
+                                            endLocation: $endLocation
+                                        ) { prediction in
+                                            predictionResult = prediction
+                                        }
+                                        .presentationDragIndicator(.visible)
+                                    }
+
+                                    Button {
+                                        withAnimation(.spring()) {
+                                            startLocation = nil
+                                            paths = []
+                                            intermediatePoints = []
+                                            endLocation = nil
+                                        }
+                                    } label: {
+                                        Text("Очистить место старта")
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 6)
+                                    }
+                                    .buttonStyle(.glass)
                                 }
-                                .presentationDragIndicator(.visible)
                             }
 
-                            Button {
-                                withAnimation(.spring()) {
-                                    startLocation = nil
-                                    paths = []
-                                    intermediatePoints = []
-                                    endLocation = nil
-                                }
-                            } label: {
-                                Text("Очистить место старта")
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 6)
-                            }
-                            .buttonStyle(.glass)
+                        
                         }
                     } else {
                         PathsView()
@@ -225,26 +249,6 @@ struct ContentView: View {
             .padding()
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: paths.isEmpty)
             .animation(.spring(), value: startLocation)
-
-            if !isFollowingUser, locationManager.userLocation != nil {
-                Button(action: {
-                    withAnimation(.spring()) {
-                        isFollowingUser = true
-                    }
-                }) {
-                    Image(systemName: "location.fill")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.blue)
-                        .padding(12)
-                        .background(.ultraThinMaterial)
-                        .clipShape(Circle())
-                        .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
-                }
-                .padding(.trailing, 20)
-                .padding(.bottom, 20)
-                .transition(.scale.combined(with: .opacity))
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-            }
         }
         .onAppear {
             locationManager.requestLocation()
