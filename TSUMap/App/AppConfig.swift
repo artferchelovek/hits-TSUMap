@@ -41,7 +41,7 @@ enum AppConfig {
             options: [
                 .init(title: "Главный корпус", value: "main_building"),
                 .init(title: "Второй корпус", value: "second_building"),
-                .init(title: "Остановка", value: "bus_stop"),
+                .init(title: "Остановка Университет", value: "bus_stop"),
                 .init(title: "Кампус Центр", value: "campus"),
             ]
         ),
@@ -73,6 +73,7 @@ enum AppConfig {
             options: [
                 .init(title: "Кофе", value: "coffee"),
                 .init(title: "Блинчики", value: "pancakes"),
+                .init(title: "Десерт", value: "dessert"),
                 .init(title: "Перекус", value: "snack"),
                 .init(title: "Обед", value: "full_meal"),
             ]
