@@ -15,6 +15,9 @@ struct IdentifiableItem: Identifiable {
 }
 
 struct ContentView: View {
+    var treeNode: TreeNode?
+    var onLoadTree: (() -> Void)?
+
     @State private var startLocation: GridPoint?
     @State private var endLocation: GridPoint?
     @State private var intermediatePoints: [GridPoint] = []
@@ -32,7 +35,6 @@ struct ContentView: View {
     @State private var pathToCurrentPoint: Set<GridPoint> = []
 
     @State private var clusters: [Cluster] = []
-    @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
     @State private var isShowingSettings: Bool = false
 
@@ -268,7 +270,9 @@ struct ContentView: View {
         }
         .onAppear {
             locationManager.requestLocation()
-            loadTree()
+            if onLoadTree != nil {
+                onLoadTree?()
+            }
         }
         .onChange(of: locationManager.userLocation) { _, newUserLocation in
             if let location = newUserLocation {
@@ -281,21 +285,8 @@ struct ContentView: View {
             }
         }
     }
-
-    private func loadTree() {
-        let data = manager.allAttributes
-
-        guard !data.isEmpty else {
-            print("Данных для построения дерева нет")
-            return
-        }
-
-        treeNode = buildTree(data: data, availableAttributes: AppConfig.aviableTreeAttributes)
-
-        print("Дерево перестроено на основе \(data.count) записей")
-    }
 }
 
 #Preview {
-    ContentView()
+    ContentView(treeNode: nil, onLoadTree: nil)
 }

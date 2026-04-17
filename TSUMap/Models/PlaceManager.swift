@@ -16,23 +16,30 @@ final class PlaceManager: ObservableObject {
     @Published var sights: [String: Sight] = [:]
     private var aStarPaths: AStarCash?
     private let ratingStorage = RatingStorage()
+    @Published var isLoading = true
 
     init() {
-        loadData()
+        Task { @MainActor in
+            await loadData()
+            isLoading = false
+        }
     }
 
     func setGrid(grid: [[CellType]]) {
         aStarPaths = AStarCash(grid: grid)
     }
 
-    private func loadData() {
+    func loadData() async {
         guard let jsonCafesURL = Bundle.main.url(forResource: "cafesData", withExtension: "json") else {
+            print("cafesData.json not found")
             return
         }
         guard let jsonCoworkingsURL = Bundle.main.url(forResource: "coworkingsData", withExtension: "json") else {
+            print("coworkingsData.json not found")
             return
         }
         guard let jsonSightsURL = Bundle.main.url(forResource: "sightData", withExtension: "json") else {
+            print("sightData.json not found")
             return
         }
         do {

@@ -32,6 +32,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         manager.startUpdatingLocation()
     }
 
+    func checkPermissions() async {
+        manager.requestWhenInUseAuthorization()
+        try? await Task.sleep(nanoseconds: 500_000_000)
+    }
+
     func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
 
