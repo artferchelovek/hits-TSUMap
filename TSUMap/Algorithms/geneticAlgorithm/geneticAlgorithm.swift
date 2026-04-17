@@ -60,35 +60,51 @@ class GeneticAlgorithm {
 
     private func calculateFitnessForAll() {
         let currentDay = getCurrentWeekDay()
+        let currentStartTime = getCurrentTimeInMinutes()
 
         for i in 0 ..< population.count {
             var route = population[i]
-            var totalTime = 0
+            var totalCost = 0
+            var simulatedTime = currentStartTime
 
             for j in 0 ..< route.cafesToVisit.count {
                 let currentCafe = route.cafesToVisit[j]
-
-                if currentCafe.workSchedule[currentDay]?.isClosed == true {
-                    totalTime += penaltyDistance
+                    
+                guard let schedule = currentCafe.workSchedule[currentDay] else {
+                    totalCost += penaltyDistance
+                    continue
+                }
+                if schedule.isDayOff == true {
+                    totalCost += penaltyDistance
+                    continue
                 }
 
+                var distance = 0
+                
                 if j == 0 {
-                    if let dist = startDistances[currentCafe.id] {
-                        totalTime += dist
-                    } else {
-                        totalTime += penaltyDistance
-                    }
+                    distance = startDistances[currentCafe.id] ?? penaltyDistance
                 } else {
                     let prevCafe = route.cafesToVisit[j - 1]
                     if let cache = aStarCache {
-                        totalTime += cache.getDistance(firstPlace: prevCafe, secondPlace: currentCafe)
+                        distance = cache.getDistance(firstPlace: prevCafe, secondPlace: currentCafe)
                     } else {
                         let directPath = AStar(graph: grid, start: prevCafe.entryCord, end: currentCafe.entryCord)
-                        totalTime += directPath.isEmpty ? penaltyDistance : directPath.count
+                        distance = directPath.isEmpty ? penaltyDistance : directPath.count
                     }
                 }
+
+                let travelTime = calculateTravelTimeInMinutes(cellsCount: distance)
+                simulatedTime += travelTime
+                totalCost += distance
+
+                let closeTime = parseTimeStringToMinutes(schedule.timeClose)
+                    
+                if simulatedTime > closeTime {
+                    totalCost += penaltyDistance * 2
+                }
             }
-            route.fitness = fitnessMultiplier / Double(totalTime + 1)
+                
+            route.fitness = fitnessMultiplier / Double(totalCost + 1)
             population[i] = route
         }
     }
@@ -128,6 +144,30 @@ class GeneticAlgorithm {
     private func getCurrentWeekDay() -> WeekDay {
         let dayIndex = Calendar.current.component(.weekday, from: Date())
         return WeekDay(calendarIndex: dayIndex)
+    }
+    
+    private func getCurrentTimeInMinutes() -> Int {
+            let date = Date()
+            let calendar = Calendar.current
+            let hour = calendar.component(.hour, from: date)
+            let minute = calendar.component(.minute, from: date)
+            return hour * 60 + minute
+        }
+
+    private func parseTimeStringToMinutes(_ timeComponents: DateComponents?) -> Int {
+        guard let components = timeComponents else { return 24 * 60 }
+            
+        let hours = components.hour ?? 0
+        let minutes = components.minute ?? 0
+            
+        return hours * 60 + minutes
+    }
+
+    private func calculateTravelTimeInMinutes(cellsCount: Int) -> Int {
+        let metersPerCell = 4.5
+        let distanceMeters = Double(cellsCount) * metersPerCell
+        let speedMetersPerMinute = 5000.0 / 60.0
+        return Int(distanceMeters / speedMetersPerMinute)
     }
 
     func startEvolution(neededDishes: [Dish], userLocation: GridPoint, onProgressUpdate: (Route) -> Void) -> Route {
