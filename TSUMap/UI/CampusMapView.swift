@@ -81,10 +81,16 @@ struct CampusMapView: View {
     @Binding var startLocation: GridPoint?
     @Binding var endLocation: GridPoint?
     @Binding var intermediatePoints: [GridPoint]
+    @Binding var obstaclePoints: [GridPoint]
+    @Binding var startObstacle: GridPoint?
+    @Binding var endObstacle: GridPoint?
     @Binding var paths: [GridPoint]
     @Binding var selectedPlace: IdentifiableItem?
     @Binding var selectedCluster: Cluster?
+    @Binding var isCreateObstacle: Bool
     @State private var pathProgress: CGFloat = 0.0
+    @Binding private var isCalculatingPath: Bool
+    @State private var pathCalculationTask: Task<Void, any Error>?
 
     @Binding var visitedPoints: Set<GridPoint>
     @Binding var pointsInQueue: [GridPoint]
@@ -141,7 +147,13 @@ struct CampusMapView: View {
         visitedPoints: Binding<Set<GridPoint>>,
         correctPoints: Binding<[GridPoint]>,
         pathToCurrentPoint: Binding<Set<GridPoint>>,
-        settingsManager: SettingsManager
+        settingsManager: SettingsManager,
+        obstaclePoints: Binding<[GridPoint]>,
+        isCreateObstacle: Binding<Bool>,
+        startObstacle: Binding<GridPoint?>,
+        endObstacle: Binding<GridPoint?>,
+        isCalculatingPath: Binding<Bool>
+
     ) {
         _startLocation = startLocation
         _endLocation = endLocation
@@ -156,30 +168,23 @@ struct CampusMapView: View {
         _pathToCurrentPoint = pathToCurrentPoint
         _selectedCluster = selectedCluster
         _clusters = clusters
+        _obstaclePoints = obstaclePoints
+        _isCreateObstacle = isCreateObstacle
         self.settingsManager = settingsManager
-
+        _endObstacle = endObstacle
+        _startObstacle = startObstacle
+        _isCalculatingPath = isCalculatingPath
         self.placeManager.setGrid(grid: loadedGrid)
     }
 
     fileprivate func staticCanvas() -> some View {
         Canvas { context, _ in
-            for point in visitedPoints where !pathToCurrentPoint.contains(point) {
-                let (x, y) = Normalize(point: point)
-                let rect = CGRect(x: x - cellSize / 2 + 1, y: y - cellSize / 2 + 1, width: cellSize - 2, height: cellSize - 2)
-                context.fill(Path(rect), with: .color(.blue.opacity(0.3)))
+            if isCreateObstacle {
+                drawObstacles(context)
             }
-
-            for point in pointsInQueue where !pathToCurrentPoint.contains(point) {
-                let (x, y) = Normalize(point: point)
-                let rect = CGRect(x: x - cellSize / 2 + 1, y: y - cellSize / 2 + 1, width: cellSize - 2, height: cellSize - 2)
-                context.fill(Path(rect), with: .color(.red.opacity(0.6)))
-            }
-
-            for point in pathToCurrentPoint {
-                let (x, y) = Normalize(point: point)
-                let rect = CGRect(x: x - cellSize / 2 + 1, y: y - cellSize / 2 + 1, width: cellSize - 2, height: cellSize - 2)
-                context.fill(Path(rect), with: .color(.blue.opacity(1)))
-            }
+            drawVisitedPoints(context)
+            drawPointsInQueue(context)
+            drawPathToCurrentPoint(context)
             if !clusters.isEmpty {
                 for cluster in clusters {
                     let point: GridPoint = cluster.medoid.iconCord
@@ -197,7 +202,8 @@ struct CampusMapView: View {
             }
             if let start = startLocation { drawStartPoint(start, context) }
             if let end = endLocation { drawEndPoint(end, context) }
-
+            if let startObs = startObstacle { drawStartObs(startObs, context) }
+            if let endObs = endObstacle { drawStartObs(endObs, context) }
             for point in intermediatePoints {
                 drawIntermediatePoint(point, context)
             }
@@ -280,6 +286,14 @@ struct CampusMapView: View {
             .defaultScrollAnchor(.center)
             .task(id: endLocation) { calculatePath() }
             .task(id: intermediatePoints) { calculatePath() }
+            .onChange(of: endLocation) { _, newValue in
+                if newValue == nil {
+                    pathCalculationTask?.cancel()
+                    pathCalculationTask = nil
+                    isCalculatingPath = false
+                    intermediatePoints = []
+                }
+            }
         }
     }
 
@@ -401,7 +415,11 @@ struct CampusMapView: View {
     }
 
     private func calculatePath() {
-        Task {
+        guard endLocation != nil else { return }
+
+        let task = Task {
+            isCalculatingPath = true
+            defer { isCalculatingPath = false }
 
             guard let rawStart = startLocation, let rawEnd = endLocation else {
                 if startLocation == nil {
@@ -424,8 +442,14 @@ struct CampusMapView: View {
             for j in 0 ..< points.count - 1 {
                 let startPoint = points[j]
                 let endPoint = points[j + 1]
-                let stream = AStar(graph: loadedGrid).aStarGenerator(start: startPoint, end: endPoint)
+                let stream = AStar(graph: loadedGrid, obstacle: obstaclePoints).aStarGenerator(start: startPoint, end: endPoint)
                 for await i in stream {
+                    if Task.isCancelled {
+                        pointsInQueue = []
+                        visitedPoints = []
+                        pathToCurrentPoint = []
+                        return
+                    }
                     if settingsManager.isBuildPath {
                         await MainActor.run {
                             visitedPoints.insert(i.point)
@@ -442,10 +466,21 @@ struct CampusMapView: View {
                 }
             }
 
+            if Task.isCancelled {
+                pointsInQueue = []
+                visitedPoints = []
+                pathToCurrentPoint = []
+            }
+
             pathProgress = 0.0
             pointsInQueue = []
             visitedPoints = []
             pathToCurrentPoint = []
+
+            if newPath.isEmpty {
+                endLocation = nil
+                return
+            }
 
             paths = newPath
             if !hasAutoFitRoute {
@@ -456,6 +491,7 @@ struct CampusMapView: View {
                 pathProgress = 1.0
             }
         }
+        pathCalculationTask = task
     }
 
     private func autoFitToPath(_ path: [GridPoint]) {
@@ -594,11 +630,77 @@ private extension CampusMapView {
         context.fill(Path(ellipseIn: rect.insetBy(dx: 2, dy: 2)), with: .color(.white))
     }
 
+    func drawVisitedPoints(_ context: GraphicsContext) {
+        for point in visitedPoints where !pathToCurrentPoint.contains(point) {
+            let (x, y) = Normalize(point: point)
+            let rect = CGRect(x: x - cellSize / 2 + 1, y: y - cellSize / 2 + 1, width: cellSize - 2, height: cellSize - 2)
+            context.fill(Path(rect), with: .color(.blue.opacity(0.3)))
+        }
+    }
+
+    func drawObstacles(_ context: GraphicsContext) {
+        for point in obstaclePoints {
+            let (x, y) = Normalize(point: point)
+            let size = cellSize - 4
+            let rect = CGRect(x: x - size / 2, y: y - size / 2, width: size, height: size)
+            let path = Path(roundedRect: rect, cornerRadius: size * 0.2)
+            context.fill(path, with: .color(.red.opacity(0.8)))
+            context.stroke(path, with: .color(.white.opacity(0.3)), lineWidth: 1.5)
+        }
+    }
+
+    func drawStartObs(_ startObstacle: GridPoint, _ context: GraphicsContext) {
+        let (x, y) = Normalize(point: startObstacle)
+        let size: CGFloat = 20
+        let rect = CGRect(x: x - size / 2, y: y - size / 2, width: size, height: size)
+        context.fill(Path(ellipseIn: rect), with: .color(.red))
+        context.stroke(Path(ellipseIn: rect), with: .color(.white), lineWidth: 3)
+    }
+
+    func drawPointsInQueue(_ context: GraphicsContext) {
+        for point in pointsInQueue where !pathToCurrentPoint.contains(point) {
+            let (x, y) = Normalize(point: point)
+            let rect = CGRect(x: x - cellSize / 2 + 1, y: y - cellSize / 2 + 1, width: cellSize - 2, height: cellSize - 2)
+            context.fill(Path(rect), with: .color(.red.opacity(0.6)))
+        }
+    }
+
+    func drawPathToCurrentPoint(_ context: GraphicsContext) {
+        for point in pathToCurrentPoint {
+            let (x, y) = Normalize(point: point)
+            let rect = CGRect(x: x - cellSize / 2 + 1, y: y - cellSize / 2 + 1, width: cellSize - 2, height: cellSize - 2)
+            context.fill(Path(rect), with: .color(.blue.opacity(1)))
+        }
+    }
+
     func drawEndPoint(_ end: GridPoint, _ context: GraphicsContext) {
         let (x, y) = Normalize(point: end)
         if let pin = context.resolveSymbol(id: "endPin") {
             context.draw(pin, at: CGPoint(x: x, y: y), anchor: .bottom)
         }
+    }
+
+    func findNeighborsPoints(_ start: GridPoint, _ allPoints: [GridPoint]) -> Set<GridPoint> {
+        var connected = Set<GridPoint>()
+        var queue = [start]
+        let allPointsSet = Set(allPoints)
+
+        while !queue.isEmpty {
+            let current = queue.removeFirst()
+
+            if connected.insert(current).inserted {
+                let neighbors = allPointsSet.filter { point in
+                    abs(point.row - current.row) <= 1 && abs(point.col - current.col) <= 1
+                }
+
+                for neighbor in neighbors {
+                    if !connected.contains(neighbor) {
+                        queue.append(neighbor)
+                    }
+                }
+            }
+        }
+        return connected
     }
 
     private func Tap(at location: CGPoint) {
@@ -631,14 +733,33 @@ private extension CampusMapView {
         guard row >= 0, row < rowsCount, col >= 0, col < columnsCount else { return }
         if tsuCampusGrid[row][col] == 1 { return }
         let tappedPoint = GridPoint(row: row, col: col)
+        if isCreateObstacle {
+            if obstaclePoints.contains(tappedPoint) {
+                let connectedRegion = findNeighborsPoints(tappedPoint, obstaclePoints)
+                obstaclePoints.removeAll(where: { connectedRegion.contains($0) })
+                return
+            }
+            if startObstacle == nil {
+                startObstacle = tappedPoint
+            } else {
+                endObstacle = tappedPoint
+            }
+            if let start = startObstacle, let end = endObstacle {
+                obstaclePoints += AStar(graph: loadedGrid).aStarAlgorithm(start: start, end: end)
+                startObstacle = nil
+                endObstacle = nil
+            }
 
-        if startLocation == nil {
-            withAnimation(.spring()) { startLocation = tappedPoint }
-        } else if endLocation == nil {
-            endLocation = tappedPoint
         } else {
-            if !intermediatePoints.contains(tappedPoint) {
-                withAnimation(.snappy) { intermediatePoints.append(tappedPoint) }
+            if isCalculatingPath { return }
+            if startLocation == nil {
+                withAnimation(.spring()) { startLocation = tappedPoint }
+            } else if endLocation == nil || paths.isEmpty {
+                endLocation = tappedPoint
+            } else {
+                if !intermediatePoints.contains(tappedPoint) {
+                    withAnimation(.snappy) { intermediatePoints.append(tappedPoint) }
+                }
             }
         }
     }
@@ -659,7 +780,12 @@ private extension CampusMapView {
         visitedPoints: .constant([]),
         correctPoints: .constant([]),
         pathToCurrentPoint: .constant([]),
-        settingsManager: SettingsManager()
+        settingsManager: SettingsManager(),
+        obstaclePoints: .constant([]),
+        isCreateObstacle: .constant(false),
+        startObstacle: .constant(nil as GridPoint?),
+        endObstacle: .constant(nil as GridPoint?),
+        isCalculatingPath: .constant(false)
     )
 }
 
