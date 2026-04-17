@@ -7,22 +7,6 @@
 
 import Foundation
 
-class TreeNode {
-    var attributeName: String?
-    var children: [String: TreeNode] = [:]
-    var result: String?
-    var defaultResult: String?
-
-    init(attributeName: String, defaultResult: String? = nil) {
-        self.attributeName = attributeName
-        self.defaultResult = defaultResult
-    }
-
-    init(result: String) {
-        self.result = result
-    }
-}
-
 private func Entropy(_ data: [TreeAttribute]) -> Double {
     var counts: [String: Double] = [:]
     for item in data {
@@ -53,7 +37,7 @@ private func InformationGain(from data: [TreeAttribute], for columnName: String)
     return totalEntropy - entropy
 }
 
-func buildTree(data: [TreeAttribute], availableAttributes: [String]) -> TreeNode {
+func buildTree(data: [TreeAttribute], availableAttributes: [String], minInfoGain: Double = 0.05) -> TreeNode {
     let element = data[0].recommended_place
     let allSame = data.allSatisfy { $0.recommended_place == element }
     if allSame {
@@ -80,6 +64,10 @@ func buildTree(data: [TreeAttribute], availableAttributes: [String]) -> TreeNode
         }
     }
 
+    if bestGain < minInfoGain {
+        return TreeNode(result: mostCommon)
+    }
+
     let node = TreeNode(attributeName: bestAttribute, defaultResult: mostCommon)
     let updatedAttribute = availableAttributes.filter { $0 != bestAttribute }
 
@@ -100,24 +88,3 @@ func buildTree(data: [TreeAttribute], availableAttributes: [String]) -> TreeNode
     return node
 }
 
-func predictTree(tree: TreeNode, situation: TreeAttribute) -> (result: String, path: [TreeNode]) {
-    var currentNode = tree
-    var path: [TreeNode] = []
-
-    while currentNode.result == nil {
-        path.append(currentNode)
-
-        guard let attribute = currentNode.attributeName else { break }
-        let value = getTreeAttribute(from: situation, for: attribute)
-
-        if let nextNode = currentNode.children[value] {
-            currentNode = nextNode
-        } else {
-            let fallback = currentNode.defaultResult ?? "Неизвестно"
-            return (fallback, path)
-        }
-    }
-    path.append(currentNode)
-    let finalResult = currentNode.result ?? "Ошибка"
-    return (finalResult, path)
-}
