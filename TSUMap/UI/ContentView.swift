@@ -37,6 +37,10 @@ struct ContentView: View {
     @StateObject var manager = VenueManager()
     @StateObject var placeManager = PlaceManager()
 
+    @State private var loadedGrid = tsuCampusGrid.map { row in
+        row.map { value in value == 1 ? CellType.obstacle : CellType.path }
+    }
+
     fileprivate func PathsView() -> some View {
         VStack(spacing: 15) {
             HStack {
@@ -194,47 +198,44 @@ struct ContentView: View {
                                 .padding(.bottom, 20)
                                 .transition(.scale.combined(with: .opacity))
                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                                
-                                HStack(spacing: 10) {
-                                    Button {
-                                        withAnimation(.spring()) {
-                                            isShowingDecisionSheet.toggle()
-                                        }
-                                    } label: {
-                                        Text("Куда пойдём?")
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 6)
-                                    }
-                                    .buttonStyle(.glassProminent)
-                                    .sheet(isPresented: $isShowingDecisionSheet) {
-                                        DecisionTreeView(
-                                            manager: manager,
-                                            placeManager: placeManager,
-                                            treeNode: treeNode,
-                                            endLocation: $endLocation
-                                        ) { prediction in
-                                            predictionResult = prediction
-                                        }
-                                        .presentationDragIndicator(.visible)
-                                    }
-
-                                    Button {
-                                        withAnimation(.spring()) {
-                                            startLocation = nil
-                                            paths = []
-                                            intermediatePoints = []
-                                            endLocation = nil
-                                        }
-                                    } label: {
-                                        Text("Очистить место старта")
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 6)
-                                    }
-                                    .buttonStyle(.glass)
-                                }
                             }
+                            HStack(spacing: 10) {
+                                Button {
+                                    withAnimation(.spring()) {
+                                        isShowingDecisionSheet.toggle()
+                                    }
+                                } label: {
+                                    Text("Куда пойдём?")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 6)
+                                }
+                                .buttonStyle(.glassProminent)
+                                .sheet(isPresented: $isShowingDecisionSheet) {
+                                    DecisionTreeView(
+                                        manager: manager,
+                                        placeManager: placeManager,
+                                        treeNode: treeNode,
+                                        endLocation: $endLocation
+                                    ) { prediction in
+                                        predictionResult = prediction
+                                    }
+                                    .presentationDragIndicator(.visible)
+                                }
 
-                        
+                                Button {
+                                    withAnimation(.spring()) {
+                                        startLocation = nil
+                                        paths = []
+                                        intermediatePoints = []
+                                        endLocation = nil
+                                    }
+                                } label: {
+                                    Text("Очистить место старта")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 6)
+                                }
+                                .buttonStyle(.glass)
+                            }
                         }
                     } else {
                         PathsView()

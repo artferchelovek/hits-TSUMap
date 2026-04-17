@@ -127,16 +127,13 @@ struct FloatingSearchBar: View {
     }
 
     private func buildTouristRoute(with sights: [Sight]) {
-        guard let start = startLocation else { return }
+        guard let startLocation else { return }
+        let start = findNearestPathPoint(from: startLocation)
 
         isBuildingRoute = true
         withAnimation { isShowingList = false }
 
-        let cellGrid = tsuCampusGrid.map { row in
-            row.map { $0 == 1 ? CellType.obstacle : CellType.path }
-        }
-
-        let aco = ACO(start: start, sightsForVisit: sights, grid: cellGrid)
+        let aco = ACO(start: start, sightsForVisit: sights, grid: loadedGrid)
         let acoPath = aco.optimalPath()
 
         let visitedSightCoords = Set(sights.map(\.entryCord))
