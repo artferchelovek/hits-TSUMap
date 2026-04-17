@@ -31,6 +31,39 @@ enum CellType {
     case obstacle
 }
 
+func findNearestPathPoint(from point: GridPoint) -> GridPoint {
+    guard loadedGrid[point.row][point.col] == .obstacle else { return point }
+
+    var queue: [GridPoint] = [point]
+    var visited: Set<GridPoint> = [point]
+
+    let directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
+    var head = 0
+    while head < queue.count {
+        let current = queue[head]
+        head += 1
+
+        for dir in directions {
+            let newRow = current.row + dir.0
+            let newCol = current.col + dir.1
+
+            if newRow >= 0, newRow < rowsCount, newCol >= 0, newCol < columnsCount {
+                let nextPoint = GridPoint(row: newRow, col: newCol)
+                if !visited.contains(nextPoint) {
+                    if loadedGrid[newRow][newCol] == .path {
+                        return nextPoint
+                    }
+                    visited.insert(nextPoint)
+                    queue.append(nextPoint)
+                }
+            }
+        }
+        if queue.count > 400 { break }
+    }
+    return point
+}
+
 let columnsCount = 150
 let rowsCount = 150
 
@@ -350,39 +383,6 @@ struct CampusMapView: View {
             baseScale = targetScale
             baseOffset = CGSize(width: offsetX, height: offsetY)
         }
-    }
-
-    private func findNearestPathPoint(from point: GridPoint) -> GridPoint {
-        guard grid[point.row][point.col] == .obstacle else { return point }
-
-        var queue: [GridPoint] = [point]
-        var visited: Set<GridPoint> = [point]
-
-        let directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
-
-        var head = 0
-        while head < queue.count {
-            let current = queue[head]
-            head += 1
-
-            for dir in directions {
-                let newRow = current.row + dir.0
-                let newCol = current.col + dir.1
-
-                if newRow >= 0, newRow < rowsCount, newCol >= 0, newCol < columnsCount {
-                    let nextPoint = GridPoint(row: newRow, col: newCol)
-                    if !visited.contains(nextPoint) {
-                        if grid[newRow][newCol] == .path {
-                            return nextPoint
-                        }
-                        visited.insert(nextPoint)
-                        queue.append(nextPoint)
-                    }
-                }
-            }
-            if queue.count > 400 { break }
-        }
-        return point
     }
 
     private func calculatePath() {
