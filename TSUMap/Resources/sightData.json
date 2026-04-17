@@ -1,0 +1,92 @@
+[
+    {
+        "id": "001",
+        "name": "Скамья примирения",
+        "type": "sight",
+        "address": "Университетская роща",
+        "iconCord": { "row": 55, "col": 95 },
+        "entryCord": { "row": 55, "col": 95 },
+        "rating": 4.4
+    },
+    {
+        "id": "002",
+        "name": "Геофизический центр Евразии",
+        "type": "sight",
+        "address": "Университетская роща",
+        "iconCord": { "row": 69, "col": 107 },
+        "entryCord": { "row": 68, "col": 107 },
+        "rating": 4.3
+    },
+    {
+        "id": "003",
+        "name": "Каменные бабы",
+        "type": "sight",
+        "address": "Университетская роща",
+        "iconCord": { "row": 54, "col": 87 },
+        "entryCord": { "row": 53, "col": 87 },
+        "rating": 4.4
+    },
+    {
+        "id": "004",
+        "name": "Каменные бабы",
+        "type": "sight",
+        "address": "Университетская роща",
+        "iconCord": { "row": 74, "col": 89 },
+        "entryCord": { "row": 75, "col": 89 },
+        "rating": 4.3
+    },
+    {
+        "id": "005",
+        "name": "Флоринский и Менделеев",
+        "type": "sight",
+        "address": "Университетская роща",
+        "iconCord": { "row": 70, "col": 92 },
+        "entryCord": { "row": 69, "col": 93 },
+        "rating": 4.7
+    },
+    {
+        "id": "006",
+        "name": "Павшим за родину",
+        "type": "sight",
+        "address": "Университетская роща",
+        "iconCord": { "row": 78, "col": 93 },
+        "entryCord": { "row": 78, "col": 94 },
+        "rating": 5
+    },
+    {
+        "id": "007",
+        "name": "Г.Н. Потанин",
+        "type": "sight",
+        "address": "Университетская роща",
+        "iconCord": { "row": 82, "col": 108 },
+        "entryCord": { "row": 82, "col": 107 },
+        "rating": 4.3
+    },
+    {
+        "id": "008",
+        "name": "Профессор Белкин",
+        "type": "sight",
+        "address": "Университетская роща",
+        "iconCord": { "row": 67, "col": 89 },
+        "entryCord": { "row": 67, "col": 88 },
+        "rating": 4.3
+    },
+    {
+        "id": "009",
+        "name": "Распад",
+        "type": "sight",
+        "address": "Университетская роща",
+        "iconCord": { "row": 18, "col": 97 },
+        "entryCord": { "row": 18, "col": 99 },
+        "rating": 4.3
+    },
+    {
+        "id": "010",
+        "name": "Мост через Медичку",
+        "type": "sight",
+        "address": "Университетская роща",
+        "iconCord": { "row": 26, "col": 97 },
+        "entryCord": { "row": 26, "col": 97 },
+        "rating": 4.3
+    }
+]

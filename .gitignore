@@ -24,3 +24,6 @@ Coverage/
 
 *~
 *.swp
+
+.idea
+AGENTS.md
