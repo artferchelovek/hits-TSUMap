@@ -86,7 +86,7 @@ class ACO {
             for j in i + 1 ..< points.count {
                 let firstPoint = points[i]
                 let secondPoint = points[j]
-                let dist = AStar(graph: grid, start: firstPoint, end: secondPoint).count
+                let dist = AStar(graph: grid).aStarAlgorithm(start: firstPoint, end: secondPoint).count
 
                 distances[i][j] = dist
                 distances[j][i] = dist
@@ -101,6 +101,6 @@ class ACO {
             intermediatePoint.append(points[i])
         }
 
-        return AStar(graph: grid, start: start, points: intermediatePoint, end: start)
+        return AStar(graph: grid).aStarBetweenSeveralPoints(start: start, points: intermediatePoint, end: start)
     }
 }
