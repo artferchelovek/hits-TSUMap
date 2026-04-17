@@ -10,7 +10,7 @@ import Foundation
 class NeuralManager: ObservableObject {
     static let shared = NeuralManager()
 
-    @Published private(set) var network: NeuralNetwork?
+    @Published var network: NeuralNetwork?
 
     private init() {
         loadWeights()
