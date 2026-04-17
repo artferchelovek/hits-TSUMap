@@ -7,9 +7,9 @@
 import Foundation
 
 class GeneticAlgorithm {
-    var populationSize: Int = 50
+    var populationSize: Int = 200
     var mutationRate: Double = 0.1
-    var generations: Int = 50
+    var generations: Int = 200
 
     var population: [Route] = []
 
@@ -110,6 +110,10 @@ class GeneticAlgorithm {
     }
 
     private func crossover(parent1: Route, parent2: Route) -> Route {
+        guard parent1.cafesToVisit.count > 0 else {
+            return Route(cafesToVisit: [], fitness: 0.0)
+        }
+
         let splitIndex = Int.random(in: 0 ..< parent1.cafesToVisit.count)
         var childCafes: [Cafe] = []
 
@@ -124,6 +128,8 @@ class GeneticAlgorithm {
     }
 
     private func mutate(route: inout Route, neededDishes: [Dish]) {
+        guard !route.cafesToVisit.isEmpty else { return }
+
         if Double.random(in: 0 ... 1) < mutationRate {
             let mutateIndex = Int.random(in: 0 ..< route.cafesToVisit.count)
             let dishToMutate = neededDishes[mutateIndex]
@@ -171,8 +177,16 @@ class GeneticAlgorithm {
     }
 
     func startEvolution(neededDishes: [Dish], userLocation: GridPoint, onProgressUpdate: (Route) -> Void) -> Route {
+        guard !neededDishes.isEmpty else {
+            return Route(cafesToVisit: [], fitness: 0.0)
+        }
+
         initStartDistances(startLocation: userLocation)
         generateInitialPopulation(neededDishes: neededDishes)
+
+        guard !population.isEmpty else {
+            return Route(cafesToVisit: [], fitness: 0.0)
+        }
 
         var bestRouteOverall = population[0]
 

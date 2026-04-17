@@ -2,6 +2,13 @@ import Combine
 import Foundation
 import SwiftUI
 
+struct DishWithCafe: Identifiable {
+    let id = UUID()
+    let dish: Dish
+    let cafeName: String
+    let cafeId: String
+}
+
 @MainActor
 final class PlaceManager: ObservableObject {
     @Published var cafes: [String: Cafe] = [:]
@@ -9,23 +16,30 @@ final class PlaceManager: ObservableObject {
     @Published var sights: [String: Sight] = [:]
     private var aStarPaths: AStarCash?
     private let ratingStorage = RatingStorage()
+    @Published var isLoading = true
 
     init() {
-        loadData()
+        Task { @MainActor in
+            await loadData()
+            isLoading = false
+        }
     }
 
     func setGrid(grid: [[CellType]]) {
         aStarPaths = AStarCash(grid: grid)
     }
 
-    private func loadData() {
+    func loadData() async {
         guard let jsonCafesURL = Bundle.main.url(forResource: "cafesData", withExtension: "json") else {
+            print("cafesData.json not found")
             return
         }
         guard let jsonCoworkingsURL = Bundle.main.url(forResource: "coworkingsData", withExtension: "json") else {
+            print("coworkingsData.json not found")
             return
         }
         guard let jsonSightsURL = Bundle.main.url(forResource: "sightData", withExtension: "json") else {
+            print("sightData.json not found")
             return
         }
         do {
@@ -118,5 +132,39 @@ final class PlaceManager: ObservableObject {
     func getPlaceById(_ id: String) -> (IdentifiableItem)? {
         let allPlaces = getAllPlaces()
         return allPlaces[id]
+    }
+
+    func getAllDishesGroupedByType() -> [DishType: [DishWithCafe]] {
+        var grouped: [DishType: [DishWithCafe]] = [:]
+
+        for (_, cafe) in cafes {
+            for dish in cafe.dishes {
+                let dishWithCafe = DishWithCafe(dish: dish, cafeName: cafe.name, cafeId: cafe.id)
+                grouped[dish.type, default: []].append(dishWithCafe)
+            }
+        }
+
+        return grouped
+    }
+
+    func getAllDishesFlat() -> [DishWithCafe] {
+        var allDishes: [DishWithCafe] = []
+
+        for (_, cafe) in cafes {
+            for dish in cafe.dishes {
+                let dishWithCafe = DishWithCafe(dish: dish, cafeName: cafe.name, cafeId: cafe.id)
+                allDishes.append(dishWithCafe)
+            }
+        }
+
+        return allDishes
+    }
+
+    func getAStarCashe() -> AStarCash {
+        guard let aStarPaths else {
+            fatalError("No A* paths saved.")
+        }
+
+        return aStarPaths
     }
 }

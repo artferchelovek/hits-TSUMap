@@ -6,6 +6,6 @@
 //
 import Foundation
 
-enum ClusteringAlgorithmType {
+enum ClusteringAlgorithmType: Codable {
     case DBScan, KMedoids
 }
