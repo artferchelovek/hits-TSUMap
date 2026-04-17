@@ -154,7 +154,14 @@ struct FloatingSearchBar: View {
             .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $isShowingGA) {
-            GeneticView(placeManager: placeManager, startLocation: startLocation ?? GridPoint(row: 10, col: 10))
+            GeneticView(
+                placeManager: placeManager,
+                startLocation: startLocation ?? GridPoint(row: 10, col: 10),
+                intermediatePoints: $intermediatePoints,
+                paths: $paths,
+                endLocation: $endLocation,
+                isPresented: $isShowingGA
+            )
         }
     }
 

@@ -7,9 +7,9 @@
 import Foundation
 
 class GeneticAlgorithm {
-    var populationSize: Int = 50
+    var populationSize: Int = 200
     var mutationRate: Double = 0.1
-    var generations: Int = 50
+    var generations: Int = 200
 
     var population: [Route] = []
 

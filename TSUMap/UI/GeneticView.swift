@@ -4,6 +4,11 @@ struct GeneticView: View {
     @ObservedObject var placeManager: PlaceManager
     let startLocation: GridPoint
 
+    @Binding var intermediatePoints: [GridPoint]
+    @Binding var paths: [GridPoint]
+    @Binding var endLocation: GridPoint?
+    @Binding var isPresented: Bool
+
     @State private var dishes: [DishType: [DishWithCafe]] = [:]
     @State private var selectedDishIds: Set<UUID> = []
 
@@ -37,7 +42,11 @@ struct GeneticView: View {
                     NavigationLink(destination: CartView(
                         selectedDishes: selectedDishesObjects,
                         placeManager: placeManager,
-                        startLocation: startLocation
+                        startLocation: startLocation,
+                        intermediatePoints: $intermediatePoints,
+                        paths: $paths,
+                        endLocation: $endLocation,
+                        isPresented: $isPresented
                     )) {
                         ToolbarCartButton(count: selectedDishIds.count)
                     }
@@ -91,7 +100,6 @@ struct DishRowGA: View {
                 Spacer()
                 Text("\(item.dish.price, specifier: "%.0f") ₽")
                     .font(.subheadline).foregroundColor(.blue)
-
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isSelected ? .green : .gray)
                     .font(.title3)
@@ -106,8 +114,14 @@ struct CartView: View {
     @ObservedObject var placeManager: PlaceManager
     let startLocation: GridPoint
 
+    @Binding var intermediatePoints: [GridPoint]
+    @Binding var paths: [GridPoint]
+    @Binding var endLocation: GridPoint?
+    @Binding var isPresented: Bool
+
     @State private var bestRoute: Route?
     @State private var isCalculating = false
+    @State private var hasRouteGenerated = false
 
     var body: some View {
         List {
@@ -117,6 +131,7 @@ struct CartView: View {
                         Text(item.dish.name)
                         Spacer()
                         Text("\(item.dish.price, specifier: "%.0f") ₽")
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -147,9 +162,7 @@ struct CartView: View {
                                 Text(uniqueCafes[index].name)
                                     .font(.headline)
 
-                                let dishesHere = selectedDishes.filter { dishWithCafe in
-                                    dishWithCafe.cafeName == uniqueCafes[index].name
-                                }
+                                let dishesHere = selectedDishes.filter { $0.cafeName == uniqueCafes[index].name }
 
                                 if !dishesHere.isEmpty {
                                     Text(dishesHere.map(\.dish.name).joined(separator: ", "))
@@ -163,14 +176,29 @@ struct CartView: View {
             }
 
             Button(action: runGeneticOptimization) {
-                Text(isCalculating ? "Считаем..." : "Построить маршрут")
+                Text(buttonTitle)
             }
             .disabled(isCalculating || selectedDishes.isEmpty)
         }
         .navigationTitle("Корзина")
     }
 
+    private var buttonTitle: String {
+        if isCalculating {
+            "Считаем..."
+        } else if hasRouteGenerated {
+            "Показать на карте"
+        } else {
+            "Построить маршрут"
+        }
+    }
+
     func runGeneticOptimization() {
+        if hasRouteGenerated, let route = bestRoute {
+            showRouteOnMap(route: route)
+            return
+        }
+
         isCalculating = true
 
         let dishesToProcess: [Dish] = selectedDishes.map(\.dish)
@@ -203,14 +231,51 @@ struct CartView: View {
             DispatchQueue.main.async {
                 bestRoute = result
                 isCalculating = false
+                hasRouteGenerated = true
             }
         }
+    }
+
+    private func showRouteOnMap(route: Route) {
+        var uniqueCafes: [Cafe] = []
+        var seenIds = Set<String>()
+
+        for cafe in route.cafesToVisit {
+            if !seenIds.contains(cafe.id) {
+                seenIds.insert(cafe.id)
+                uniqueCafes.append(cafe)
+            }
+        }
+
+        let rawGrid: [[Int]] = tsuCampusGrid
+        let processedGrid: [[CellType]] = rawGrid.map { row in
+            row.map { $0 == 1 ? .obstacle : .path }
+        }
+
+        var fullPath: [GridPoint] = []
+        var previousPoint = startLocation
+
+        for cafe in uniqueCafes {
+            let aStarPath = AStar(graph: processedGrid).aStarAlgorithm(start: previousPoint, end: cafe.entryCord)
+            fullPath.append(contentsOf: aStarPath)
+            previousPoint = cafe.entryCord
+        }
+
+        intermediatePoints = uniqueCafes.map(\.entryCord)
+        paths = fullPath
+        endLocation = uniqueCafes.last?.entryCord
+
+        isPresented = false
     }
 }
 
 #Preview {
     GeneticView(
         placeManager: PlaceManager(),
-        startLocation: GridPoint(row: 0, col: 0)
+        startLocation: GridPoint(row: 0, col: 0),
+        intermediatePoints: .constant([]),
+        paths: .constant([]),
+        endLocation: .constant(nil),
+        isPresented: .constant(true)
     )
 }
