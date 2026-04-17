@@ -37,7 +37,7 @@ class GeneticAlgorithm {
     private func initStartDistances(startLocation: GridPoint) {
         startDistances.removeAll()
         for cafe in allCafes {
-            let path = AStar(graph: grid, start: startLocation, end: cafe.entryCord)
+            let path = AStar(graph: grid).aStarAlgorithm(start: startLocation, end: cafe.entryCord)
             startDistances[cafe.id] = path.isEmpty ? penaltyDistance : path.count
         }
     }
@@ -88,7 +88,7 @@ class GeneticAlgorithm {
                     if let cache = aStarCache {
                         distance = cache.getDistance(firstPlace: prevCafe, secondPlace: currentCafe)
                     } else {
-                        let directPath = AStar(graph: grid, start: prevCafe.entryCord, end: currentCafe.entryCord)
+                        let directPath = AStar(graph: grid).aStarAlgorithm(start: prevCafe.entryCord, end: currentCafe.entryCord)
                         distance = directPath.isEmpty ? penaltyDistance : directPath.count
                     }
                 }

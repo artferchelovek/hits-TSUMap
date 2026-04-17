@@ -27,8 +27,11 @@ struct ContentView: View {
     @StateObject var locationManager = LocationManager()
     @State private var isFollowingUser = true
 
-    @State private var clusters: [Cluster] = []
+    @State private var visitedPoints: Set<GridPoint> = []
+    @State private var pointsInQueue: [GridPoint] = []
+    @State private var pathToCurrentPoint: Set<GridPoint> = []
 
+    @State private var clusters: [Cluster] = []
     @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
 
@@ -81,6 +84,9 @@ struct ContentView: View {
                     paths = []
                     endLocation = nil
                     intermediatePoints = []
+                    visitedPoints = []
+                    pointsInQueue = []
+                    pathToCurrentPoint = []
                     animatePlusMinus = true
                 }
             } label: {
@@ -108,6 +114,9 @@ struct ContentView: View {
                 clusters: $clusters,
                 showLocationAlert: $showLocationAlert,
                 isFollowingUser: $isFollowingUser
+                visitedPoints: $visitedPoints,
+                correctPoints: $pointsInQueue,
+                p: $pathToCurrentPoint
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
