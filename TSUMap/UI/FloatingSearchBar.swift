@@ -21,46 +21,64 @@ struct FloatingSearchBar: View {
     @Binding var endLocation: GridPoint?
     @Binding var intermediatePoints: [GridPoint]
     @Binding var paths: [GridPoint]
+    @Binding var isShowSettings: Bool
 
     var body: some View {
         VStack {
-            HStack(spacing: 12) {
-                Image(systemName: "magnifyingglass")
-                    .font(.title3)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
+            HStack(spacing: 10) {
+                HStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.title3)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
 
-                TextField("Поиск места...", text: $searchText, onEditingChanged: { editing in
-                    if editing {
-                        withAnimation(.spring()) {
-                            isShowingList = true
+                    TextField("Поиск места...", text: $searchText, onEditingChanged: { editing in
+                        if editing {
+                            withAnimation(.spring()) {
+                                isShowingList = true
+                            }
                         }
-                    }
-                })
-                .font(.body)
+                    })
+                    .font(.body)
 
-                Image(systemName: "xmark.circle")
-                    .font(.title3)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-                    .symbolEffect(.drawOn.individually, options: .nonRepeating, isActive: !isShowingList)
-                    .onTapGesture {
-                        withAnimation(.spring()) {
-                            searchText = ""
-                            isShowingList = false
-                            UIApplication.shared.sendAction(
-                                #selector(UIResponder.resignFirstResponder),
-                                to: nil,
-                                from: nil,
-                                for: nil
-                            )
+                    Image(systemName: "xmark.circle")
+                        .font(.title3)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .symbolEffect(.drawOn.individually, options: .nonRepeating, isActive: !isShowingList)
+                        .onTapGesture {
+                            withAnimation(.spring()) {
+                                searchText = ""
+                                isShowingList = false
+                                UIApplication.shared.sendAction(
+                                    #selector(UIResponder.resignFirstResponder),
+                                    to: nil,
+                                    from: nil,
+                                    for: nil
+                                )
+                            }
                         }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(.regularMaterial, in: Capsule())
+                .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 2)
+
+                Button {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                        isShowSettings.toggle()
                     }
+                } label: {
+                    Image(systemName: "gear")
+                        .font(.title3)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .frame(width: 44, height: 44)
+                        .rotationEffect(.degrees(isShowSettings ? 90 : 0))
+                }
+                .background(.regularMaterial, in: Circle())
+                .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 2)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(.regularMaterial, in: Capsule())
-            .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 2)
 
             if isShowingList {
                 VStack {
@@ -254,6 +272,7 @@ struct SightSelectionView: View {
         startLocation: .constant(GridPoint(row: 10, col: 10)),
         endLocation: .constant(nil),
         intermediatePoints: .constant([]),
-        paths: .constant([])
+        paths: .constant([]),
+        isShowSettings: .constant(false)
     )
 }

@@ -48,6 +48,10 @@ final class SettingsManager: ObservableObject {
         }
     }
 
+    init() {
+        load()
+    }
+
     @Published var isBuildPath: Bool = false {
         didSet { save() }
     }

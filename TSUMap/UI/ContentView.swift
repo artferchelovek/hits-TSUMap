@@ -34,15 +34,13 @@ struct ContentView: View {
     @State private var clusters: [Cluster] = []
     @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
+    @State private var isShowingSettings: Bool = false
 
     @State private var animatePlusMinus = true
 
     @StateObject var manager = VenueManager()
     @StateObject var placeManager = PlaceManager()
-
-    @State private var loadedGrid = tsuCampusGrid.map { row in
-        row.map { value in value == 1 ? CellType.obstacle : CellType.path }
-    }
+    @StateObject var settingsManager = SettingsManager()
 
     fileprivate func PathsView() -> some View {
         VStack(spacing: 15) {
@@ -136,6 +134,11 @@ struct ContentView: View {
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }
+            .sheet(isPresented: $isShowingSettings) {
+                AppSettingsView(settingsManager: settingsManager)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+            }
 
             VStack(spacing: 0) {
                 if startLocation == nil {
@@ -164,7 +167,8 @@ struct ContentView: View {
                                 startLocation: $startLocation,
                                 endLocation: $endLocation,
                                 intermediatePoints: $intermediatePoints,
-                                paths: $paths
+                                paths: $paths,
+                                isShowSettings: $isShowingSettings
                             )
                         }
                     }
