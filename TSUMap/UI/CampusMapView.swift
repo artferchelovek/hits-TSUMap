@@ -31,6 +31,39 @@ enum CellType {
     case obstacle
 }
 
+func findNearestPathPoint(from point: GridPoint) -> GridPoint {
+    guard loadedGrid[point.row][point.col] == .obstacle else { return point }
+
+    var queue: [GridPoint] = [point]
+    var visited: Set<GridPoint> = [point]
+
+    let directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
+    var head = 0
+    while head < queue.count {
+        let current = queue[head]
+        head += 1
+
+        for dir in directions {
+            let newRow = current.row + dir.0
+            let newCol = current.col + dir.1
+
+            if newRow >= 0, newRow < rowsCount, newCol >= 0, newCol < columnsCount {
+                let nextPoint = GridPoint(row: newRow, col: newCol)
+                if !visited.contains(nextPoint) {
+                    if loadedGrid[newRow][newCol] == .path {
+                        return nextPoint
+                    }
+                    visited.insert(nextPoint)
+                    queue.append(nextPoint)
+                }
+            }
+        }
+        if queue.count > 400 { break }
+    }
+    return point
+}
+
 let columnsCount = 150
 let rowsCount = 150
 
@@ -60,7 +93,11 @@ struct CampusMapView: View {
     @Binding var pathToCurrentPoint: Set<GridPoint>
 
     @ObservedObject var placeManager: PlaceManager
+    @StateObject var locationManager = LocationManager()
     @Binding var clusters: [Cluster]
+    @Binding var showLocationAlert: Bool
+    @Binding var isFollowingUser: Bool
+
     @State private var hasAutoFitRoute: Bool = false
 
     @State private var baseScale: CGFloat = 1.0
@@ -99,6 +136,8 @@ struct CampusMapView: View {
         selectedPlace: Binding<IdentifiableItem?>,
         selectedCluster: Binding<Cluster?>,
         clusters: Binding<[Cluster]>,
+        showLocationAlert: Binding<Bool>,
+        isFollowingUser: Binding<Bool>
         visitedPoints: Binding<Set<GridPoint>>,
         correctPoints: Binding<[GridPoint]>,
         p: Binding<Set<GridPoint>>
@@ -110,6 +149,9 @@ struct CampusMapView: View {
         _paths = paths
         self.placeManager = placeManager
         _selectedPlace = selectedPlace
+        _showLocationAlert = showLocationAlert
+        _isFollowingUser = isFollowingUser
+
         _visitedPoints = visitedPoints
         _pointsInQueue = correctPoints
         _pathToCurrentPoint = p
@@ -191,15 +233,13 @@ struct CampusMapView: View {
             GeometryReader { geo in
                 ZStack(alignment: .topLeading) {
                     Map(
-                        initialPosition: .region(MKCoordinateRegion(
-                            center: CLLocationCoordinate2D(latitude: 56.4690, longitude: 84.9470),
-                            span: MKCoordinateSpan(latitudeDelta: 0.007, longitudeDelta: 0.007)
-                        )),
+                        initialPosition: .region(MapConfig.region),
                         interactionModes: []
                     )
                     .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
                     .allowsHitTesting(false)
                     .frame(width: mapWidth, height: mapHeight)
+                    .aspectRatio(1, contentMode: .fit)
 
                     staticCanvas()
 
@@ -231,9 +271,20 @@ struct CampusMapView: View {
                 .gesture(mapGesture)
                 .onAppear {
                     viewSize = geo.size
+                    locationManager.requestLocation()
                 }
                 .onChange(of: geo.size) { _, newValue in
                     viewSize = newValue
+                }
+                .onChange(of: locationManager.userLocation) { _, newValue in
+                    if isFollowingUser, let location = newValue, let gridPoint = convertToGrid(location: location) {
+                        centerOnGridPoint(gridPoint)
+                    }
+                }
+                .onChange(of: isFollowingUser) { _, newValue in
+                    if newValue {
+                        centerOnUser()
+                    }
                 }
             }
             .defaultScrollAnchor(.center)
@@ -247,6 +298,11 @@ struct CampusMapView: View {
             DragGesture(minimumDistance: 0)
                 .onChanged { value in
                     activePan = value.translation
+                    if abs(value.translation.width) > 2 || abs(value.translation.height) > 2 {
+                        if isFollowingUser {
+                            isFollowingUser = false
+                        }
+                    }
                 }
                 .onEnded { value in
                     activePan = value.translation
@@ -257,6 +313,9 @@ struct CampusMapView: View {
                     activeZoom = value.magnification
                     if pinchAnchor == .zero {
                         pinchAnchor = value.startLocation
+                    }
+                    if isFollowingUser {
+                        isFollowingUser = false
                     }
                 }
                 .onEnded { value in
@@ -327,22 +386,50 @@ struct CampusMapView: View {
         return CGSize(width: clampedWidth, height: clampedHeight)
     }
 
+    private func centerOnUser() {
+        guard let location = locationManager.userLocation,
+              let gridPoint = convertToGrid(location: location) else { return }
+
+        centerOnGridPoint(gridPoint)
+    }
+
+    private func centerOnGridPoint(_ point: GridPoint) {
+        let targetScale: CGFloat = 1.3
+        let screenWidth = viewSize.width > 0 ? viewSize.width : 400
+        let screenHeight = viewSize.height > 0 ? viewSize.height : 700
+
+        let centerCol = CGFloat(point.col) * cellSize + cellSize / 2
+        let centerRow = CGFloat(point.row) * cellSize + cellSize / 2
+
+        let offsetX = screenWidth / 2 - centerCol * targetScale
+        let offsetY = screenHeight / 2 - centerRow * targetScale
+
+        withAnimation(.easeInOut(duration: 0.6)) {
+            baseScale = targetScale
+            baseOffset = CGSize(width: offsetX, height: offsetY)
+        }
+    }
+
     private func calculatePath() {
         Task {
 
-            guard let start = startLocation, let end = endLocation else {
-                if startLocation == nil {
-                    hasAutoFitRoute = false
+           guard let rawStart = startLocation, let rawEnd = endLocation else {
+            if startLocation == nil {
+                hasAutoFitRoute = false
                 }
                 return
             }
+
+        let start = findNearestPathPoint(from: rawStart)
+        let end = findNearestPathPoint(from: rawEnd)
+        let adjustedIntermediates = intermediatePoints.map { findNearestPathPoint(from: $0) }
 
             pointsInQueue = []
             visitedPoints = []
             pathToCurrentPoint = []
             paths = []
 
-            let points = [start] + intermediatePoints + [end]
+            let points = [start] + adjustedIntermediates + [end]
             var newPath: [GridPoint] = []
             for j in 0 ..< points.count - 1 {
                 let startPoint = points[j]
@@ -527,7 +614,7 @@ private extension CampusMapView {
         let col = Int(location.x / cellSize)
         let row = Int(location.y / cellSize)
 
-        print(col, row)
+        print(row, col)
 
         if startLocation != nil {
             let tapThreshold: CGFloat = 22.0
@@ -576,6 +663,8 @@ private extension CampusMapView {
         selectedPlace: .constant(nil as IdentifiableItem?),
         selectedCluster: .constant(nil as Cluster?),
         clusters: .constant([]),
+        showLocationAlert: .constant(false),
+        isFollowingUser: .constant(true)
         visitedPoints: .constant([]),
         correctPoints: .constant([]),
         p: .constant([])

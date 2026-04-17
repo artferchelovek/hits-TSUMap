@@ -23,6 +23,9 @@ struct ContentView: View {
     @State private var selectedPlace: IdentifiableItem?
     @State private var selectedCluster: Cluster?
     @State private var sheetDetent: PresentationDetent = .height(180)
+    @State private var showLocationAlert = false
+    @StateObject var locationManager = LocationManager()
+    @State private var isFollowingUser = true
 
     @State private var visitedPoints: Set<GridPoint> = []
     @State private var pointsInQueue: [GridPoint] = []
@@ -36,6 +39,10 @@ struct ContentView: View {
 
     @StateObject var manager = VenueManager()
     @StateObject var placeManager = PlaceManager()
+
+    @State private var loadedGrid = tsuCampusGrid.map { row in
+        row.map { value in value == 1 ? CellType.obstacle : CellType.path }
+    }
 
     fileprivate func PathsView() -> some View {
         VStack(spacing: 15) {
@@ -105,6 +112,8 @@ struct ContentView: View {
                 selectedPlace: $selectedPlace,
                 selectedCluster: $selectedCluster,
                 clusters: $clusters,
+                showLocationAlert: $showLocationAlert,
+                isFollowingUser: $isFollowingUser
                 visitedPoints: $visitedPoints,
                 correctPoints: $pointsInQueue,
                 p: $pathToCurrentPoint
@@ -179,35 +188,63 @@ struct ContentView: View {
                         .cornerRadius(24)
                         .shadow(color: .black.opacity(0.1), radius: 10)
                     } else if endLocation == nil {
-                        HStack {
-                            Button {
-                                withAnimation(.spring()) {
-                                    isShowingDecisionSheet.toggle()
+                        VStack {
+                            if !isFollowingUser, locationManager.userLocation != nil {
+                                Button(action: {
+                                    withAnimation(.spring()) {
+                                        isFollowingUser = true
+                                    }
+                                }) {
+                                    Image(systemName: "location.fill")
+                                        .font(.system(size: 20, weight: .medium))
+                                        .foregroundColor(.blue)
+                                        .padding(12)
+                                        .background(.ultraThinMaterial)
+                                        .clipShape(Circle())
+                                        .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
                                 }
-                            } label: {
-                                Text("Куда пойдём?").padding(.vertical, 6).padding(.horizontal, 20)
+                                .padding(.trailing, 20)
+                                .padding(.bottom, 20)
+                                .transition(.scale.combined(with: .opacity))
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                             }
-                            .buttonStyle(.glassProminent)
-                            .sheet(isPresented: $isShowingDecisionSheet) {
-                                DecisionTreeView(
-                                    manager: manager,
-                                    placeManager: placeManager,
-                                    treeNode: treeNode,
-                                    endLocation: $endLocation
-                                ) { prediction in
-                                    predictionResult = prediction
+                            HStack(spacing: 10) {
+                                Button {
+                                    withAnimation(.spring()) {
+                                        isShowingDecisionSheet.toggle()
+                                    }
+                                } label: {
+                                    Text("Куда пойдём?")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 6)
                                 }
-                                .presentationDragIndicator(.visible)
-                            }
+                                .buttonStyle(.glassProminent)
+                                .sheet(isPresented: $isShowingDecisionSheet) {
+                                    DecisionTreeView(
+                                        manager: manager,
+                                        placeManager: placeManager,
+                                        treeNode: treeNode,
+                                        endLocation: $endLocation
+                                    ) { prediction in
+                                        predictionResult = prediction
+                                    }
+                                    .presentationDragIndicator(.visible)
+                                }
 
-                            Button {
-                                withAnimation(.spring()) {
-                                    startLocation = nil
+                                Button {
+                                    withAnimation(.spring()) {
+                                        startLocation = nil
+                                        paths = []
+                                        intermediatePoints = []
+                                        endLocation = nil
+                                    }
+                                } label: {
+                                    Text("Очистить место старта")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 6)
                                 }
-                            } label: {
-                                Text("Изменить старт").padding(.vertical, 6).padding(.horizontal, 20)
+                                .buttonStyle(.glass)
                             }
-                            .buttonStyle(.glass)
                         }
                     } else {
                         PathsView()
@@ -224,7 +261,18 @@ struct ContentView: View {
             .animation(.spring(), value: startLocation)
         }
         .onAppear {
+            locationManager.requestLocation()
             loadTree()
+        }
+        .onChange(of: locationManager.userLocation) { _, newUserLocation in
+            if let location = newUserLocation {
+                if let gridPoint = convertToGrid(location: location) {
+                    print("в кампусе это точка: \(gridPoint)")
+                    withAnimation(.spring()) {
+                        startLocation = gridPoint
+                    }
+                }
+            }
         }
     }
 

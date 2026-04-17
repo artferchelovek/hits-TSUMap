@@ -22802,3 +22802,7 @@ let tsuCampusGrid = [
         1,
     ],
 ]
+
+let loadedGrid = tsuCampusGrid.map { row in
+    row.map { value in value == 1 ? CellType.obstacle : CellType.path }
+}
