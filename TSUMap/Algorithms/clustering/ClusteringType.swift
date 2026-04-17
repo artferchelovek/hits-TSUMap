@@ -1,6 +1,6 @@
 import Foundation
 
-enum ClusteringType: String {
+enum ClusteringType: String, Codable {
     case aStar = "AStar"
     case byStraight = "EuclideanDistance"
 
