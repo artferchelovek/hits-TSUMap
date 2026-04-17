@@ -24,8 +24,11 @@ struct ContentView: View {
     @State private var selectedCluster: Cluster?
     @State private var sheetDetent: PresentationDetent = .height(180)
 
-    @State private var clusters: [Cluster] = []
+    @State private var visitedPoints: Set<GridPoint> = []
+    @State private var pointsInQueue: [GridPoint] = []
+    @State private var pathToCurrentPoint: Set<GridPoint> = []
 
+    @State private var clusters: [Cluster] = []
     @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
 
@@ -74,6 +77,9 @@ struct ContentView: View {
                     paths = []
                     endLocation = nil
                     intermediatePoints = []
+                    visitedPoints = []
+                    pointsInQueue = []
+                    pathToCurrentPoint = []
                     animatePlusMinus = true
                 }
             } label: {
@@ -98,7 +104,10 @@ struct ContentView: View {
                 placeManager: placeManager,
                 selectedPlace: $selectedPlace,
                 selectedCluster: $selectedCluster,
-                clusters: $clusters
+                clusters: $clusters,
+                visitedPoints: $visitedPoints,
+                correctPoints: $pointsInQueue,
+                p: $pathToCurrentPoint
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
