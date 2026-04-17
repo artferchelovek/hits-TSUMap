@@ -26,7 +26,7 @@ struct AppSettingsView: View {
                 Text("Скорость поиска")
                 Picker("", selection: $settingsManager.buildPathSpeed) {
                     ForEach(1 ... 5, id: \.self) { value in
-                        Text("x\(value)").tag(Double(value))
+                        Text("x\(1 / Double(value), specifier: "%.2f")").tag(Double(value))
                     }
                 }
                 .pickerStyle(.segmented)

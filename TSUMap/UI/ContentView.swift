@@ -114,7 +114,8 @@ struct ContentView: View {
                 isFollowingUser: $isFollowingUser,
                 visitedPoints: $visitedPoints,
                 correctPoints: $pointsInQueue,
-                pathToCurrentPoint: $pathToCurrentPoint
+                pathToCurrentPoint: $pathToCurrentPoint,
+                settingsManager: settingsManager
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
@@ -163,6 +164,7 @@ struct ContentView: View {
                         } else {
                             FloatingSearchBar(
                                 placeManager: placeManager,
+                                settingsManager: settingsManager,
                                 clusters: $clusters,
                                 startLocation: $startLocation,
                                 endLocation: $endLocation,

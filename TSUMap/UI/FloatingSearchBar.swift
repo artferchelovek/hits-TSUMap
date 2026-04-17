@@ -15,6 +15,7 @@ struct FloatingSearchBar: View {
     @State private var isBuildingRoute = false
 
     @ObservedObject var placeManager: PlaceManager
+    @ObservedObject var settingsManager: SettingsManager
 
     @Binding var clusters: [Cluster]
     @Binding var startLocation: GridPoint?
@@ -86,7 +87,8 @@ struct FloatingSearchBar: View {
                         Button {
                             clusters = placeManager.clustering(
                                 numberClusters: 5,
-                                typeClustering: .byStraight,
+                                typeClustering: settingsManager.clusterType,
+                                typeAlgorithm: settingsManager.clusterAlgorithm,
                                 data: Array(placeManager.cafes.values)
                             )
                             withAnimation(.spring()) {
@@ -268,6 +270,7 @@ struct SightSelectionView: View {
 #Preview {
     FloatingSearchBar(
         placeManager: PlaceManager(),
+        settingsManager: SettingsManager(),
         clusters: .constant([]),
         startLocation: .constant(GridPoint(row: 10, col: 10)),
         endLocation: .constant(nil),

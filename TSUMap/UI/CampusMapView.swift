@@ -78,8 +78,6 @@ var mapHeight: CGFloat {
 }
 
 struct CampusMapView: View {
-    @State private var grid: [[CellType]]
-
     @Binding var startLocation: GridPoint?
     @Binding var endLocation: GridPoint?
     @Binding var intermediatePoints: [GridPoint]
@@ -107,6 +105,8 @@ struct CampusMapView: View {
     @State private var pinchAnchor: CGPoint = .zero
 
     @State private var viewSize: CGSize = .zero
+
+    @ObservedObject var settingsManager: SettingsManager
 
     var currentScale: CGFloat {
         clamp(baseScale * activeZoom, min: 0.5, max: 4.0)
@@ -140,8 +140,8 @@ struct CampusMapView: View {
         isFollowingUser: Binding<Bool>,
         visitedPoints: Binding<Set<GridPoint>>,
         correctPoints: Binding<[GridPoint]>,
-        pathToCurrentPoint: Binding<Set<GridPoint>>
-
+        pathToCurrentPoint: Binding<Set<GridPoint>>,
+        settingsManager: SettingsManager
     ) {
         _startLocation = startLocation
         _endLocation = endLocation
@@ -151,24 +151,14 @@ struct CampusMapView: View {
         _selectedPlace = selectedPlace
         _showLocationAlert = showLocationAlert
         _isFollowingUser = isFollowingUser
-
         _visitedPoints = visitedPoints
         _pointsInQueue = correctPoints
         _pathToCurrentPoint = pathToCurrentPoint
-        if tsuCampusGrid.isEmpty {
-            _grid = State(initialValue: Array(
-                repeating: Array(repeating: .obstacle, count: columnsCount),
-                count: rowsCount
-            ))
-        } else {
-            let loadedGrid = tsuCampusGrid.map { row in
-                row.map { value in value == 1 ? CellType.obstacle : CellType.path }
-            }
-            _grid = State(initialValue: loadedGrid)
-        }
         _selectedCluster = selectedCluster
         _clusters = clusters
-        self.placeManager.setGrid(grid: grid)
+        self.settingsManager = settingsManager
+
+        self.placeManager.setGrid(grid: loadedGrid)
     }
 
     fileprivate func staticCanvas() -> some View {
@@ -434,17 +424,18 @@ struct CampusMapView: View {
             for j in 0 ..< points.count - 1 {
                 let startPoint = points[j]
                 let endPoint = points[j + 1]
-                let stream = AStar(graph: grid).aStarGenerator(start: startPoint, end: endPoint)
+                let stream = AStar(graph: loadedGrid).aStarGenerator(start: startPoint, end: endPoint)
                 for await i in stream {
-                    /* if тут какой то флаг, который определяет будет ли дебаг режим или просто нарисуется путь */ // {
-                    await MainActor.run {
-                        visitedPoints.insert(i.point)
-                        pointsInQueue = i.openPoints
-                        pathToCurrentPoint = []
-                        i.pathToPoint.forEach { pathToCurrentPoint.insert($0) }
+                    if settingsManager.isBuildPath {
+                        await MainActor.run {
+                            visitedPoints.insert(i.point)
+                            pointsInQueue = i.openPoints
+                            pathToCurrentPoint = []
+                            i.pathToPoint.forEach { pathToCurrentPoint.insert($0) }
+                        }
+                        try await Task.sleep(nanoseconds: 10_000_000 * UInt64(settingsManager.buildPathSpeed))
                     }
-                    try await Task.sleep(nanoseconds: 10_000_000 /* *k - тут кэф, который контролирует скорость выполнения */ )
-                    // }
+
                     if i.isEnd {
                         newPath += i.path
                     }
@@ -667,7 +658,8 @@ private extension CampusMapView {
         isFollowingUser: .constant(true),
         visitedPoints: .constant([]),
         correctPoints: .constant([]),
-        pathToCurrentPoint: .constant([])
+        pathToCurrentPoint: .constant([]),
+        settingsManager: SettingsManager()
     )
 }
 
