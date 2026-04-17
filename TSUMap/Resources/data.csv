@@ -1,193 +1,240 @@
-second_building, medium, very_short, snack, low, bad, Vending_Machine
-second_building, medium, very_short, snack, low, good, Vending_Machine
-second_building, medium, very_short, coffee, low, bad, Vending_Machine
-second_building, medium, very_short, coffee, low, good, Vending_Machine
-second_building, high, very_short, snack, low, good, Vending_Machine
-second_building, high, very_short, snack, low, bad, Vending_Machine
-second_building, high, very_short, coffee, low, bad, Vending_Machine
-main_building, high, very_short, coffee, low, good, Vending_Machine
-main_building, medium, very_short, snack, low, bad, Vending_Machine
-main_building, medium, very_short, snack, low, good, Vending_Machine
-main_building, medium, very_short, coffee, low, bad, Vending_Machine
-main_building, medium, very_short, coffee, low, good, Vending_Machine
-main_building, high, very_short, snack, low, good, Vending_Machine
-main_building, high, very_short, snack, low, bad, Vending_Machine
-main_building, high, very_short, coffee, low, good, Vending_Machine
-campus_center, high, very_short, coffee, low, good, Vending_Machine
-campus_center, medium, very_short, snack, low, bad, Vending_Machine
-campus_center, medium, very_short, snack, low, good, Vending_Machine
-campus_center, medium, very_short, coffee, low, bad, Vending_Machine
-campus_center, medium, very_short, coffee, low, good, Vending_Machine
-campus_center, high, very_short, snack, low, good, Vending_Machine
-campus_center, high, very_short, snack, low, bad, Vending_Machine
-campus_center, high, very_short, coffee, low, good, Vending_Machine
-second_building, low, medium, coffee, medium, good, Yarche
-second_building, medium, medium, coffee, medium, good, Yarche
-second_building, low, medium, snack, medium, good, Yarche
-second_building, medium, medium, snack, medium, good, Yarche
-second_building, low, medium, coffee, high, good, Yarche
-second_building, medium, medium, coffee, high, good, Yarche
-second_building, low, medium, snack, high, good, Yarche
-second_building, medium, medium, snack, high, good, Yarche
-main_building, low, medium, coffee, medium, good, Yarche
-main_building, medium, medium, coffee, medium, good, Yarche
-main_building, low, medium, snack, medium, good, Yarche
-main_building, medium, medium, snack, medium, good, Yarche
-main_building, low, medium, coffee, high, good, Yarche
-main_building, medium, medium, coffee, high, good, Yarche
-main_building, low, medium, snack, high, good, Yarche
-main_building, medium, medium, snack, high, good, Yarche
-campus_center, low, medium, coffee, medium, good, Yarche
-campus_center, low, medium, snack, medium, good, Yarche
-campus_center, medium, medium, snack, medium, good, Yarche
-campus_center, low, medium, coffee, high, good, Yarche
-campus_center, medium, medium, coffee, high, good, Yarche
-campus_center, low, medium, snack, high, good, Yarche
-campus_center, medium, medium, snack, high, good, Yarche
-bus_stop, low, medium, coffee, medium, good, Yarche
-bus_stop, low, medium, snack, medium, good, Yarche
-bus_stop, medium, medium, snack, medium, good, Yarche
-bus_stop, low, medium, coffee, high, good, Yarche
-bus_stop, medium, medium, coffee, high, good, Yarche
-bus_stop, low, medium, snack, high, good, Yarche
-bus_stop, medium, medium, snack, high, good, Yarche
-second_building, high, medium, pancakes, medium, good, Siberian_Pancakes
-second_building, medium, medium, pancakes, high, good, Siberian_Pancakes
-second_building, high, medium, pancakes, high, good, Siberian_Pancakes
-second_building, medium, medium, pancakes, medium, good, Siberian_Pancakes
-second_building, high, medium, pancakes, medium, bad, Siberian_Pancakes
-second_building, medium, medium, pancakes, high, bad, Siberian_Pancakes
-second_building, high, medium, pancakes, high, bad, Siberian_Pancakes
-second_building, medium, medium, pancakes, medium, bad, Siberian_Pancakes
-main_building, high, medium, pancakes, medium, good, Siberian_Pancakes
-main_building, medium, medium, pancakes, high, good, Siberian_Pancakes
-main_building, high, medium, pancakes, high, good, Siberian_Pancakes
-main_building, medium, medium, pancakes, medium, good, Siberian_Pancakes
-main_building, high, medium, pancakes, medium, bad, Siberian_Pancakes
-main_building, medium, medium, pancakes, high, bad, Siberian_Pancakes
-main_building, high, medium, pancakes, high, bad, Siberian_Pancakes
-main_building, medium, medium, pancakes, medium, bad, Siberian_Pancakes
-campus_center, high, medium, pancakes, medium, good, Siberian_Pancakes
-campus_center, medium, medium, pancakes, high, good, Siberian_Pancakes
-campus_center, high, medium, pancakes, high, good, Siberian_Pancakes
-campus_center, medium, medium, pancakes, medium, good, Siberian_Pancakes
-campus_center, high, medium, pancakes, medium, bad, Siberian_Pancakes
-campus_center, medium, medium, pancakes, high, bad, Siberian_Pancakes
-campus_center, high, medium, pancakes, high, bad, Siberian_Pancakes
-campus_center, medium, medium, pancakes, medium, bad, Siberian_Pancakes
-bus_stop, high, medium, pancakes, medium, good, Siberian_Pancakes
-bus_stop, medium, medium, pancakes, high, good, Siberian_Pancakes
-bus_stop, high, medium, pancakes, high, good, Siberian_Pancakes
-bus_stop, medium, medium, pancakes, medium, good, Siberian_Pancakes
-bus_stop, high, medium, pancakes, medium, bad, Siberian_Pancakes
-bus_stop, medium, medium, pancakes, high, bad, Siberian_Pancakes
-bus_stop, high, medium, pancakes, high, bad, Siberian_Pancakes
-bus_stop, medium, medium, pancakes, medium, bad, Siberian_Pancakes
-second_building, medium, very_short, coffee, low, good, Second_Building_Cafe
-second_building, high, very_short, coffee, low, good, Second_Building_Cafe
-second_building, medium, very_short, full_meal, low, good, Second_Building_Cafe
-second_building, high, very_short, full_meal, low, good, Second_Building_Cafe
-second_building, medium, very_short, snack, low, good, Second_Building_Cafe
-second_building, high, very_short, snack, low, good, Second_Building_Cafe
-second_building, medium, very_short, coffee, low, bad, Second_Building_Cafe
-second_building, high, very_short, coffee, low, bad, Second_Building_Cafe
-second_building, medium, very_short, full_meal, low, bad, Second_Building_Cafe
-second_building, high, very_short, full_meal, low, bad, Second_Building_Cafe
-second_building, medium, very_short, snack, low, bad, Second_Building_Cafe
-second_building, high, very_short, snack, low, bad, Second_Building_Cafe
-second_building, low, very_short, coffee, low, good, Second_Building_Cafe
-second_building, low, very_short, coffee, low, good, Second_Building_Cafe
-second_building, low, very_short, full_meal, low, good, Second_Building_Cafe
-second_building, low, very_short, full_meal, low, good, Second_Building_Cafe
-second_building, low, very_short, snack, low, good, Second_Building_Cafe
-second_building, low, very_short, snack, low, good, Second_Building_Cafe
-second_building, low, very_short, coffee, low, bad, Second_Building_Cafe
-second_building, low, very_short, coffee, low, bad, Second_Building_Cafe
-second_building, low, very_short, full_meal, low, bad, Second_Building_Cafe
-second_building, low, very_short, full_meal, low, bad, Second_Building_Cafe
-second_building, low, very_short, snack, low, bad, Second_Building_Cafe
-second_building, low, very_short, snack, low, bad, Second_Building_Cafe
-bus_stop, medium, short, coffee, low, good, Bus_Stop_Coffee
-bus_stop, high, short, coffee, low, good, Bus_Stop_Coffee
-bus_stop, medium, very_short, coffee, low, good, Bus_Stop_Coffee
-bus_stop, high, very_short, coffee, low, good, Bus_Stop_Coffee
-bus_stop, medium, short, coffee, medium, good, Bus_Stop_Coffee
-bus_stop, high, short, coffee, medium, good, Bus_Stop_Coffee
-bus_stop, medium, very_short, coffee, medium, good, Bus_Stop_Coffee
-bus_stop, high, very_short, coffee, medium, good, Bus_Stop_Coffee
-bus_stop, medium, short, coffee, high, good, Bus_Stop_Coffee
-bus_stop, high, short, coffee, high, good, Bus_Stop_Coffee
-bus_stop, medium, very_short, coffee, high, good, Bus_Stop_Coffee
-bus_stop, high, very_short, coffee, high, good, Bus_Stop_Coffee
-bus_stop, medium, short, coffee, low, bad, Bus_Stop_Coffee
-bus_stop, high, short, coffee, low, bad, Bus_Stop_Coffee
-bus_stop, medium, very_short, coffee, low, bad, Bus_Stop_Coffee
-bus_stop, high, very_short, coffee, low, bad, Bus_Stop_Coffee
-bus_stop, medium, short, coffee, medium, bad, Bus_Stop_Coffee
-bus_stop, high, short, coffee, medium, bad, Bus_Stop_Coffee
-bus_stop, medium, very_short, coffee, medium, bad, Bus_Stop_Coffee
-bus_stop, high, very_short, coffee, medium, bad, Bus_Stop_Coffee
-bus_stop, medium, short, coffee, high, bad, Bus_Stop_Coffee
-bus_stop, high, short, coffee, high, bad, Bus_Stop_Coffee
-bus_stop, medium, very_short, coffee, high, bad, Bus_Stop_Coffee
-bus_stop, high, very_short, coffee, high, bad, Bus_Stop_Coffee
-main_building, medium, very_short, coffee, low, good, Main_Cafeteria
-main_building, high, very_short, coffee, low, good, Main_Cafeteria
-main_building, medium, very_short, full_meal, low, good, Main_Cafeteria
-main_building, high, very_short, full_meal, low, good, Main_Cafeteria
-main_building, medium, very_short, snack, low, good, Main_Cafeteria
-main_building, high, very_short, snack, low, good, Main_Cafeteria
-main_building, medium, very_short, coffee, low, bad, Main_Cafeteria
-main_building, high, very_short, coffee, low, bad, Main_Cafeteria
-main_building, medium, very_short, full_meal, low, bad, Main_Cafeteria
-main_building, high, very_short, full_meal, low, bad, Main_Cafeteria
-main_building, medium, very_short, snack, low, bad, Main_Cafeteria
-main_building, high, very_short, snack, low, bad, Main_Cafeteria
-main_building, low, very_short, coffee, low, good, Main_Cafeteria
-main_building, low, very_short, coffee, low, good, Main_Cafeteria
-main_building, low, very_short, full_meal, low, good, Main_Cafeteria
-main_building, low, very_short, full_meal, low, good, Main_Cafeteria
-main_building, low, very_short, snack, low, good, Main_Cafeteria
-main_building, low, very_short, snack, low, good, Main_Cafeteria
-main_building, low, very_short, coffee, low, bad, Main_Cafeteria
-main_building, low, very_short, coffee, low, bad, Main_Cafeteria
-main_building, low, very_short, full_meal, low, bad, Main_Cafeteria
-main_building, low, very_short, full_meal, low, bad, Main_Cafeteria
-main_building, low, very_short, snack, low, bad, Main_Cafeteria
-main_building, low, very_short, snack, low, bad, Main_Cafeteria
-main_building, medium, short, coffee, low, good, Starbooks
-main_building, high, short, coffee, low, good, Starbooks
-main_building, medium, very_short, coffee, low, good, Starbooks
-main_building, high, very_short, coffee, low, good, Starbooks
-main_building, medium, medium, coffee, low, good, Starbooks
-main_building, high, medium, coffee, low, good, Starbooks
-main_building, medium, short, coffee, medium, good, Starbooks
-main_building, high, short, coffee, medium, good, Starbooks
-main_building, medium, very_short, coffee, medium, good, Starbooks
-main_building, high, very_short, coffee, medium, good, Starbooks
-main_building, medium, medium, coffee, medium, good, Starbooks
-main_building, high, medium, coffee, medium, good, Starbooks
-main_building, medium, short, coffee, high, good, Starbooks
-main_building, high, short, coffee, high, good, Starbooks
-main_building, medium, very_short, coffee, high, good, Starbooks
-main_building, high, very_short, coffee, high, good, Starbooks
-main_building, medium, medium, coffee, high, good, Starbooks
-main_building, high, medium, coffee, high, good, Starbooks
-main_building, medium, short, coffee, low, bad, Starbooks
-main_building, high, short, coffee, low, bad, Starbooks
-main_building, medium, very_short, coffee, low, bad, Starbooks
-main_building, high, very_short, coffee, low, bad, Starbooks
-main_building, medium, medium, coffee, low, bad, Starbooks
-main_building, high, medium, coffee, low, bad, Starbooks
-main_building, medium, short, coffee, medium, bad, Starbooks
-main_building, high, short, coffee, medium, bad, Starbooks
-main_building, medium, very_short, coffee, medium, bad, Starbooks
-main_building, high, very_short, coffee, medium, bad, Starbooks
-main_building, medium, medium, coffee, medium, bad, Starbooks
-main_building, high, medium, coffee, medium, bad, Starbooks
-main_building, medium, short, coffee, high, bad, Starbooks
-main_building, high, short, coffee, high, bad, Starbooks
-main_building, medium, very_short, coffee, high, bad, Starbooks
-main_building, high, very_short, coffee, high, bad, Starbooks
-main_building, medium, medium, coffee, high, bad, Starbooks
-main_building, high, medium, coffee, high, bad, Starbooks
+bus_stop,high,medium,dessert,high,good,Baba Roma@coffee_002
+bus_stop,medium,medium,dessert,high,good,Baba Roma@coffee_002
+bus_stop,high,medium,snack,high,good,Baba Roma@coffee_002
+bus_stop,medium,medium,snack,high,good,Baba Roma@coffee_002
+bus_stop,high,medium,coffee,high,good,Baba Roma@coffee_002
+bus_stop,medium,medium,coffee,high,good,Baba Roma@coffee_002
+bus_stop,high,long,dessert,high,good,Baba Roma@coffee_002
+bus_stop,medium,long,dessert,high,good,Baba Roma@coffee_002
+bus_stop,high,long,snack,high,good,Baba Roma@coffee_002
+bus_stop,medium,long,snack,high,good,Baba Roma@coffee_002
+bus_stop,high,long,coffee,high,good,Baba Roma@coffee_002
+bus_stop,medium,long,coffee,high,good,Baba Roma@coffee_002
+bus_stop,high,medium,dessert,medium,good,Baba Roma@coffee_002
+bus_stop,medium,medium,dessert,medium,good,Baba Roma@coffee_002
+bus_stop,high,medium,snack,medium,good,Baba Roma@coffee_002
+bus_stop,medium,medium,snack,medium,good,Baba Roma@coffee_002
+bus_stop,high,medium,coffee,medium,good,Baba Roma@coffee_002
+bus_stop,medium,medium,coffee,medium,good,Baba Roma@coffee_002
+bus_stop,high,long,dessert,medium,good,Baba Roma@coffee_002
+bus_stop,medium,long,dessert,medium,good,Baba Roma@coffee_002
+bus_stop,high,long,snack,medium,good,Baba Roma@coffee_002
+bus_stop,medium,long,snack,medium,good,Baba Roma@coffee_002
+bus_stop,high,long,coffee,medium,good,Baba Roma@coffee_002
+bus_stop,medium,long,coffee,medium,good,Baba Roma@coffee_002
+main_building,high,medium,dessert,high,good,Baba Roma@coffee_002
+main_building,medium,medium,dessert,high,good,Baba Roma@coffee_002
+main_building,high,medium,snack,high,good,Baba Roma@coffee_002
+main_building,medium,medium,snack,high,good,Baba Roma@coffee_002
+main_building,high,medium,coffee,high,good,Baba Roma@coffee_002
+main_building,medium,medium,coffee,high,good,Baba Roma@coffee_002
+main_building,high,long,dessert,high,good,Baba Roma@coffee_002
+main_building,medium,long,dessert,high,good,Baba Roma@coffee_002
+main_building,high,long,snack,high,good,Baba Roma@coffee_002
+main_building,medium,long,snack,high,good,Baba Roma@coffee_002
+main_building,high,long,coffee,high,good,Baba Roma@coffee_002
+main_building,medium,long,coffee,high,good,Baba Roma@coffee_002
+main_building,high,medium,dessert,medium,good,Baba Roma@coffee_002
+main_building,medium,medium,dessert,medium,good,Baba Roma@coffee_002
+main_building,high,medium,snack,medium,good,Baba Roma@coffee_002
+main_building,medium,medium,snack,medium,good,Baba Roma@coffee_002
+main_building,high,medium,coffee,medium,good,Baba Roma@coffee_002
+main_building,medium,medium,coffee,medium,good,Baba Roma@coffee_002
+main_building,high,long,dessert,medium,good,Baba Roma@coffee_002
+main_building,medium,long,dessert,medium,good,Baba Roma@coffee_002
+main_building,high,long,snack,medium,good,Baba Roma@coffee_002
+main_building,medium,long,snack,medium,good,Baba Roma@coffee_002
+main_building,high,long,coffee,medium,good,Baba Roma@coffee_002
+main_building,medium,long,coffee,medium,good,Baba Roma@coffee_002
+bus_stop,high,long,full_meal,high,good,Rostics@cafe_016
+bus_stop,high,medium,full_meal,high,good,Rostics@cafe_016
+main_building,high,long,full_meal,high,good,Rostics@cafe_016
+main_building,high,medium,full_meal,high,good,Rostics@cafe_016
+main_building,medium,short,snack,low,bad,Starbooks@coffee_010
+main_building,medium,short,snack,low,good,Starbooks@coffee_010
+main_building,medium,short,coffee,low,bad,Starbooks@coffee_010
+main_building,medium,short,coffee,low,good,Starbooks@coffee_010
+main_building,medium,medium,snack,low,bad,Starbooks@coffee_010
+main_building,medium,medium,snack,low,good,Starbooks@coffee_010
+main_building,medium,medium,coffee,low,bad,Starbooks@coffee_010
+main_building,medium,medium,coffee,low,good,Starbooks@coffee_010
+main_building,medium,short,snack,medium,bad,Starbooks@coffee_010
+main_building,medium,short,snack,medium,good,Starbooks@coffee_010
+main_building,medium,short,coffee,medium,bad,Starbooks@coffee_010
+main_building,medium,short,coffee,medium,good,Starbooks@coffee_010
+main_building,medium,medium,snack,medium,bad,Starbooks@coffee_010
+main_building,medium,medium,snack,medium,good,Starbooks@coffee_010
+main_building,medium,medium,coffee,medium,bad,Starbooks@coffee_010
+main_building,medium,medium,coffee,medium,good,Starbooks@coffee_010
+second_building,medium,short,snack,low,bad,Starbooks@coffee_010
+second_building,medium,short,snack,low,good,Starbooks@coffee_010
+second_building,medium,short,coffee,low,bad,Starbooks@coffee_010
+second_building,medium,short,coffee,low,good,Starbooks@coffee_010
+second_building,medium,medium,snack,low,bad,Starbooks@coffee_010
+second_building,medium,medium,snack,low,good,Starbooks@coffee_010
+second_building,medium,medium,coffee,low,bad,Starbooks@coffee_010
+second_building,medium,medium,coffee,low,good,Starbooks@coffee_010
+second_building,medium,short,snack,medium,bad,Starbooks@coffee_010
+second_building,medium,short,snack,medium,good,Starbooks@coffee_010
+second_building,medium,short,coffee,medium,bad,Starbooks@coffee_010
+second_building,medium,short,coffee,medium,good,Starbooks@coffee_010
+second_building,medium,medium,snack,medium,bad,Starbooks@coffee_010
+second_building,medium,medium,snack,medium,good,Starbooks@coffee_010
+second_building,medium,medium,coffee,medium,bad,Starbooks@coffee_010
+second_building,medium,medium,coffee,medium,good,Starbooks@coffee_010
+campus,medium,short,snack,low,bad,Starbooks@coffee_010
+campus,medium,short,snack,low,good,Starbooks@coffee_010
+campus,medium,short,coffee,low,bad,Starbooks@coffee_010
+campus,medium,short,coffee,low,good,Starbooks@coffee_010
+campus,medium,medium,snack,low,bad,Starbooks@coffee_010
+campus,medium,medium,snack,low,good,Starbooks@coffee_010
+campus,medium,medium,coffee,low,bad,Starbooks@coffee_010
+campus,medium,medium,coffee,low,good,Starbooks@coffee_010
+campus,medium,short,snack,medium,bad,Starbooks@coffee_010
+campus,medium,short,snack,medium,good,Starbooks@coffee_010
+campus,medium,short,coffee,medium,bad,Starbooks@coffee_010
+campus,medium,short,coffee,medium,good,Starbooks@coffee_010
+campus,medium,medium,snack,medium,bad,Starbooks@coffee_010
+campus,medium,medium,snack,medium,good,Starbooks@coffee_010
+campus,medium,medium,coffee,medium,bad,Starbooks@coffee_010
+campus,medium,medium,coffee,medium,good,Starbooks@coffee_010
+main_building,low,very_short,coffee,medium,good,Xo bakery@coffee_013
+main_building,low,very_short,coffee,medium,bad,Xo bakery@coffee_013
+main_building,low,very_short,dessert,medium,good,Xo bakery@coffee_013
+main_building,low,very_short,dessert,medium,bad,Xo bakery@coffee_013
+main_building,low,very_short,snack,medium,good,Xo bakery@coffee_013
+main_building,low,very_short,snack,medium,bad,Xo bakery@coffee_013
+main_building,low,short,coffee,medium,good,Xo bakery@coffee_013
+main_building,low,short,coffee,medium,bad,Xo bakery@coffee_013
+main_building,low,short,dessert,medium,good,Xo bakery@coffee_013
+main_building,low,short,dessert,medium,bad,Xo bakery@coffee_013
+main_building,low,short,snack,medium,good,Xo bakery@coffee_013
+main_building,low,short,snack,medium,bad,Xo bakery@coffee_013
+second_building,low,very_short,coffee,medium,good,Xo bakery@coffee_013
+second_building,low,very_short,coffee,medium,bad,Xo bakery@coffee_013
+second_building,low,very_short,dessert,medium,good,Xo bakery@coffee_013
+second_building,low,very_short,dessert,medium,bad,Xo bakery@coffee_013
+second_building,low,very_short,snack,medium,good,Xo bakery@coffee_013
+second_building,low,very_short,snack,medium,bad,Xo bakery@coffee_013
+second_building,low,short,coffee,medium,good,Xo bakery@coffee_013
+second_building,low,short,coffee,medium,bad,Xo bakery@coffee_013
+second_building,low,short,dessert,medium,good,Xo bakery@coffee_013
+second_building,low,short,dessert,medium,bad,Xo bakery@coffee_013
+second_building,low,short,snack,medium,good,Xo bakery@coffee_013
+second_building,low,short,snack,medium,bad,Xo bakery@coffee_013
+main_building,high,medium,dessert,high,good,Абрикос@product_001
+main_building,high,medium,coffee,high,good,Абрикос@product_001
+main_building,high,medium,snack,high,good,Абрикос@product_001
+main_building,high,medium,full_meal,high,good,Абрикос@product_001
+main_building,high,long,dessert,high,good,Абрикос@product_001
+main_building,high,long,coffee,high,good,Абрикос@product_001
+main_building,high,long,snack,high,good,Абрикос@product_001
+main_building,high,long,full_meal,high,good,Абрикос@product_001
+main_building,high,medium,dessert,medium,good,Абрикос@product_001
+main_building,high,medium,coffee,medium,good,Абрикос@product_001
+main_building,high,medium,snack,medium,good,Абрикос@product_001
+main_building,high,medium,full_meal,medium,good,Абрикос@product_001
+main_building,high,long,dessert,medium,good,Абрикос@product_001
+main_building,high,long,coffee,medium,good,Абрикос@product_001
+main_building,high,long,snack,medium,good,Абрикос@product_001
+main_building,high,long,full_meal,medium,good,Абрикос@product_001
+main_building,high,medium,dessert,low,good,Абрикос@product_001
+main_building,high,medium,coffee,low,good,Абрикос@product_001
+main_building,high,medium,snack,low,good,Абрикос@product_001
+main_building,high,medium,full_meal,low,good,Абрикос@product_001
+main_building,high,long,dessert,low,good,Абрикос@product_001
+main_building,high,long,coffee,low,good,Абрикос@product_001
+main_building,high,long,snack,low,good,Абрикос@product_001
+main_building,high,long,full_meal,low,good,Абрикос@product_001
+second_building,high,medium,dessert,high,good,Абрикос@product_001
+second_building,high,medium,coffee,high,good,Абрикос@product_001
+second_building,high,medium,snack,high,good,Абрикос@product_001
+second_building,high,medium,full_meal,high,good,Абрикос@product_001
+second_building,high,long,dessert,high,good,Абрикос@product_001
+second_building,high,long,coffee,high,good,Абрикос@product_001
+second_building,high,long,snack,high,good,Абрикос@product_001
+second_building,high,long,full_meal,high,good,Абрикос@product_001
+second_building,high,medium,dessert,medium,good,Абрикос@product_001
+second_building,high,medium,coffee,medium,good,Абрикос@product_001
+second_building,high,medium,snack,medium,good,Абрикос@product_001
+second_building,high,medium,full_meal,medium,good,Абрикос@product_001
+second_building,high,long,dessert,medium,good,Абрикос@product_001
+second_building,high,long,coffee,medium,good,Абрикос@product_001
+second_building,high,long,snack,medium,good,Абрикос@product_001
+second_building,high,long,full_meal,medium,good,Абрикос@product_001
+second_building,high,medium,dessert,low,good,Абрикос@product_001
+second_building,high,medium,coffee,low,good,Абрикос@product_001
+second_building,high,medium,snack,low,good,Абрикос@product_001
+second_building,high,medium,full_meal,low,good,Абрикос@product_001
+second_building,high,long,dessert,low,good,Абрикос@product_001
+second_building,high,long,coffee,low,good,Абрикос@product_001
+second_building,high,long,snack,low,good,Абрикос@product_001
+second_building,high,long,full_meal,low,good,Абрикос@product_001
+bus_stop,low,medium,full_meal,medium,good,Батина Шаурма@cafe_003
+second_building,low,medium,full_meal,medium,good,Батина Шаурма@cafe_003
+main_building,low,medium,full_meal,medium,good,Батина Шаурма@cafe_003
+second_building,high,long,full_meal,high,good,Безумно@cafe_004
+main_building,high,long,full_meal,high,good,Безумно@cafe_004
+bus_stop,high,long,full_meal,high,good,Безумно@cafe_004
+bus_stop,medium,short,coffee,medium,bad,Белка@coffee_005
+bus_stop,medium,short,coffee,medium,good,Белка@coffee_005
+bus_stop,medium,very_short,coffee,medium,bad,Белка@coffee_005
+bus_stop,medium,very_short,coffee,medium,good,Белка@coffee_005
+main_building,medium,short,coffee,medium,bad,Белка@coffee_005
+main_building,medium,short,coffee,medium,good,Белка@coffee_005
+main_building,medium,very_short,coffee,medium,bad,Белка@coffee_005
+main_building,medium,very_short,coffee,medium,good,Белка@coffee_005
+campus,low,long,full_meal,high,good,Гербарий@cafe_006
+campus,low,long,snack,high,good,Гербарий@cafe_006
+campus,low,long,dessert,high,good,Гербарий@cafe_006
+campus,low,long,coffee,high,good,Гербарий@cafe_006
+bus_stop,low,long,full_meal,high,good,Гербарий@cafe_006
+bus_stop,low,long,snack,high,good,Гербарий@cafe_006
+bus_stop,low,long,dessert,high,good,Гербарий@cafe_006
+bus_stop,low,long,coffee,high,good,Гербарий@cafe_006
+main_building,low,long,full_meal,high,good,Гербарий@cafe_006
+main_building,low,long,snack,high,good,Гербарий@cafe_006
+main_building,low,long,dessert,high,good,Гербарий@cafe_006
+main_building,low,long,coffee,high,good,Гербарий@cafe_006
+second_building,low,long,full_meal,high,good,Гербарий@cafe_006
+second_building,low,long,snack,high,good,Гербарий@cafe_006
+second_building,low,long,dessert,high,good,Гербарий@cafe_006
+second_building,low,long,coffee,high,good,Гербарий@cafe_006
+second_building,high,medium,pancakes,high,good,Сибирские блины@cafe_009
+second_building,high,medium,pancakes,high,bad,Сибирские блины@cafe_009
+second_building,high,medium,coffee,high,good,Сибирские блины@cafe_009
+second_building,high,medium,coffee,high,bad,Сибирские блины@cafe_009
+second_building,high,medium,dessert,high,good,Сибирские блины@cafe_009
+second_building,high,medium,dessert,high,bad,Сибирские блины@cafe_009
+second_building,high,short,pancakes,high,good,Сибирские блины@cafe_009
+second_building,high,short,pancakes,high,bad,Сибирские блины@cafe_009
+second_building,high,short,coffee,high,good,Сибирские блины@cafe_009
+second_building,high,short,coffee,high,bad,Сибирские блины@cafe_009
+second_building,high,short,dessert,high,good,Сибирские блины@cafe_009
+second_building,high,short,dessert,high,bad,Сибирские блины@cafe_009
+main_building,high,medium,pancakes,high,good,Сибирские блины@cafe_009
+main_building,high,medium,pancakes,high,bad,Сибирские блины@cafe_009
+main_building,high,medium,coffee,high,good,Сибирские блины@cafe_009
+main_building,high,medium,coffee,high,bad,Сибирские блины@cafe_009
+main_building,high,medium,dessert,high,good,Сибирские блины@cafe_009
+main_building,high,medium,dessert,high,bad,Сибирские блины@cafe_009
+main_building,high,short,pancakes,high,good,Сибирские блины@cafe_009
+main_building,high,short,pancakes,high,bad,Сибирские блины@cafe_009
+main_building,high,short,coffee,high,good,Сибирские блины@cafe_009
+main_building,high,short,coffee,high,bad,Сибирские блины@cafe_009
+main_building,high,short,dessert,high,good,Сибирские блины@cafe_009
+main_building,high,short,dessert,high,bad,Сибирские блины@cafe_009
+second_building,medium,medium,snack,medium,good,Сыр-бор@cafe_015
+second_building,medium,medium,full_meal,medium,good,Сыр-бор@cafe_015
+second_building,medium,short,snack,medium,good,Сыр-бор@cafe_015
+second_building,medium,short,full_meal,medium,good,Сыр-бор@cafe_015
+bus_stop,medium,medium,snack,medium,good,Сыр-бор@cafe_015
+bus_stop,medium,medium,full_meal,medium,good,Сыр-бор@cafe_015
+bus_stop,medium,short,snack,medium,good,Сыр-бор@cafe_015
+bus_stop,medium,short,full_meal,medium,good,Сыр-бор@cafe_015
+main_building,medium,medium,snack,medium,good,Сыр-бор@cafe_015
+main_building,medium,medium,full_meal,medium,good,Сыр-бор@cafe_015
+main_building,medium,short,snack,medium,good,Сыр-бор@cafe_015
+main_building,medium,short,full_meal,medium,good,Сыр-бор@cafe_015
+campus,low,very_short,coffee,medium,bad,Точка@coffee_011
+campus,low,short,coffee,medium,bad,Точка@coffee_011

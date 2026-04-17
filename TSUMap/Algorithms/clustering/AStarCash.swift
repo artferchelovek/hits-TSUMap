@@ -17,7 +17,7 @@ class AStarCash {
             return path
         }
 
-        let path = AStar(graph: grid, start: firstPlace.entryCord, end: secondPlace.entryCord)
+        let path = AStar(graph: grid).aStarAlgorithm(start: firstPlace.entryCord, end: secondPlace.entryCord)
         let pathCount = path.isEmpty ? 10000 : path.count
 
         if paths[firstId] == nil { paths[firstId] = [:] }

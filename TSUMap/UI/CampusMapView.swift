@@ -53,17 +53,18 @@ struct CampusMapView: View {
     @Binding var paths: [GridPoint]
     @Binding var selectedPlace: IdentifiableItem?
     @Binding var selectedCluster: Cluster?
-
     @State private var pathProgress: CGFloat = 0.0
+
+    @Binding var visitedPoints: Set<GridPoint>
+    @Binding var pointsInQueue: [GridPoint]
+    @Binding var pathToCurrentPoint: Set<GridPoint>
 
     @ObservedObject var placeManager: PlaceManager
     @Binding var clusters: [Cluster]
-
     @State private var hasAutoFitRoute: Bool = false
 
     @State private var baseScale: CGFloat = 1.0
     @State private var baseOffset: CGSize = .zero
-
     @State private var activePan: CGSize = .zero
     @State private var activeZoom: CGFloat = 1.0
     @State private var pinchAnchor: CGPoint = .zero
@@ -97,7 +98,11 @@ struct CampusMapView: View {
         placeManager: PlaceManager,
         selectedPlace: Binding<IdentifiableItem?>,
         selectedCluster: Binding<Cluster?>,
-        clusters: Binding<[Cluster]>
+        clusters: Binding<[Cluster]>,
+        visitedPoints: Binding<Set<GridPoint>>,
+        correctPoints: Binding<[GridPoint]>,
+        p: Binding<Set<GridPoint>>
+
     ) {
         _startLocation = startLocation
         _endLocation = endLocation
@@ -105,7 +110,9 @@ struct CampusMapView: View {
         _paths = paths
         self.placeManager = placeManager
         _selectedPlace = selectedPlace
-
+        _visitedPoints = visitedPoints
+        _pointsInQueue = correctPoints
+        _pathToCurrentPoint = p
         if tsuCampusGrid.isEmpty {
             _grid = State(initialValue: Array(
                 repeating: Array(repeating: .obstacle, count: columnsCount),
@@ -124,6 +131,23 @@ struct CampusMapView: View {
 
     fileprivate func staticCanvas() -> some View {
         Canvas { context, _ in
+            for point in visitedPoints where !pathToCurrentPoint.contains(point) {
+                let (x, y) = Normalize(point: point)
+                let rect = CGRect(x: x - cellSize / 2 + 1, y: y - cellSize / 2 + 1, width: cellSize - 2, height: cellSize - 2)
+                context.fill(Path(rect), with: .color(.blue.opacity(0.3)))
+            }
+
+            for point in pointsInQueue where !pathToCurrentPoint.contains(point) {
+                let (x, y) = Normalize(point: point)
+                let rect = CGRect(x: x - cellSize / 2 + 1, y: y - cellSize / 2 + 1, width: cellSize - 2, height: cellSize - 2)
+                context.fill(Path(rect), with: .color(.red.opacity(0.6)))
+            }
+
+            for point in pathToCurrentPoint {
+                let (x, y) = Normalize(point: point)
+                let rect = CGRect(x: x - cellSize / 2 + 1, y: y - cellSize / 2 + 1, width: cellSize - 2, height: cellSize - 2)
+                context.fill(Path(rect), with: .color(.blue.opacity(1)))
+            }
             if !clusters.isEmpty {
                 for cluster in clusters {
                     let point: GridPoint = cluster.medoid.iconCord
@@ -139,7 +163,6 @@ struct CampusMapView: View {
                     }
                 }
             }
-
             if let start = startLocation { drawStartPoint(start, context) }
             if let end = endLocation { drawEndPoint(end, context) }
 
@@ -305,23 +328,55 @@ struct CampusMapView: View {
     }
 
     private func calculatePath() {
-        guard let start = startLocation, let end = endLocation else {
-            if startLocation == nil {
-                hasAutoFitRoute = false
+        Task {
+
+            guard let start = startLocation, let end = endLocation else {
+                if startLocation == nil {
+                    hasAutoFitRoute = false
+                }
+                return
             }
-            return
-        }
 
-        pathProgress = 0.0
-        let newPath = AStar(graph: grid, start: start, points: intermediatePoints, end: end)
-        paths = newPath
+            pointsInQueue = []
+            visitedPoints = []
+            pathToCurrentPoint = []
+            paths = []
 
-        if !hasAutoFitRoute {
-            autoFitToPath(newPath)
-        }
+            let points = [start] + intermediatePoints + [end]
+            var newPath: [GridPoint] = []
+            for j in 0 ..< points.count - 1 {
+                let startPoint = points[j]
+                let endPoint = points[j + 1]
+                let stream = AStar(graph: grid).aStarGenerator(start: startPoint, end: endPoint)
+                for await i in stream {
+                    /* if тут какой то флаг, который определяет будет ли дебаг режим или просто нарисуется путь */ // {
+                    await MainActor.run {
+                        visitedPoints.insert(i.point)
+                        pointsInQueue = i.openPoints
+                        pathToCurrentPoint = []
+                        i.pathToPoint.forEach { pathToCurrentPoint.insert($0) }
+                    }
+                    try await Task.sleep(nanoseconds: 10_000_000 /* *k - тут кэф, который контролирует скорость выполнения */ )
+                    // }
+                    if i.isEnd {
+                        newPath += i.path
+                    }
+                }
+            }
 
-        withAnimation(.easeInOut(duration: 1.5)) {
-            pathProgress = 1.0
+            pathProgress = 0.0
+            pointsInQueue = []
+            visitedPoints = []
+            pathToCurrentPoint = []
+
+            paths = newPath
+            if !hasAutoFitRoute {
+                autoFitToPath(newPath)
+            }
+
+            withAnimation(.easeInOut(duration: 1.5)) {
+                pathProgress = 1.0
+            }
         }
     }
 
@@ -520,7 +575,10 @@ private extension CampusMapView {
         placeManager: PlaceManager(),
         selectedPlace: .constant(nil as IdentifiableItem?),
         selectedCluster: .constant(nil as Cluster?),
-        clusters: .constant([])
+        clusters: .constant([]),
+        visitedPoints: .constant([]),
+        correctPoints: .constant([]),
+        p: .constant([])
     )
 }
 

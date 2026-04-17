@@ -108,4 +108,8 @@ struct PriorityQueue {
         }
         return element
     }
+
+    var allGridPoints: [GridPoint] {
+        elements.map(\.point)
+    }
 }
