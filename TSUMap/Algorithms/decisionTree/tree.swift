@@ -7,22 +7,6 @@
 
 import Foundation
 
-class TreeNode {
-    var attributeName: String?
-    var children: [String: TreeNode] = [:]
-    var result: String?
-    var defaultResult: String?
-
-    init(attributeName: String, defaultResult: String? = nil) {
-        self.attributeName = attributeName
-        self.defaultResult = defaultResult
-    }
-
-    init(result: String) {
-        self.result = result
-    }
-}
-
 private func Entropy(_ data: [TreeAttribute]) -> Double {
     var counts: [String: Double] = [:]
     for item in data {
@@ -104,24 +88,3 @@ func buildTree(data: [TreeAttribute], availableAttributes: [String], minInfoGain
     return node
 }
 
-func predictTree(tree: TreeNode, situation: TreeAttribute) -> (result: String, path: [TreeNode]) {
-    var currentNode = tree
-    var path: [TreeNode] = []
-
-    while currentNode.result == nil {
-        path.append(currentNode)
-
-        guard let attribute = currentNode.attributeName else { break }
-        let value = getTreeAttribute(from: situation, for: attribute)
-
-        if let nextNode = currentNode.children[value] {
-            currentNode = nextNode
-        } else {
-            let fallback = currentNode.defaultResult ?? "Неизвестно"
-            return (fallback, path)
-        }
-    }
-    path.append(currentNode)
-    let finalResult = currentNode.result ?? "Ошибка"
-    return (finalResult, path)
-}

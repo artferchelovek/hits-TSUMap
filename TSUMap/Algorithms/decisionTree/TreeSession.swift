@@ -4,7 +4,7 @@
 ///
 ///  Created by Екатерина Кондрашова on 17.04.2026.
 ///
-class DecisionTreeSession {
+class TreeSession {
     var currentNode: TreeNode
     var path: [TreeNode] = []
     var rootTree: TreeNode
@@ -36,19 +36,16 @@ class DecisionTreeSession {
 
         if nextNode != nil {
             currentNode = nextNode!
-        } else {
+        }
+        else {
             let fallback = currentNode.defaultResult
             if fallback != nil {
                 currentNode = TreeNode(result: fallback!)
-            } else {
+            }
+            else {
                 currentNode = TreeNode(result: "Неизвестно")
             }
         }
         path.append(currentNode)
-    }
-
-    func reset() {
-        currentNode = rootTree
-        path = [rootTree]
     }
 }
