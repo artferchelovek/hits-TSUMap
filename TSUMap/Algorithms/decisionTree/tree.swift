@@ -53,7 +53,7 @@ private func InformationGain(from data: [TreeAttribute], for columnName: String)
     return totalEntropy - entropy
 }
 
-func buildTree(data: [TreeAttribute], availableAttributes: [String]) -> TreeNode {
+func buildTree(data: [TreeAttribute], availableAttributes: [String], minInfoGain: Double = 0.05) -> TreeNode {
     let element = data[0].recommended_place
     let allSame = data.allSatisfy { $0.recommended_place == element }
     if allSame {
@@ -78,6 +78,10 @@ func buildTree(data: [TreeAttribute], availableAttributes: [String]) -> TreeNode
             bestGain = gain
             bestAttribute = attribute
         }
+    }
+
+    if bestGain < minInfoGain {
+        return TreeNode(result: mostCommon)
     }
 
     let node = TreeNode(attributeName: bestAttribute, defaultResult: mostCommon)
