@@ -23,6 +23,9 @@ struct ContentView: View {
     @State private var selectedPlace: IdentifiableItem?
     @State private var selectedCluster: Cluster?
     @State private var sheetDetent: PresentationDetent = .height(180)
+    @State private var showLocationAlert = false
+    @StateObject var locationManager = LocationManager()
+    @State private var isFollowingUser = true
 
     @State private var clusters: [Cluster] = []
 
@@ -98,7 +101,9 @@ struct ContentView: View {
                 placeManager: placeManager,
                 selectedPlace: $selectedPlace,
                 selectedCluster: $selectedCluster,
-                clusters: $clusters
+                clusters: $clusters,
+                showLocationAlert: $showLocationAlert,
+                isFollowingUser: $isFollowingUser
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
@@ -170,13 +175,15 @@ struct ContentView: View {
                         .cornerRadius(24)
                         .shadow(color: .black.opacity(0.1), radius: 10)
                     } else if endLocation == nil {
-                        HStack {
+                        HStack(spacing: 10) {
                             Button {
                                 withAnimation(.spring()) {
                                     isShowingDecisionSheet.toggle()
                                 }
                             } label: {
-                                Text("Куда пойдём?").padding(.vertical, 6).padding(.horizontal, 20)
+                                Text("Куда пойдём?")
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 6)
                             }
                             .buttonStyle(.glassProminent)
                             .sheet(isPresented: $isShowingDecisionSheet) {
@@ -194,9 +201,14 @@ struct ContentView: View {
                             Button {
                                 withAnimation(.spring()) {
                                     startLocation = nil
+                                    paths = []
+                                    intermediatePoints = []
+                                    endLocation = nil
                                 }
                             } label: {
-                                Text("Изменить старт").padding(.vertical, 6).padding(.horizontal, 20)
+                                Text("Очистить место старта")
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 6)
                             }
                             .buttonStyle(.glass)
                         }
@@ -213,9 +225,40 @@ struct ContentView: View {
             .padding()
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: paths.isEmpty)
             .animation(.spring(), value: startLocation)
+
+            if !isFollowingUser, locationManager.userLocation != nil {
+                Button(action: {
+                    withAnimation(.spring()) {
+                        isFollowingUser = true
+                    }
+                }) {
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(.blue)
+                        .padding(12)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+                }
+                .padding(.trailing, 20)
+                .padding(.bottom, 20)
+                .transition(.scale.combined(with: .opacity))
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+            }
         }
         .onAppear {
+            locationManager.requestLocation()
             loadTree()
+        }
+        .onChange(of: locationManager.userLocation) { _, newUserLocation in
+            if let location = newUserLocation {
+                if let gridPoint = convertToGrid(location: location) {
+                    print("в кампусе это точка: \(gridPoint)")
+                    withAnimation(.spring()) {
+                        startLocation = gridPoint
+                    }
+                }
+            }
         }
     }
 
