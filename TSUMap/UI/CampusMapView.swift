@@ -89,7 +89,8 @@ struct CampusMapView: View {
     @Binding var selectedCluster: Cluster?
     @Binding var isCreateObstacle: Bool
     @State private var pathProgress: CGFloat = 0.0
-    @State private var isCalculatingPath: Bool = false
+    @Binding private var isCalculatingPath: Bool
+    @State private var pathCalculationTask: Task<Void, any Error>?
 
     @Binding var visitedPoints: Set<GridPoint>
     @Binding var pointsInQueue: [GridPoint]
@@ -150,7 +151,8 @@ struct CampusMapView: View {
         obstaclePoints: Binding<[GridPoint]>,
         isCreateObstacle: Binding<Bool>,
         startObstacle: Binding<GridPoint?>,
-        endObstacle: Binding<GridPoint?>
+        endObstacle: Binding<GridPoint?>,
+        isCalculatingPath: Binding<Bool>
 
     ) {
         _startLocation = startLocation
@@ -171,6 +173,7 @@ struct CampusMapView: View {
         self.settingsManager = settingsManager
         _endObstacle = endObstacle
         _startObstacle = startObstacle
+        _isCalculatingPath = isCalculatingPath
         self.placeManager.setGrid(grid: loadedGrid)
     }
 
@@ -283,6 +286,14 @@ struct CampusMapView: View {
             .defaultScrollAnchor(.center)
             .task(id: endLocation) { calculatePath() }
             .task(id: intermediatePoints) { calculatePath() }
+            .onChange(of: endLocation) { _, newValue in
+                if newValue == nil {
+                    pathCalculationTask?.cancel()
+                    pathCalculationTask = nil
+                    isCalculatingPath = false
+                    intermediatePoints = []
+                }
+            }
         }
     }
 
@@ -404,7 +415,9 @@ struct CampusMapView: View {
     }
 
     private func calculatePath() {
-        Task {
+        guard endLocation != nil else { return }
+
+        let task = Task {
             isCalculatingPath = true
             defer { isCalculatingPath = false }
 
@@ -431,6 +444,12 @@ struct CampusMapView: View {
                 let endPoint = points[j + 1]
                 let stream = AStar(graph: loadedGrid, obstacle: obstaclePoints).aStarGenerator(start: startPoint, end: endPoint)
                 for await i in stream {
+                    if Task.isCancelled {
+                        pointsInQueue = []
+                        visitedPoints = []
+                        pathToCurrentPoint = []
+                        return
+                    }
                     if settingsManager.isBuildPath {
                         await MainActor.run {
                             visitedPoints.insert(i.point)
@@ -445,6 +464,12 @@ struct CampusMapView: View {
                         newPath += i.path
                     }
                 }
+            }
+
+            if Task.isCancelled {
+                pointsInQueue = []
+                visitedPoints = []
+                pathToCurrentPoint = []
             }
 
             pathProgress = 0.0
@@ -466,6 +491,7 @@ struct CampusMapView: View {
                 pathProgress = 1.0
             }
         }
+        pathCalculationTask = task
     }
 
     private func autoFitToPath(_ path: [GridPoint]) {
@@ -758,7 +784,8 @@ private extension CampusMapView {
         obstaclePoints: .constant([]),
         isCreateObstacle: .constant(false),
         startObstacle: .constant(nil as GridPoint?),
-        endObstacle: .constant(nil as GridPoint?)
+        endObstacle: .constant(nil as GridPoint?),
+        isCalculatingPath: .constant(false)
     )
 }
 

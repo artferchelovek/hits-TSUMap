@@ -27,6 +27,7 @@ struct ContentView: View {
     @State private var selectedCluster: Cluster?
     @State private var sheetDetent: PresentationDetent = .height(180)
     @State private var showLocationAlert = false
+    @State private var isCalculatingPath: Bool = false
     @StateObject var locationManager = LocationManager()
     @State private var isFollowingUser = true
 
@@ -122,9 +123,34 @@ struct ContentView: View {
                 obstaclePoints: $obstaclePoints,
                 isCreateObstacle: $isCreateObstacle,
                 startObstacle: $startObstacle,
-                endObstacle: $endObstacle
+                endObstacle: $endObstacle,
+                isCalculatingPath: $isCalculatingPath
             )
             .ignoresSafeArea()
+            .overlay(alignment: .bottomTrailing) {
+                if isCalculatingPath {
+                    VStack {
+                        Button {
+                            withAnimation {
+                                endLocation = nil
+                            }
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.title3)
+                                Text("Отмена")
+                                    .font(.headline)
+                            }
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(.red.opacity(0.9))
+                            .clipShape(Capsule())
+                        }
+                        .padding()
+                    }
+                }
+            }
             .sheet(item: $selectedPlace) { place in
                 PlaceInfoView(
                     newPlace: place.item,
