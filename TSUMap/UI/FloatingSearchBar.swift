@@ -25,6 +25,33 @@ struct FloatingSearchBar: View {
     @Binding var paths: [GridPoint]
     @Binding var isShowSettings: Bool
 
+    private var searchResults: [any MapItem] {
+        guard !searchText.isEmpty else { return [] }
+
+        let query = searchText.lowercased()
+        var results: [any MapItem] = []
+
+        for cafe in placeManager.cafes.values {
+            if cafe.name.lowercased().contains(query) || cafe.address.lowercased().contains(query) {
+                results.append(cafe)
+            }
+        }
+
+        for coworking in placeManager.coworkings.values {
+            if coworking.name.lowercased().contains(query) || coworking.address.lowercased().contains(query) {
+                results.append(coworking)
+            }
+        }
+
+        for sight in placeManager.sights.values {
+            if sight.name.lowercased().contains(query) || sight.address.lowercased().contains(query) {
+                results.append(sight)
+            }
+        }
+
+        return Array(results.prefix(20))
+    }
+
     var body: some View {
         VStack {
             HStack(spacing: 10) {
@@ -42,24 +69,38 @@ struct FloatingSearchBar: View {
                         }
                     })
                     .font(.body)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
 
-                    Image(systemName: "xmark.circle")
-                        .font(.title3)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                        .symbolEffect(.drawOn.individually, options: .nonRepeating, isActive: !isShowingList)
-                        .onTapGesture {
-                            withAnimation(.spring()) {
-                                searchText = ""
-                                isShowingList = false
-                                UIApplication.shared.sendAction(
-                                    #selector(UIResponder.resignFirstResponder),
-                                    to: nil,
-                                    from: nil,
-                                    for: nil
-                                )
+                    if !searchText.isEmpty {
+                        Image(systemName: "xmark.circle")
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                            .onTapGesture {
+                                withAnimation(.spring()) {
+                                    searchText = ""
+                                }
                             }
-                        }
+                    } else if !isShowingList {
+                        Image(systemName: "xmark.circle")
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                            .symbolEffect(.drawOn.individually, options: .nonRepeating, isActive: !isShowingList)
+                            .onTapGesture {
+                                withAnimation(.spring()) {
+                                    searchText = ""
+                                    isShowingList = false
+                                    UIApplication.shared.sendAction(
+                                        #selector(UIResponder.resignFirstResponder),
+                                        to: nil,
+                                        from: nil,
+                                        for: nil
+                                    )
+                                }
+                            }
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -83,7 +124,29 @@ struct FloatingSearchBar: View {
             }
 
             if isShowingList {
-                VStack {
+                VStack(spacing: 5) {
+                    if !searchText.isEmpty, !searchResults.isEmpty {
+                        ScrollView {
+                            LazyVStack(spacing: 5) {
+                                ForEach(searchResults, id: \.id) { item in
+                                    SearchResultRow(item: item) {
+                                        selectPlace(item)
+                                    }
+                                }
+                            }
+                        }
+                        .frame(maxHeight: 250)
+                    } else if !searchText.isEmpty, searchResults.isEmpty {
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
+                            Text("Ничего не найдено")
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                    }
+
                     VStack(spacing: 10) {
                         Button {
                             clusters = placeManager.clustering(
@@ -194,6 +257,27 @@ struct FloatingSearchBar: View {
             isBuildingRoute = false
         }
     }
+
+    private func selectPlace(_ item: any MapItem) {
+        withAnimation(.spring()) {
+            searchText = ""
+            isShowingList = false
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil,
+                from: nil,
+                for: nil
+            )
+        }
+
+        let gridPoint = findNearestPathPoint(from: item.entryCord)
+
+        if startLocation == nil {
+            startLocation = gridPoint
+        } else {
+            endLocation = gridPoint
+        }
+    }
 }
 
 struct SightSelectionView: View {
@@ -282,6 +366,48 @@ struct SightSelectionView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+struct SearchResultRow: View {
+    let item: any MapItem
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 5) {
+                Image(systemName: item.type.iconName())
+                    .foregroundStyle(iconColor)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.name)
+                        .font(.body)
+                        .foregroundStyle(iconColor)
+                        .lineLimit(1)
+                    Text(item.address)
+                        .font(.caption)
+                        .foregroundStyle(.blue)
+                        .lineLimit(1)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.primary)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var iconColor: Color {
+        switch item.type {
+        case .coffee: .orange
+        case .cafe: .red
+        case .product: .green
+        case .sight: .purple
+        case .coworkingSpace: .blue
         }
     }
 }
