@@ -18,6 +18,9 @@ struct ContentView: View {
     @State private var startLocation: GridPoint?
     @State private var endLocation: GridPoint?
     @State private var intermediatePoints: [GridPoint] = []
+    @State private var obstaclePoints: [GridPoint] = []
+    @State private var startObstacle: GridPoint?
+    @State private var endObstacle: GridPoint?
     @State private var paths: [GridPoint] = []
     @State private var isShowingDecisionSheet = false
     @State private var selectedPlace: IdentifiableItem?
@@ -30,7 +33,7 @@ struct ContentView: View {
     @State private var visitedPoints: Set<GridPoint> = []
     @State private var pointsInQueue: [GridPoint] = []
     @State private var pathToCurrentPoint: Set<GridPoint> = []
-
+    @State private var isCreateObstacle: Bool = false
     @State private var clusters: [Cluster] = []
     @State private var treeNode: TreeNode?
     @State private var predictionResult: String?
@@ -115,7 +118,11 @@ struct ContentView: View {
                 visitedPoints: $visitedPoints,
                 correctPoints: $pointsInQueue,
                 pathToCurrentPoint: $pathToCurrentPoint,
-                settingsManager: settingsManager
+                settingsManager: settingsManager,
+                obstaclePoints: $obstaclePoints,
+                isCreateObstacle: $isCreateObstacle,
+                startObstacle: $startObstacle,
+                endObstacle: $endObstacle
             )
             .ignoresSafeArea()
             .sheet(item: $selectedPlace) { place in
@@ -195,61 +202,81 @@ struct ContentView: View {
                         .shadow(color: .black.opacity(0.1), radius: 10)
                     } else if endLocation == nil {
                         VStack {
-                            if !isFollowingUser, locationManager.userLocation != nil {
+                            VStack(spacing: 5) {
+                                Spacer()
+
                                 Button(action: {
-                                    withAnimation(.spring()) {
-                                        isFollowingUser = true
-                                    }
+                                    isCreateObstacle.toggle()
+                                    endObstacle = nil
+                                    startObstacle = nil
                                 }) {
-                                    Image(systemName: "location.fill")
+                                    Image(systemName: "figure.walk.triangle.fill")
                                         .font(.system(size: 20, weight: .medium))
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(.yellow)
                                         .padding(12)
-                                        .background(.ultraThinMaterial)
+                                        .background(Color.white)
                                         .clipShape(Circle())
                                         .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
                                 }
-                                .padding(.trailing, 20)
-                                .padding(.bottom, 20)
-                                .transition(.scale.combined(with: .opacity))
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                            }
-                            HStack(spacing: 10) {
-                                Button {
-                                    withAnimation(.spring()) {
-                                        isShowingDecisionSheet.toggle()
-                                    }
-                                } label: {
-                                    Text("Куда пойдём?")
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 6)
-                                }
-                                .buttonStyle(.glassProminent)
-                                .sheet(isPresented: $isShowingDecisionSheet) {
-                                    DecisionTreeView(
-                                        manager: manager,
-                                        placeManager: placeManager,
-                                        treeNode: treeNode,
-                                        endLocation: $endLocation
-                                    ) { prediction in
-                                        predictionResult = prediction
-                                    }
-                                    .presentationDragIndicator(.visible)
-                                }
 
-                                Button {
-                                    withAnimation(.spring()) {
-                                        startLocation = nil
-                                        paths = []
-                                        intermediatePoints = []
-                                        endLocation = nil
+                                if !isFollowingUser, locationManager.userLocation != nil,!isCreateObstacle {
+                                    Button(action: {
+                                        withAnimation(.spring()) {
+                                            isFollowingUser = true
+                                        }
+                                    }) {
+                                        Image(systemName: "location.fill")
+                                            .font(.system(size: 20, weight: .medium))
+                                            .foregroundColor(.blue)
+                                            .padding(12)
+                                            .background(Color.white)
+                                            .clipShape(Circle())
+                                            .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
                                     }
-                                } label: {
-                                    Text("Очистить место старта")
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 6)
                                 }
-                                .buttonStyle(.glass)
+                            }
+                            .padding(.trailing, 20)
+                            .padding(.bottom, 20)
+                            .transition(.scale.combined(with: .opacity))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                            if !isCreateObstacle {
+                                HStack(spacing: 10) {
+                                    Button {
+                                        withAnimation(.spring()) {
+                                            isShowingDecisionSheet.toggle()
+                                        }
+                                    } label: {
+                                        Text("Куда пойдём?")
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 6)
+                                    }
+                                    .buttonStyle(.glassProminent)
+                                    .sheet(isPresented: $isShowingDecisionSheet) {
+                                        DecisionTreeView(
+                                            manager: manager,
+                                            placeManager: placeManager,
+                                            treeNode: treeNode,
+                                            endLocation: $endLocation
+                                        ) { prediction in
+                                            predictionResult = prediction
+                                        }
+                                        .presentationDragIndicator(.visible)
+                                    }
+
+                                    Button {
+                                        withAnimation(.spring()) {
+                                            startLocation = nil
+                                            paths = []
+                                            intermediatePoints = []
+                                            endLocation = nil
+                                        }
+                                    } label: {
+                                        Text("Очистить место старта")
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 6)
+                                    }
+                                    .buttonStyle(.glass)
+                                }
                             }
                         }
                     } else {
