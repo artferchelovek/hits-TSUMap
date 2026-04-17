@@ -29,7 +29,7 @@ struct DecisionTreeView: View {
 
     @ObservedObject var manager: VenueManager
     @ObservedObject var placeManager: PlaceManager
-
+    @State private var session: TreeSession?
     @State private var selectedPlace: IdentifiableItem?
 
     let treeNode: TreeNode?
@@ -89,8 +89,12 @@ struct DecisionTreeView: View {
             }
 
             .onAppear {
-                if messages.isEmpty {
-                    messages.append(ChatMessage(text: questions[0].chatText, isUser: false))
+                if let tree = treeNode {
+                    session = TreeSession(tree: tree)
+                    if let firstQuestionAttr = session?.getNextQuestion() {
+                        let firstMsg = ChatMessage(text: questions.first(where: { $0.key == firstQuestionAttr })?.chatText ?? "", isUser: false)
+                        messages.append(firstMsg)
+                    }
                 }
             }
             .navigationTitle("Куда сходить?")
@@ -124,17 +128,21 @@ struct DecisionTreeView: View {
     private var answerOptionsPicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                ForEach(AppConfig.questions[currentIndex].options) { option in
-                    Button {
-                        handleAnswer(option: option)
-                    } label: {
-                        Text(option.title)
-                            .font(.body)
-                            .foregroundColor(.white)
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 20)
-                            .background(Color.blue)
-                            .clipShape(Capsule())
+                if let currentAttr = session?.getNextQuestion(),
+                   let currentQuestion = AppConfig.questions.first(where: { $0.key == currentAttr })
+                {
+                    ForEach(currentQuestion.options) { option in
+                        Button {
+                            handleAnswer(option: option)
+                        } label: {
+                            Text(option.title)
+                                .font(.body)
+                                .foregroundColor(.white)
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 20)
+                                .background(Color.blue)
+                                .clipShape(Capsule())
+                        }
                     }
                 }
             }
@@ -164,39 +172,31 @@ struct DecisionTreeView: View {
         isAnswering = true
         let userMessage = ChatMessage(text: option.title, isUser: true)
         withAnimation(.spring()) { messages.append(userMessage) }
-
-        switch currentIndex {
-        case 0: userAttribute.location = option.value
-        case 1: userAttribute.budget = option.value
-        case 2: userAttribute.time_available = option.value
-        case 3: userAttribute.food_type = option.value
-        case 4: userAttribute.queue_tolerance = option.value
-        case 5: userAttribute.weather = option.value
-        default: break
-        }
+        session?.provideAnswer(answer: option.value)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.spring()) { isAnswering = false }
 
-            if currentIndex < questions.count - 1 {
-                currentIndex += 1
-                let botMessage = ChatMessage(text: questions[currentIndex].chatText, isUser: false)
-                withAnimation(.spring()) { messages.append(botMessage) }
-            } else {
+            if let result = session?.getFinalResult() {
                 withAnimation(.spring()) {
                     isFinished = true
-                }
 
-                if let treeNode {
-                    let (result, _) = predictTree(tree: treeNode, situation: userAttribute)
-                    withAnimation(.spring()) {
-                        messages.append(ChatMessage(text: "Рекомендую посетить:", isUser: false))
-                        messages.append(ChatMessage(text: "\(result.components(separatedBy: "@")[0])", isUser: false))
-                        guard let parseResult = placeManager.getPlaceById(result.components(separatedBy: "@")[1])
-                        else { return }
-                        print(parseResult)
+                    let components = result.components(separatedBy: "@")
+                    let name = components[0]
+
+                    messages.append(ChatMessage(text: "Рекомендую посетить:", isUser: false))
+                    messages.append(ChatMessage(text: name, isUser: false))
+
+                    if components.count > 1,
+                       let parseResult = placeManager.getPlaceById(components[1])
+                    {
                         selectedPlace = parseResult
                     }
+                }
+            } else if let nextAttribute = session?.getNextQuestion() {
+                if let nextQuestions = AppConfig.questions.first(where: { $0.key == nextAttribute }) {
+                    let botMessage = ChatMessage(text: nextQuestions.chatText, isUser: false)
+                    withAnimation(.spring()) { messages.append(botMessage) }
                 }
             }
         }
