@@ -87,4 +87,3 @@ func buildTree(data: [TreeAttribute], availableAttributes: [String], minInfoGain
     }
     return node
 }
-

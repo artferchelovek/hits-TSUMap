@@ -834,8 +834,6 @@ private extension CampusMapView {
         let col = Int(location.x / cellSize)
         let row = Int(location.y / cellSize)
 
-        print(row, col)
-
         if startLocation != nil {
             let tapThreshold: CGFloat = 22.0
             if clusters.isEmpty {

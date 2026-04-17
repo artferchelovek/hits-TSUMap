@@ -226,7 +226,6 @@ struct EditVenueView: View {
                                     recommended_place: placeName
                                 )
                                 newEntries.append(newAttr)
-                                print(newAttr)
                             }
                         }
                     }

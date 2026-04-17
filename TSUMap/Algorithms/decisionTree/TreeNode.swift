@@ -1,9 +1,9 @@
-//
-//  TreeNode.swift
-//  TSUMap
-//
-//  Created by Екатерина Кондрашова on 17.04.2026.
-//
+///
+///  TreeNode.swift
+///  TSUMap
+///
+///  Created by Екатерина Кондрашова on 17.04.2026.
+///
 class TreeNode {
     var attributeName: String?
     var children: [String: TreeNode] = [:]

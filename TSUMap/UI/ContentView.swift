@@ -330,7 +330,6 @@ struct ContentView: View {
         .onChange(of: locationManager.userLocation) { _, newUserLocation in
             if let location = newUserLocation {
                 if let gridPoint = convertToGrid(location: location) {
-                    print("в кампусе это точка: \(gridPoint)")
                     withAnimation(.spring()) {
                         startLocation = gridPoint
                     }

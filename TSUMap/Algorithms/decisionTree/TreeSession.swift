@@ -36,13 +36,11 @@ class TreeSession {
 
         if nextNode != nil {
             currentNode = nextNode!
-        }
-        else {
+        } else {
             let fallback = currentNode.defaultResult
             if fallback != nil {
                 currentNode = TreeNode(result: fallback!)
-            }
-            else {
+            } else {
                 currentNode = TreeNode(result: "Неизвестно")
             }
         }
