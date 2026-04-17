@@ -13,6 +13,7 @@ struct FloatingSearchBar: View {
     @State private var isShowingSightSelection = false
     @State private var selectedSights: Set<String> = []
     @State private var isBuildingRoute = false
+    @State private var isShowingGA = false
 
     @ObservedObject var placeManager: PlaceManager
     @ObservedObject var settingsManager: SettingsManager
@@ -121,7 +122,15 @@ struct FloatingSearchBar: View {
                                 Spacer()
                             }
                         }
-                        .disabled(isBuildingRoute || startLocation == nil)
+                        .disabled(isBuildingRoute)
+
+                        Button {
+                            isShowingGA.toggle()
+                        } label: {
+                            Image(systemName: "figure.walk")
+                            Text("Гастро-тур")
+                            Spacer()
+                        }
                     }
                 }
                 .padding(.horizontal, 16)
@@ -143,6 +152,9 @@ struct FloatingSearchBar: View {
             }
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isShowingGA) {
+            GeneticView(placeManager: placeManager, startLocation: startLocation ?? GridPoint(row: 10, col: 10))
         }
     }
 
@@ -273,7 +285,7 @@ struct SightSelectionView: View {
         settingsManager: SettingsManager(),
         clusters: .constant([]),
         startLocation: .constant(GridPoint(row: 10, col: 10)),
-        endLocation: .constant(nil),
+        endLocation: .constant(GridPoint(row: 11, col: 10)),
         intermediatePoints: .constant([]),
         paths: .constant([]),
         isShowSettings: .constant(false)

@@ -2,6 +2,13 @@ import Combine
 import Foundation
 import SwiftUI
 
+struct DishWithCafe: Identifiable {
+    let id = UUID()
+    let dish: Dish
+    let cafeName: String
+    let cafeId: String
+}
+
 @MainActor
 final class PlaceManager: ObservableObject {
     @Published var cafes: [String: Cafe] = [:]
@@ -118,5 +125,39 @@ final class PlaceManager: ObservableObject {
     func getPlaceById(_ id: String) -> (IdentifiableItem)? {
         let allPlaces = getAllPlaces()
         return allPlaces[id]
+    }
+
+    func getAllDishesGroupedByType() -> [DishType: [DishWithCafe]] {
+        var grouped: [DishType: [DishWithCafe]] = [:]
+
+        for (_, cafe) in cafes {
+            for dish in cafe.dishes {
+                let dishWithCafe = DishWithCafe(dish: dish, cafeName: cafe.name, cafeId: cafe.id)
+                grouped[dish.type, default: []].append(dishWithCafe)
+            }
+        }
+
+        return grouped
+    }
+
+    func getAllDishesFlat() -> [DishWithCafe] {
+        var allDishes: [DishWithCafe] = []
+
+        for (_, cafe) in cafes {
+            for dish in cafe.dishes {
+                let dishWithCafe = DishWithCafe(dish: dish, cafeName: cafe.name, cafeId: cafe.id)
+                allDishes.append(dishWithCafe)
+            }
+        }
+
+        return allDishes
+    }
+
+    func getAStarCashe() -> AStarCash {
+        guard let aStarPaths else {
+            fatalError("No A* paths saved.")
+        }
+
+        return aStarPaths
     }
 }
